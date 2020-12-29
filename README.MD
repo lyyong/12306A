@@ -23,3 +23,5 @@
 |&emsp;&emsp; |------ticket&emsp;&emsp;&emsp;&emsp;购票服务器</br>
 |&emsp;&emsp; |------user&emsp;&emsp;&emsp;&emsp; 用户服务器</br>
 |------ticketPool&emsp;&emsp;&emsp;&emsp; 线程池服务,主要是对内提供服务</br>
+|------interface&emsp;&emsp;&emsp;&emsp; 每个服务能够提供的接口</br>
+|------ticketPool&emsp;&emsp;&emsp;&emsp; 每个服务的接口实现</br>
