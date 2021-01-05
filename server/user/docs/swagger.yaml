@@ -1,0 +1,41 @@
+basePath: /user
+definitions:
+  resp.Response:
+    properties:
+      code:
+        type: string
+      data:
+        type: object
+      msg:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: 用户管理 API
+paths:
+  /register:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 用户注册，参数为用户名和密码
+      operationId: register-by-username-password
+      parameters:
+      - description: 用户名
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: 用户注册
+swagger: "2.0"
