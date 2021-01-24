@@ -1,0 +1,15 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "负责处理与支付和退款相关的业务",
+        "title": "支付服务",
+        "contact": {
+            "name": "LiuYong",
+            "email": "ly_yong@qq.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8082",
+    "basePath": "pay/api/v1",
+    "paths": {}
+}

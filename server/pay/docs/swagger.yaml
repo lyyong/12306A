@@ -1,0 +1,11 @@
+basePath: pay/api/v1
+host: localhost:8082
+info:
+  contact:
+    email: ly_yong@qq.com
+    name: LiuYong
+  description: 负责处理与支付和退款相关的业务
+  title: 支付服务
+  version: "1.0"
+paths: {}
+swagger: "2.0"

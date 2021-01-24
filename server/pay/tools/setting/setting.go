@@ -1,9 +1,12 @@
+// @Author liuYong
+// @Created at 2020-01-05
+// @Modified at 2020-01-05
 package setting
 
 import (
-	"12306A/server/pay/tools/logging"
 	"flag"
 	"github.com/go-ini/ini"
+	"pay/tools/logging"
 	"time"
 )
 

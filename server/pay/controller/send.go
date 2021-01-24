@@ -1,8 +1,11 @@
+// @Author liuYong
+// @Created at 2020-01-05
+// @Modified at 2020-01-05
 package controller
 
 import (
-	"12306A/server/pay/tools/message"
 	"github.com/gin-gonic/gin"
+	"pay/tools/message"
 )
 
 type Send struct {

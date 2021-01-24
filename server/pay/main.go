@@ -1,22 +1,26 @@
+// @Author liuYong
+// @Created at 2020-01-05
+// @Modified at 2020-01-05
 package main
 
 import (
-	"12306A/server/pay/router"
-	"12306A/server/pay/tools/logging"
-	"12306A/server/pay/tools/setting"
 	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
+	"pay/router"
+	"pay/script"
+	"pay/tools/logging"
+	"pay/tools/setting"
 	"time"
 )
 
 // 需要初始化的组件
 func init() {
-	setting.Setup()
-
 	logging.Setup()
+	setting.Setup()
+	script.Setup()
 }
 
 // 需要关闭的组件
@@ -49,11 +53,13 @@ func main() {
 
 	// 5 秒后关闭资源
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	defer func() {
+		cancel()
+		serverClose()
+	}()
 	if err := s.Shutdown(ctx); err != nil {
 		logging.Fatal("Server Shutdown: ", err)
 	}
 
 	logging.Info("Server exiting")
-	serverClose()
 }
