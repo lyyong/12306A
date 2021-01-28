@@ -10,6 +10,221 @@
         "version": "1.0"
     },
     "host": "localhost:8082",
-    "basePath": "pay/api/v1",
-    "paths": {}
+    "basePath": "/pay/api/v1",
+    "paths": {
+        "/ok/abb": {
+            "post": {
+                "description": "服务器对支付进行验证",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "告知服务器通过支付宝支付完成",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "需要接受的信息",
+                        "name": "wantPayR",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.wantPayAbbRecv"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回成功",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/refund/abb": {
+            "post": {
+                "description": "给订单号然后进行退款操作",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "请求退款",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "订单信息",
+                        "name": "refundR",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.refundAbbRecv"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功信息",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/want/abb": {
+            "post": {
+                "description": "获得支付需要的来自支付宝的OrderInfo",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "告知服务器想要支付",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "需要接受的信息",
+                        "name": "wantPayR",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.wantPayAbbRecv"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回订单号和OrderInfo",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/controller.JSONResult"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/v1.wantPayAbbSend"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.JSONResult": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "object"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.refundAbbRecv": {
+            "type": "object",
+            "required": [
+                "order_outside_id"
+            ],
+            "properties": {
+                "order_outside_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.wantPayAbbRecv": {
+            "type": "object",
+            "required": [
+                "order_outside_id"
+            ],
+            "properties": {
+                "order_outside_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.wantPayAbbSend": {
+            "type": "object",
+            "properties": {
+                "order_info": {
+                    "type": "string"
+                },
+                "order_outside_id": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

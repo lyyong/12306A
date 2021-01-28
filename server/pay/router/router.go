@@ -19,20 +19,24 @@ import (
 // @contact.email ly_yong@qq.com
 
 // @host localhost:8082
-// @BasePath pay/api/v1
+// @BasePath /pay/api/v1
 // @query.collection.format multi
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	apiV1 := r.Group("/pay/api/v1")
 	{
+		okGroup := apiV1.Group("/ok")
 		{
-			apiV1.POST("/ok", v1.PayOK)
-			apiV1.POST("/want", v1.WantPay)
+			okGroup.POST("/abb", v1.PayOKAbb)
+		}
+		wantGroup := apiV1.Group("/want")
+		{
+			wantGroup.POST("/abb", v1.WantPayAbb)
 		}
 		refundGroup := apiV1.Group("/refund")
 		{
-			refundGroup.POST("/", v1.Refund)
+			refundGroup.POST("/abb", v1.RefundAbb)
 		}
 	}
 

@@ -1,0 +1,35 @@
+syntax="proto3";
+
+package proto;
+
+option go_package=".;orderRPCpb";
+
+message CreateInfo {
+  int64 UserID = 1;
+  string Money = 2;
+  string AffairID = 3;
+  int32 ExpireDuration = 4;
+  string OrderOutsideID = 5;
+}
+
+message Info {
+  int64 UserID = 1;
+  string Money = 2;
+  string AffairID = 3;
+  int32 ExpireDuration = 4;
+  string OrderOutsideID = 5;
+  int32 State = 6;
+}
+
+message SearchInfo {
+  int64 UserID = 1;
+}
+
+message Error {
+  string content = 1;
+}
+
+service OrderRPCService {
+  rpc Create(CreateInfo) returns (Error) {};
+  rpc Read(SearchInfo) returns (Info) {};
+}

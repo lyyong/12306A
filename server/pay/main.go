@@ -6,6 +6,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +15,7 @@ import (
 	"pay/script"
 	"pay/tools/logging"
 	"pay/tools/setting"
+	"strings"
 	"time"
 )
 
@@ -29,12 +32,25 @@ func serverClose() {
 }
 
 func main() {
-	r := router.InitRouter()
-
+	// gin 路由
+	ginRouter := router.InitRouter()
+	// grpc路由
+	grpcRouter := router.InitRPCService()
 	logging.Info("启动Pay服务, 端口号: ", setting.ServerSetting.HttpPort)
 	s := &http.Server{
-		Addr:         fmt.Sprintf(":%d", setting.ServerSetting.HttpPort),
-		Handler:      r,
+		Addr: fmt.Sprintf(":%d", setting.ServerSetting.HttpPort),
+		// 使用h2c库,避免使用TLS, 实现http2的未加密模式
+		Handler: h2c.NewHandler(http.HandlerFunc(
+			func(responseWriter http.ResponseWriter, request *http.Request) {
+				if request.ProtoMajor == 2 && strings.Contains(
+					request.Header.Get("Content-Type"), "application/grpc") {
+					// grpc请求
+					grpcRouter.ServeHTTP(responseWriter, request)
+				} else {
+					ginRouter.ServeHTTP(responseWriter, request)
+				}
+				return
+			}), &http2.Server{}),
 		ReadTimeout:  setting.ServerSetting.ReadTimeout,
 		WriteTimeout: setting.ServerSetting.WriteTimeout,
 	}

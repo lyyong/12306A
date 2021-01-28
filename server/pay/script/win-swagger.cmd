@@ -1,1 +1,1 @@
-swag init -g ./router/router.go
+swag init -g router/router.go

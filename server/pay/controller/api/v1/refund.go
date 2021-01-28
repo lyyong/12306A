@@ -11,19 +11,29 @@ import (
 	"pay/tools/message"
 )
 
-type refundRecv struct {
-	Username       string `json:"username" binding:"required"`
+type refundAbbRecv struct {
 	OrderOutsideID string `json:"order_outside_id" binding:"required"`
 }
 
-func Refund(c *gin.Context) {
+// 退款 godoc
+// @Summary 请求退款
+// @Description 给订单号然后进行退款操作
+// @Accept json
+// @Produce json
+// @Param userID query string true "用户ID"
+// @Param username query string true "用户名"
+// @Param refundR body v1.refundAbbRecv true "订单信息"
+// @Success 200 {object} controller.JSONResult{} "成功信息"
+// @Failure 400 {object} controller.JSONResult{}
+// @Router /refund/abb [post]
+func RefundAbb(c *gin.Context) {
 	sender := controller.NewSend(c)
 	noData := make(map[string]interface{})
-	var refundR refundRecv
+	var refundR refundAbbRecv
 	if err := c.ShouldBindJSON(&refundR); err != nil {
 		logging.Error(err)
-		sender.Response(http.StatusOK, message.PARAMS_ERROR, noData)
+		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
 	}
 	// TODO 通过outside id 查找到订单然后通过orderInfo向支付宝请求退款 过程可能是排队的
-	sender.Response(http.StatusOK, message.OK, noData)
+	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, noData))
 }
