@@ -10,14 +10,27 @@ import (
 	"time"
 )
 
-type Server struct {
+type server struct {
+	ServerName   string
 	HttpPort     int
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
 	RunMode      string
 }
 
-var ServerSetting = &Server{}
+type consul struct {
+	Address     string
+	Interval    int
+	TTL         int
+	ServiceHost string
+	ServiceID   string
+}
+
+type zipkin struct {
+}
+
+var Server = &server{}
+var Consul = &consul{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -31,9 +44,10 @@ func Setup() {
 	if err != nil {
 		logging.Fatal("加载配置文件%s\\%s失败\n", configPath, configName)
 	}
-	loadConfig(Cfg, "server", ServerSetting)
-	ServerSetting.ReadTimeout *= time.Second
-	ServerSetting.WriteTimeout *= time.Second
+	loadConfig(Cfg, "server", Server)
+	loadConfig(Cfg, "consul", Consul)
+	Server.ReadTimeout *= time.Second
+	Server.WriteTimeout *= time.Second
 }
 
 func loadConfig(Cfg *ini.File, section string, data interface{}) {

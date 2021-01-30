@@ -26,10 +26,23 @@ message SearchInfo {
 }
 
 message Error {
-  string content = 1;
+  string Content = 1;
+}
+
+message UpdateStateInfo {
+  string OutsideID = 1;
+  int32 State = 2;
+}
+
+message UpdateStateWithRInfo {
+  string OutsideID = 1;
+  int32 State = 2;
+  string ROutsideID = 3;
 }
 
 service OrderRPCService {
   rpc Create(CreateInfo) returns (Error) {};
   rpc Read(SearchInfo) returns (Info) {};
+  rpc UpdateState(UpdateStateInfo) returns (Error) {};
+  rpc UpdateStateWithRelativeOrder(UpdateStateWithRInfo) returns (Error) {};
 }

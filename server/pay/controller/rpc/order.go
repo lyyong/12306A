@@ -11,6 +11,14 @@ import (
 type OrderRPCService struct {
 }
 
+func (o OrderRPCService) UpdateState(ctx context.Context, info *orderRPCpb.UpdateStateInfo) (*orderRPCpb.Error, error) {
+	return &orderRPCpb.Error{Content: "hello UpdateState"}, nil
+}
+
+func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info *orderRPCpb.UpdateStateWithRInfo) (*orderRPCpb.Error, error) {
+	return &orderRPCpb.Error{Content: "hello UpdateStateWithRelativeOrder"}, nil
+}
+
 func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateInfo) (*orderRPCpb.Error, error) {
 	return &orderRPCpb.Error{Content: "hello Create"}, nil
 }

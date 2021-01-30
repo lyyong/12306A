@@ -1,0 +1,30 @@
+{
+  "alc": {
+    "enabled": true,
+    "default_policy": "deny",
+    "token": {
+      "master": "5d79de96-13zx-11e7-93f1-874561abff5a"
+    }
+  },
+  "acl_datacenter": "12306A",
+  "bootstrap_expect": 2,
+  "client_addr": "0.0.0.0",
+  "bind_addr": "0.0.0.0",
+  "advertise_addr": "192.168.1.200",
+  "data_dir": "/opt/consul",
+  "datacenter": "12306A",
+  "dns_config": {
+    "allow_stale": true,
+    "enable_truncate": true,
+    "node_ttl": "60s",
+    "service_ttl": {
+      "*": "5s"
+    }
+  },
+  "enable_script_checks": true,
+  "encrypt": "MK12in12319786zaAu3in0A==",
+  "log_level": "INFO",
+  "node_name": "12306A_ConsulServer1",
+  "server": true,
+  "ui": true
+}

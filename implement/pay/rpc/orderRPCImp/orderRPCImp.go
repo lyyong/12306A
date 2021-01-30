@@ -60,3 +60,32 @@ func (*OrderRPCImp) Close() error {
 	}
 	return nil
 }
+
+func (*OrderRPCImp) UpdateState(orderOutsideID string, state int32) error {
+	res, err := orderRPCClient.UpdateState(&orderRPCpb.UpdateStateInfo{
+		OutsideID: orderOutsideID,
+		State:     state,
+	})
+	if err != nil {
+		return err
+	}
+	if res != nil && res.Content != "" {
+		return errors.New(res.Content)
+	}
+	return nil
+}
+
+func (*OrderRPCImp) UpdateStateWithRelativeOrder(orderOutsideID string, state int32, relativeOutsideID string) error {
+	res, err := orderRPCClient.UpdateStateWithRelativeOrder(&orderRPCpb.UpdateStateWithRInfo{
+		OutsideID:  orderOutsideID,
+		State:      state,
+		ROutsideID: relativeOutsideID,
+	})
+	if err != nil {
+		return err
+	}
+	if res != nil && res.Content != "" {
+		return errors.New(res.Content)
+	}
+	return nil
+}

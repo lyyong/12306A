@@ -13,6 +13,7 @@ import (
 	"os/signal"
 	"pay/router"
 	"pay/script"
+	"pay/tools/consul"
 	"pay/tools/logging"
 	"pay/tools/setting"
 	"strings"
@@ -21,14 +22,35 @@ import (
 
 // 需要初始化的组件
 func init() {
+	// 初始化log
 	logging.Setup()
+	// 载入配置文件
 	setting.Setup()
+	// 运行脚本
 	script.Setup()
+
+	// 服务发现
+	err := consul.Register(setting.Server.ServerName,
+		setting.Consul.ServiceHost,
+		setting.Server.HttpPort,
+		setting.Consul.ServiceID,
+		setting.Consul.Address,
+		setting.Consul.Interval,
+		setting.Consul.TTL)
+	if err != nil {
+		logging.Error(err)
+	} else {
+		logging.Info("启动服务发现")
+	}
 }
 
 // 需要关闭的组件
 func serverClose() {
-
+	// 注销服务发现
+	err := consul.DeRegister()
+	if err != nil {
+		logging.Error(err)
+	}
 }
 
 func main() {
@@ -36,9 +58,9 @@ func main() {
 	ginRouter := router.InitRouter()
 	// grpc路由
 	grpcRouter := router.InitRPCService()
-	logging.Info("启动Pay服务, 端口号: ", setting.ServerSetting.HttpPort)
+	logging.Info("启动Pay服务, 端口号: ", setting.Server.HttpPort)
 	s := &http.Server{
-		Addr: fmt.Sprintf(":%d", setting.ServerSetting.HttpPort),
+		Addr: fmt.Sprintf(":%d", setting.Server.HttpPort),
 		// 使用h2c库,避免使用TLS, 实现http2的未加密模式
 		Handler: h2c.NewHandler(http.HandlerFunc(
 			func(responseWriter http.ResponseWriter, request *http.Request) {
@@ -51,8 +73,8 @@ func main() {
 				}
 				return
 			}), &http2.Server{}),
-		ReadTimeout:  setting.ServerSetting.ReadTimeout,
-		WriteTimeout: setting.ServerSetting.WriteTimeout,
+		ReadTimeout:  setting.Server.ReadTimeout,
+		WriteTimeout: setting.Server.WriteTimeout,
 	}
 
 	go func() {

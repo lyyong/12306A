@@ -1,0 +1,37 @@
+version: '3'
+services:
+  mysql:
+    ports:
+      - "3310:3306"
+    volumes:
+      - "~/data/docker-mysql:/var/lib/mysql"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=12306A.12306A"
+    image:
+      mysql
+  redis:
+    ports:
+      - "6379:6379"
+    image:
+      redis
+  zipkin:
+    ports:
+      - "9410:9410/tcp"
+      - "9411:9411/tcp"
+    image:
+      openzipkin/zipkin
+  consul:
+    build:
+      context: ./docker/consul
+      labels:
+        - "latest"
+    ports:
+      - "8300:8300/tcp"
+      - "8301:8301/tcp"
+      - "8301:8301/udp"
+      - "8302:8302/tcp"
+      - "8302:8302/udp"
+      - "8500:8500/tcp"
+      - "8600:8600/tcp"
+      - "8600:8600/udp"
+

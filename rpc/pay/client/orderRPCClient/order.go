@@ -62,3 +62,27 @@ func Read(info *orderRPCpb.SearchInfo) (*orderRPCpb.Info, error) {
 	}
 	return resp, err
 }
+
+func UpdateState(info *orderRPCpb.UpdateStateInfo) (*orderRPCpb.Error, error) {
+	if client == nil {
+		InitClient()
+	}
+	tclient := *client
+	resp, err := tclient.UpdateState(context.Background(), info)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func UpdateStateWithRelativeOrder(info *orderRPCpb.UpdateStateWithRInfo) (*orderRPCpb.Error, error) {
+	if client == nil {
+		InitClient()
+	}
+	tclient := *client
+	resp, err := tclient.UpdateStateWithRelativeOrder(context.Background(), info)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
