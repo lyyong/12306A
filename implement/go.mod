@@ -3,8 +3,11 @@ module implement
 go 1.15
 
 replace (
+	implement => ../implement
 	interface => ../interface
+	pay => ../server/pay/
 	rpc => ../rpc
+	common => ../common
 )
 
 require (

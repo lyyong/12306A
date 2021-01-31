@@ -9,8 +9,12 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	InitClient()
-	resp, err := Create(&orderRPCpb.CreateInfo{
+	client, err := NewClientWithHttpTracer("test", "localhost", "9000", "http://localhost:9411/api/v2/spans")
+	defer client.Close()
+	if err != nil {
+		t.Error(err)
+	}
+	resp, err := client.Create(&orderRPCpb.CreateInfo{
 		UserID:         1,
 		Money:          "20",
 		AffairID:       "123asd",
@@ -21,15 +25,14 @@ func TestCreate(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(resp.Content)
-	defer CloseClient()
 }
 
 func TestRead(t *testing.T) {
-	InitClient()
-	resp, err := Read(&orderRPCpb.SearchInfo{UserID: 1})
+	client, err := NewClient()
+	defer client.Close()
+	resp, err := client.Read(&orderRPCpb.SearchInfo{UserID: 1})
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(resp)
-	defer CloseClient()
 }

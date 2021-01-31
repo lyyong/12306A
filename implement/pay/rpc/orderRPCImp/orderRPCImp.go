@@ -10,18 +10,21 @@ import (
 	"rpc/pay/proto/orderRPCpb"
 )
 
-type OrderRPCImp struct{}
+type OrderRPCImp struct {
+	client *orderRPCClient.OrderRPCClient
+}
 
 func NewOrderRPCImp() (*OrderRPCImp, error) {
-	if err := orderRPCClient.InitClient(); err != nil {
+	cli, err := orderRPCClient.NewClient()
+	if err != nil {
 		return nil, err
 	}
-	return &OrderRPCImp{}, nil
+	return &OrderRPCImp{client: cli}, nil
 }
 
 // Create 创建订单
-func (*OrderRPCImp) Create(info *orderInterfaces.CreateInfo) error {
-	res, err := orderRPCClient.Create(&orderRPCpb.CreateInfo{
+func (o *OrderRPCImp) Create(info *orderInterfaces.CreateInfo) error {
+	res, err := o.client.Create(&orderRPCpb.CreateInfo{
 		UserID:         info.UserID,
 		Money:          info.Money,
 		AffairID:       info.AffairID,
@@ -39,8 +42,8 @@ func (*OrderRPCImp) Create(info *orderInterfaces.CreateInfo) error {
 
 // Read 获取订单
 // userID 为用户的逐渐
-func (*OrderRPCImp) Read(userID int64) (*orderInterfaces.Info, error) {
-	res, err := orderRPCClient.Read(&orderRPCpb.SearchInfo{UserID: userID})
+func (o *OrderRPCImp) Read(userID int64) (*orderInterfaces.Info, error) {
+	res, err := o.client.Read(&orderRPCpb.SearchInfo{UserID: userID})
 	if err != nil {
 		return nil, err
 	}
@@ -54,15 +57,15 @@ func (*OrderRPCImp) Read(userID int64) (*orderInterfaces.Info, error) {
 	}, nil
 }
 
-func (*OrderRPCImp) Close() error {
-	if err := orderRPCClient.CloseClient(); err != nil {
+func (o *OrderRPCImp) Close() error {
+	if err := o.client.Close(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (*OrderRPCImp) UpdateState(orderOutsideID string, state int32) error {
-	res, err := orderRPCClient.UpdateState(&orderRPCpb.UpdateStateInfo{
+func (o *OrderRPCImp) UpdateState(orderOutsideID string, state int32) error {
+	res, err := o.client.UpdateState(&orderRPCpb.UpdateStateInfo{
 		OutsideID: orderOutsideID,
 		State:     state,
 	})
@@ -75,8 +78,8 @@ func (*OrderRPCImp) UpdateState(orderOutsideID string, state int32) error {
 	return nil
 }
 
-func (*OrderRPCImp) UpdateStateWithRelativeOrder(orderOutsideID string, state int32, relativeOutsideID string) error {
-	res, err := orderRPCClient.UpdateStateWithRelativeOrder(&orderRPCpb.UpdateStateWithRInfo{
+func (o *OrderRPCImp) UpdateStateWithRelativeOrder(orderOutsideID string, state int32, relativeOutsideID string) error {
+	res, err := o.client.UpdateStateWithRelativeOrder(&orderRPCpb.UpdateStateWithRInfo{
 		OutsideID:  orderOutsideID,
 		State:      state,
 		ROutsideID: relativeOutsideID,

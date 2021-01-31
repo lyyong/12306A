@@ -4,7 +4,7 @@
 package setting
 
 import (
-	"pay/tools/logging"
+	"common/tools/logging"
 	"testing"
 )
 

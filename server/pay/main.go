@@ -4,6 +4,7 @@
 package main
 
 import (
+	"common/tools/logging"
 	"context"
 	"fmt"
 	"golang.org/x/net/http2"
@@ -13,8 +14,6 @@ import (
 	"os/signal"
 	"pay/router"
 	"pay/script"
-	"pay/tools/consul"
-	"pay/tools/logging"
 	"pay/tools/setting"
 	"strings"
 	"time"
@@ -22,42 +21,27 @@ import (
 
 // 需要初始化的组件
 func init() {
-	// 初始化log
+	// 加载配置文件
 	logging.Setup()
 	// 载入配置文件
 	setting.Setup()
 	// 运行脚本
 	script.Setup()
-
-	// 服务发现
-	err := consul.Register(setting.Server.ServerName,
-		setting.Consul.ServiceHost,
-		setting.Server.HttpPort,
-		setting.Consul.ServiceID,
-		setting.Consul.Address,
-		setting.Consul.Interval,
-		setting.Consul.TTL)
-	if err != nil {
-		logging.Error(err)
-	} else {
-		logging.Info("启动服务发现")
-	}
 }
 
 // 需要关闭的组件
 func serverClose() {
-	// 注销服务发现
-	err := consul.DeRegister()
-	if err != nil {
-		logging.Error(err)
-	}
+
 }
 
 func main() {
 	// gin 路由
 	ginRouter := router.InitRouter()
 	// grpc路由
-	grpcRouter := router.InitRPCService()
+	grpcRouter, err := router.InitRPCService()
+	if err != nil {
+		logging.Error("创建rpc服务器失败:", err)
+	}
 	logging.Info("启动Pay服务, 端口号: ", setting.Server.HttpPort)
 	s := &http.Server{
 		Addr: fmt.Sprintf(":%d", setting.Server.HttpPort),
@@ -67,7 +51,7 @@ func main() {
 				if request.ProtoMajor == 2 && strings.Contains(
 					request.Header.Get("Content-Type"), "application/grpc") {
 					// grpc请求
-					grpcRouter.ServeHTTP(responseWriter, request)
+					grpcRouter.Server().ServeHTTP(responseWriter, request)
 				} else {
 					ginRouter.ServeHTTP(responseWriter, request)
 				}
@@ -94,9 +78,10 @@ func main() {
 	defer func() {
 		cancel()
 		serverClose()
+		grpcRouter.Close()
 	}()
 	if err := s.Shutdown(ctx); err != nil {
-		logging.Fatal("Server Shutdown: ", err)
+		logging.Error("Server Shutdown: ", err)
 	}
 
 	logging.Info("Server exiting")

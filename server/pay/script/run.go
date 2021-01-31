@@ -4,8 +4,8 @@
 package script
 
 import (
+	"log"
 	"os/exec"
-	"pay/tools/logging"
 	"runtime"
 )
 
@@ -23,6 +23,6 @@ func Setup() {
 	}
 	err := cmd.Run()
 	if err != nil {
-		logging.Error("运行cmd错误", err)
+		log.Fatalln("运行cmd错误", err)
 	}
 }
