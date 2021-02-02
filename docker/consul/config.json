@@ -26,5 +26,7 @@
   "log_level": "INFO",
   "node_name": "12306A_ConsulServer1",
   "server": true,
-  "ui": true
+  "ui_config": {
+    "enabled": true
+  }
 }

@@ -1,18 +1,21 @@
 // @Author LiuYong
 // @Created at 2021-01-30
 // @Modified at 2021-01-30
-package zipkin
+package router_tracer
 
 import (
-	"errors"
 	"fmt"
 	"github.com/opentracing/opentracing-go"
 	zipkinot "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	"github.com/openzipkin/zipkin-go"
 	zgrp "github.com/openzipkin/zipkin-go/reporter"
-	zipkinhttp "github.com/openzipkin/zipkin-go/reporter/http"
 )
 
+// router_tracer.Client 将会是一个全局单例.
+// 首先是由zipkin.SetupByHttp() 初始化zipkin.Client.
+// 然后可以直接通过zipkin.GetClient()获取.
+// 使用zipkin.IsTracing() 判断是否进行了zipkin的初始化
+// 服务器关闭后要使用zipkin.Close()关闭.
 type Client struct {
 	httpReporter  *zgrp.Reporter
 	kafkaReporter *zgrp.Reporter
@@ -27,7 +30,11 @@ func (c *Client) Tracer() *opentracing.Tracer {
 	return c.tracer
 }
 
-func NewClient(serviceName string, serviceHost string, servicePort string) *Client {
+// newClient 创建一个zipkin客户端, 用来连接zipkin服务器, 给服务器汇报信息
+// serviceName - 当前服务的名称
+// serviceHost - 当前服务的host 不包括端口
+// servicePort - 当前服务的端口
+func newClient(serviceName string, serviceHost string, servicePort string) *Client {
 	return &Client{
 		httpReporter:  nil,
 		kafkaReporter: nil,
@@ -37,17 +44,6 @@ func NewClient(serviceName string, serviceHost string, servicePort string) *Clie
 		zkHttp:        "",
 		tracer:        nil,
 	}
-}
-
-func (c *Client) SetupByHttp(zkHttp string) error {
-	// 创建一个报告器, 用来想zipkin汇报信息
-	if c.httpReporter != nil {
-		return errors.New("重复创建zipkin-http")
-	}
-	rp := zipkinhttp.NewReporter(zkHttp)
-	c.httpReporter = &rp
-
-	return c.setup(c.httpReporter)
 }
 
 func (c *Client) setup(zkReporter *zgrp.Reporter) error {
@@ -68,19 +64,14 @@ func (c *Client) setup(zkReporter *zgrp.Reporter) error {
 	return nil
 }
 
-func (c *Client) CloseHttp() {
+func (c *Client) closeHttp() {
 	if c.httpReporter != nil {
 		(*c.httpReporter).Close()
 	}
 }
 
-func (c *Client) CloseKafka() {
+func (c *Client) closeKafka() {
 	if c.kafkaReporter != nil {
 		(*c.kafkaReporter).Close()
 	}
-}
-
-func (c *Client) Close() {
-	c.CloseHttp()
-	c.CloseKafka()
 }

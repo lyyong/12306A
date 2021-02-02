@@ -57,13 +57,6 @@ func (o *OrderRPCImp) Read(userID int64) (*orderInterfaces.Info, error) {
 	}, nil
 }
 
-func (o *OrderRPCImp) Close() error {
-	if err := o.client.Close(); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (o *OrderRPCImp) UpdateState(orderOutsideID string, state int32) error {
 	res, err := o.client.UpdateState(&orderRPCpb.UpdateStateInfo{
 		OutsideID: orderOutsideID,

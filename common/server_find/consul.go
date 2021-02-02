@@ -1,7 +1,7 @@
 // @Author LiuYong
 // @Created at 2021-01-29
 // @Modified at 2021-01-29
-package consul
+package server_find
 
 import (
 	"common/tools/logging"
@@ -11,6 +11,12 @@ import (
 	"time"
 )
 
+// Client 作为consul服务的封装, 包含了服务发现和注销服务
+// server_find.Client 将会是一个全局单例.
+// 首先是由 server_find.Register() 初始化 server_find.Client.
+// 然后可以直接通过 server_find.GetClient()获取.
+// 使用 consul.HaveClient() 判断是否进行了 server_find.Client 的初始化
+// 服务器关闭后要使用 server_find.DeRegister()关闭.
 type Client struct {
 	cli       *consulApi.Client
 	name      string // 服务名称
@@ -22,7 +28,19 @@ type Client struct {
 	ttl       int    // 注册信息的缓存时间, 如果ttl过时前没有得到updateTTL则注册服务信息将被抛弃, 单位秒
 }
 
-// NewClient 注册服务到consul
+func (c *Client) Target() string {
+	return c.target
+}
+
+func (c *Client) Agent() *consulApi.Agent {
+	return c.cli.Agent()
+}
+
+func (c *Client) Health() *consulApi.Health {
+	return c.cli.Health()
+}
+
+// newClient 注册服务到consul
 // name - 服务名称
 // host - 服务的地址
 // port - 服务的端口号
@@ -30,7 +48,7 @@ type Client struct {
 // target - consul的地址,例如"localhost:8500"
 // interval - //consul的地址,例如"localhost:8500"
 // ttl - 注册信息的缓存时间, 如果ttl过时前没有得到updateTTL则注册服务信息将被抛弃, 单位秒
-func NewClient(name string, host string, port int, serviceID string, target string, interval int, ttl int) (*Client, error) {
+func newClient(name string, host string, port int, serviceID string, target string, interval int, ttl int) (*Client, error) {
 	if interval > ttl {
 		return nil, errors.New("interval大于ttl")
 	}
@@ -46,7 +64,8 @@ func NewClient(name string, host string, port int, serviceID string, target stri
 	}, nil
 }
 
-func (c *Client) Register() error {
+// register 注册服务
+func (c *Client) register() error {
 	if c.cli != nil {
 		return errors.New("重复注册服务")
 	}
@@ -99,7 +118,8 @@ func (c *Client) Register() error {
 	return nil
 }
 
-func (c *Client) DeRegister() error {
+// deRegister 注销服务
+func (c *Client) deRegister() error {
 	if c.cli == nil {
 		return errors.New("服务未注册")
 	}
@@ -115,4 +135,9 @@ func (c *Client) DeRegister() error {
 		return fmt.Errorf("检查注销服务出错: %v", err)
 	}
 	return nil
+}
+
+// isRegister 是否注册了服务
+func (c *Client) isRegister() bool {
+	return c.cli != nil
 }

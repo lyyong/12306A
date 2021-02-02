@@ -4,18 +4,14 @@
 package router
 
 import (
-	"common/rpcServer"
+	"common/rpc_manage"
+	"google.golang.org/grpc"
 	"pay/controller/rpc"
-	"pay/tools/setting"
 	"rpc/pay/proto/orderRPCpb"
 )
 
-func InitRPCService() (*rpcServer.RpcServer, error) {
-	server, err := rpcServer.NewRpcServerWithServerFindAndHttpTracer(setting.Server.Name,
-		setting.Server.Host, setting.Server.HttpPort, setting.Consul.ServiceID, setting.Consul.Address, setting.Consul.Interval, setting.Consul.TTL, setting.Zipkin.HttpEndpoint)
-	if err != nil {
-		return nil, err
-	}
-	orderRPCpb.RegisterOrderRPCServiceServer(server.Server(), &rpc.OrderRPCService{})
-	return server, nil
+func InitRPCService() *grpc.Server {
+	server := rpc_manage.NewGRPCServer()
+	orderRPCpb.RegisterOrderRPCServiceServer(server, &rpc.OrderRPCService{})
+	return server
 }
