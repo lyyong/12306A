@@ -3,6 +3,9 @@ module 12306A
 go 1.15
 
 require (
+	github.com/360EntSecGroup-Skylar/excelize v1.4.1
+	github.com/go-redis/redis v6.15.9+incompatible
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
