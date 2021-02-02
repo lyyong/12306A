@@ -1,6 +1,6 @@
-// @Author liuYong
-// @Created at 2020-01-05
-// @Modified at 2020-01-05
+// @Author LiuYong
+// @Created at 2021-02-02
+// @Modified at 2021-02-02
 package main
 
 import (
@@ -14,9 +14,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"pay/router"
-	"pay/script"
-	"pay/tools/setting"
+	"reticket/router"
+	"reticket/script"
+	"reticket/tools/setting"
 	"strconv"
 	"strings"
 	"time"
@@ -48,28 +48,23 @@ func serverClose() {
 }
 
 func main() {
-	// gin 路由
 	ginRouter := router.InitRouter()
-	// grpc路由
-	grpcServer := router.InitRPCService()
-
-	logging.Info("启动Pay服务, 端口号: ", setting.Server.HttpPort)
+	logging.Info("启动Reticket服务, 端口号: ", setting.Server.HttpPort)
 	s := &http.Server{
 		Addr: fmt.Sprintf(":%d", setting.Server.HttpPort),
-		// 使用h2c库,避免使用TLS, 实现http2的未加密模式
 		Handler: h2c.NewHandler(http.HandlerFunc(
 			func(responseWriter http.ResponseWriter, request *http.Request) {
-				if request.ProtoMajor == 2 && strings.Contains(
-					request.Header.Get("Content-Type"), "application/grpc") {
-					// grpc请求
-					grpcServer.ServeHTTP(responseWriter, request)
+				if request.ProtoMajor == 2 &&
+					strings.Contains(request.Header.Get("Content-type"), "application/grpc") {
+					logging.Info("grpc 请求")
 				} else {
 					ginRouter.ServeHTTP(responseWriter, request)
 				}
 				return
-			}), &http2.Server{}),
-		ReadTimeout:  setting.Server.ReadTimeout,
-		WriteTimeout: setting.Server.WriteTimeout,
+			},
+		), &http2.Server{}),
+		ReadTimeout:  0,
+		WriteTimeout: 0,
 	}
 
 	go func() {

@@ -31,6 +31,7 @@ const (
 	FATAL                // 失败信息
 )
 
+// TODO logger的多线陈单例
 func Setup() {
 	// 获得日志记录器，第一个参数是IO句柄，第二个是每行日志的开头，第三个定义了日志记录属性
 	logger = log.New(os.Stdout, DefaultPrefix, log.LstdFlags)

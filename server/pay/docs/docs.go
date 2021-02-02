@@ -58,7 +58,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/v1.wantPayAbbRecv"
+                            "$ref": "#/definitions/v1.payOKAbbRecv"
                         }
                     }
                 ],
@@ -204,6 +204,21 @@ var doc = `{
                     "type": "object"
                 },
                 "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.payOKAbbRecv": {
+            "type": "object",
+            "required": [
+                "order_info",
+                "order_outside_id"
+            ],
+            "properties": {
+                "order_info": {
+                    "type": "string"
+                },
+                "order_outside_id": {
                     "type": "string"
                 }
             }

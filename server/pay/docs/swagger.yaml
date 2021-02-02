@@ -9,6 +9,16 @@ definitions:
       msg:
         type: string
     type: object
+  v1.payOKAbbRecv:
+    properties:
+      order_info:
+        type: string
+      order_outside_id:
+        type: string
+    required:
+    - order_info
+    - order_outside_id
+    type: object
   v1.refundAbbRecv:
     properties:
       order_outside_id:
@@ -60,7 +70,7 @@ paths:
         name: wantPayR
         required: true
         schema:
-          $ref: '#/definitions/v1.wantPayAbbRecv'
+          $ref: '#/definitions/v1.payOKAbbRecv'
       produces:
       - application/json
       responses:
