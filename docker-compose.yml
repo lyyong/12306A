@@ -34,4 +34,18 @@ services:
       - "8500:8500/tcp"
       - "8600:8600/tcp"
       - "8600:8600/udp"
-
+  nginx:
+    build:
+      context: ./docker/nginx
+      labels:
+        - "latest"
+    ports:
+    - "80:80"
+  fabio:
+    build:
+      context: ./docker/fabio
+      labels:
+        - "latest"
+    ports:
+    - "9999:9999"
+    - "9998:9998"
