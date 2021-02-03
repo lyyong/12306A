@@ -4,6 +4,7 @@
 package router
 
 import (
+	v1 "candidate/controller/api/v1"
 	_ "candidate/docs"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -23,9 +24,9 @@ import (
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	// apiV1 := r.Group("/candidate/api/v1")
-	// {
-	// 	apiV1.POST("/", v1.Reticket)
-	// }
+	apiV1 := r.Group("/candidate/api/v1")
+	{
+		apiV1.POST("/", v1.Candidate)
+	}
 	return r
 }

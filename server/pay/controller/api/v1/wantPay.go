@@ -38,6 +38,7 @@ func WantPayAbb(c *gin.Context) {
 	if err := c.ShouldBindJSON(&wantPayR); err != nil {
 		logging.Error(err)
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
+		return
 	}
 	var wantPayS wantPayAbbSend
 	// TODO 亲求支付宝获取OrderInfo, 然后填充wantPayS

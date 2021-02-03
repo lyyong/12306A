@@ -29,7 +29,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 服务器对支付进行验证
+      description: 服务器执行退票请求
       parameters:
       - description: 用户ID
         in: query
@@ -58,5 +58,5 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.JSONResult'
-      summary: 告知服务器通过支付宝支付完成
+      summary: 告诉服务器执行退票请求
 swagger: "2.0"

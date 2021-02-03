@@ -34,6 +34,7 @@ func PayOKAbb(c *gin.Context) {
 	if err := c.ShouldBindJSON(&payOKR); err != nil {
 		logging.Error(err)
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
+		return
 	}
 	// TODO 支付成功逻辑 查询支付宝看是否支付成功, 然后执行一些支付完成的逻辑
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.PAYOK, noData))
