@@ -10,10 +10,13 @@ func TestWriteTrainPoolToRedis(t *testing.T) {
 	WriteTrainPoolToRedis()
 }
 
-func TestWriteTicketPoolToRedis(t *testing.T) {
-	WriteTicketPoolToRedis()
+func TestWriteTrainInfoToRedis(t *testing.T) {
+	WriteTrainInfoToRedis()
 }
-
 func TestWriteStationAndCityToRedis(t *testing.T) {
 	WriteStationAndCityToRedis()
+}
+
+func TestWriteTicketPoolToRedis(t *testing.T) {
+	WriteTicketPoolToRedis()
 }

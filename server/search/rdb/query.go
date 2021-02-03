@@ -1,28 +1,36 @@
 /*
 * @Author: 余添能
-* @Date:   2021/1/26 3:37 下午
+* @Date:   2021/2/3 7:12 下午
  */
 package rdb
 
 import (
-	"fmt"
-	"github.com/go-redis/redis"
+	"12306A/server/search/model/outer"
+	"strings"
 )
+//总查询
+func Query(search *outer.Search) []*outer.Train {
+	res:=strings.Split(search.Date," ")
+	date:=res[0]
 
-var RedisDB *redis.Client
+	//日期：2021-1-23
 
-func init() {
-	RedisDB = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-}
+	var trains []*outer.Train
+	//根据城市查车次
+	trainNos := QueryTrainByCity(search.StartCity, search.EndCity)
+	for _,t:=range trainNos{
+		//根据车次查两站信息
+		trainNo := QueryTrainInfoByTrainNo(t, search.StartCity, search.EndCity)
 
-func QueryStation() {
-	key := "stationCity"
-	resMap, _ := RedisDB.HGetAll(key).Result()
-	for k, v := range resMap {
-		fmt.Println(k, v)
+		//根据车次查询票数
+		firstSeat:=QueryTicketNumByTrainNoAndDate(date,trainNo.TrainNo,"firstSeat",int(trainNo.StartStationNo),int(trainNo.EndStationNo))
+		trainNo.FirstSeat=int(firstSeat)
+		secondSeat:=QueryTicketNumByTrainNoAndDate(date,trainNo.TrainNo,"secondSeat",int(trainNo.StartStationNo),int(trainNo.EndStationNo))
+		trainNo.SecondSeat=int(secondSeat)
+		businessSeat:=QueryTicketNumByTrainNoAndDate(date,trainNo.TrainNo,"businessSeat",int(trainNo.StartStationNo),int(trainNo.EndStationNo))
+		trainNo.BusinessSeat=int(businessSeat)
+		//fmt.Println(trainNo)
+		trains=append(trains,trainNo)
 	}
+	return trains
 }

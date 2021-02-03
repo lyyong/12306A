@@ -25,7 +25,7 @@ func init() {
 //假设所有车次天天会有，所以查车次不用日期
 //但可能出现停运情况,特殊考虑
 
-//用出发城市：目的城市作为key，使用list类型存储两个城市之间的车次
+//用出发城市：目的城市作为key，使用zset类型存储两个城市之间的车次
 func WriteTrainPoolToRedis() {
 	trainPools := init_data.ReadTrainPoolAll()
 	for _, trainPool := range trainPools {
@@ -45,7 +45,10 @@ func WriteTrainPoolToRedis() {
 }
 
 //使用hash存储列车基本信息,key: trainNo 如, G104
-func WriteTicketPoolToRedis() {
+//列车信息：列车基本信息、车站信息
+//列车基本信息用一个hash保存：key=车次, 元素：trainNo,stationNum, 1--stationNum -> cityName
+//每个车站都单独用一个hash保存,key=车次+站序，元素：stationNo,stationName,cityName,arriveTime,departTime,duration,price,mileage
+func WriteTrainInfoToRedis() {
 	trains := init_data.ReadTotalTrainNo()
 	for _, train := range trains {
 		//initialTime:=train.InitialTime
@@ -54,6 +57,7 @@ func WriteTicketPoolToRedis() {
 		//写入车次元数据
 		stationNum := train.StationNum
 		RedisDB.HSet(key, "stationNum", stationNum)
+		//RedisDB.HSet(key, "initialTime", stationNum)
 		//RedisDB.HSet(key,"initialTime",train.InitialTime)
 		//RedisDB.HSet(key,"terminalTime",train.TerminalTime)
 		stations := train.Stations
@@ -96,5 +100,39 @@ func WriteStationAndCityToRedis() {
 		var city, stationName string
 		rows.Scan(&city, &stationName)
 		RedisDB.HSet(key, stationName, city)
+	}
+}
+
+
+//初始化每趟车次的票池
+//second,first,business
+//zset保存票
+//key=日期:车次::
+func WriteTicketPoolToRedis()  {
+	trainNos:=init_data.ReadTotalTrainNo()
+	//先写入30车次数据
+	for i:=0;i<len(trainNos);i++{
+		train:=trainNos[i]
+		//fmt.Println(train)
+		stations:=train.Stations
+		year:=train.InitialTime.Year()
+		month:=train.InitialTime.Month()
+		day:=train.InitialTime.Day()
+		date:=strconv.Itoa(year)+"-"+strconv.Itoa(int(month))+"-"+strconv.Itoa(day)
+		for j:=0;j<len(stations);j++{
+			stationKey1:=date+":"+train.TrainNo+":"+strconv.Itoa(j+1)+":"+"firstSeat"
+			stationKey2:=date+":"+train.TrainNo+":"+strconv.Itoa(j+1)+":"+"secondSeat"
+			stationKey3:=date+":"+train.TrainNo+":"+strconv.Itoa(j+1)+":"+"businessSeat"
+			//score=下车站序，member=车厢号:座位号
+			//需要改
+			for k:=1;k<=20;k++{
+				RedisDB.ZAdd(stationKey1,redis.Z{Score: float64(len(stations)),Member: strconv.Itoa(k)+":"+strconv.Itoa(i+1)})
+				RedisDB.ZAdd(stationKey2,redis.Z{Score: float64(len(stations)),Member: strconv.Itoa(k)+":"+strconv.Itoa(i+1)})
+				RedisDB.ZAdd(stationKey3,redis.Z{Score: float64(len(stations)),Member: strconv.Itoa(k)+":"+strconv.Itoa(i+1)})
+				//RedisDB.ZRem(stationKey1,strconv.Itoa(k)+":"+strconv.Itoa(i+1))
+				//RedisDB.ZRem(stationKey2,strconv.Itoa(k)+":"+strconv.Itoa(i+1))
+				//RedisDB.ZRem(stationKey3,strconv.Itoa(k)+":"+strconv.Itoa(i+1))
+			}
+		}
 	}
 }

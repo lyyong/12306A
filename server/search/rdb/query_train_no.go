@@ -34,6 +34,8 @@ func QueryTrainInfoByTrainNo(trainNo string, startCity, endCity string) *outer2.
 	resMap, _ := mapCmd.Result()
 	stationNum, _ := strconv.ParseInt(resMap["stationNum"], 10, 64)
 
+	//initialTime:=resMap["initialTime"]
+
 	var start, end int
 	//寻找对应站点
 	for i := 1; i <= (int)(stationNum); i++ {
@@ -51,24 +53,29 @@ func QueryTrainInfoByTrainNo(trainNo string, startCity, endCity string) *outer2.
 
 	endKey := trainNo + "-" + strconv.Itoa(end)
 	endStation, _ := RedisDB.HGetAll(endKey).Result()
+
+
 	train := &outer2.Train{}
 	train.TrainNo = trainNo
 	train.StartStation = startStation["stationName"]
 	train.StartTime = startStation["arriveTime"]
+	train.StartStationNo,_=strconv.ParseInt(startStation["stationNo"],10,64)
+
 	//fmt.Println("sarriveTime",startStation["arriveTime"])
 	train.EndStation = endStation["stationName"]
 	train.EndTime = endStation["arriveTime"]
+	train.EndStationNo,_=strconv.ParseInt(endStation["stationNo"],10,64)
 	//fmt.Println("earriveTime",endStation["arriveName"])
 	//持续时间
-	//fmt.Println(startStation["duration"],endStation["duration"])
 	startDuration := strings.Split(startStation["duration"], ":")
 	endDuration := strings.Split(endStation["duration"], ":")
+
 	startH, _ := strconv.ParseInt(startDuration[0], 10, 64)
 	startM, _ := strconv.ParseInt(startDuration[1], 10, 64)
 	endH, _ := strconv.ParseInt(endDuration[0], 10, 64)
 	endM, _ := strconv.ParseInt(endDuration[1], 10, 64)
 	minutes := (endH*60 + endM) - (startH*60 + startM)
 	train.Duration = strconv.Itoa(int(minutes/60)) + ":" + strconv.Itoa(int(minutes%60))
-	//fmt.Println(train)
+
 	return train
 }
