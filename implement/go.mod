@@ -4,9 +4,7 @@ go 1.15
 
 replace (
 	common => ../common
-	implement => ../implement
 	interface => ../interface
-	pay => ../server/pay/
 	rpc => ../rpc
 )
 
