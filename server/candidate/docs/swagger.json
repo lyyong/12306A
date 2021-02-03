@@ -1,0 +1,94 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "负责处理与支付和退款相关的业务",
+        "title": "支付服务",
+        "contact": {
+            "name": "LiuYong",
+            "email": "ly_yong@qq.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8082",
+    "basePath": "/reticket/api/v1",
+    "paths": {
+        "/": {
+            "post": {
+                "description": "服务器对支付进行验证",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "告知服务器通过支付宝支付完成",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "需要接受的信息",
+                        "name": "wantPayR",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.reticketRecv"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回成功",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.JSONResult": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "object"
+                },
+                "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.reticketRecv": {
+            "type": "object",
+            "required": [
+                "ticket_outside_id"
+            ],
+            "properties": {
+                "ticket_outside_id": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
