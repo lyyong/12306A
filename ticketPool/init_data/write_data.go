@@ -20,7 +20,7 @@ func WriteStationProvinceCity() {
 	//先清空表
 	Db.Exec("delete from station_province_city")
 
-	bytes, err := ioutil.ReadFile("/Users/yutianneng/go/src/12306A/ticketPool/stations_prov_city.json")
+	bytes, err := ioutil.ReadFile("../stations_prov_city.json")
 	if err != nil {
 		fmt.Println("read file failed, err:", err)
 	}
@@ -64,7 +64,7 @@ func WriteStationProvinceCity() {
 //获取城市的编码
 func ReadCity() map[string]string {
 
-	bytes, err := ioutil.ReadFile("/Users/yutianneng/go/src/12306A/ticketPool/city.json")
+	bytes, err := ioutil.ReadFile("../city.json")
 	if err != nil {
 		fmt.Println("read city.json failed, err:", err)
 	}
@@ -117,7 +117,8 @@ func ReadStationCity() map[string]string {
 //读取车次信息，包括途径所有站点
 func ReadTrainNo() []*inner.Train {
 
-	xlsx, err := excelize.OpenFile("/Users/yutianneng/go/src/12306A/ticketPool/train_no.xlsx")
+	//xlsx, err := excelize.OpenFile("/Users/yutianneng/go/src/12306A/ticketPool/train_no.xlsx")
+	xlsx, err := excelize.OpenFile("../train_no.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return nil
