@@ -6,6 +6,7 @@ package rdb
 
 import (
 	"12306A/server/search/model/outer"
+	"fmt"
 	"strings"
 )
 //总查询
@@ -29,7 +30,7 @@ func Query(search *outer.Search) []*outer.Train {
 		trainNo.SecondSeat=int(secondSeat)
 		businessSeat:=QueryTicketNumByTrainNoAndDate(date,trainNo.TrainNo,"businessSeat",int(trainNo.StartStationNo),int(trainNo.EndStationNo))
 		trainNo.BusinessSeat=int(businessSeat)
-		//fmt.Println(trainNo)
+		fmt.Println(trainNo)
 		trains=append(trains,trainNo)
 	}
 	return trains

@@ -22,9 +22,6 @@ func TestReadTrainNo(t *testing.T) {
 	fmt.Println(len(trains))
 }
 
-func TestWriteTotalTrainNo(t *testing.T) {
-	WriteTotalTrainNo()
-}
 func TestReadStationCity(t *testing.T) {
 	stationCity := ReadStationCity()
 	fmt.Println(stationCity["明光"])

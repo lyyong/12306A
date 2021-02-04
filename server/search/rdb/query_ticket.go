@@ -10,16 +10,6 @@ import (
 	"strconv"
 )
 
-var RedisDB *redis.Client
-
-func init() {
-	RedisDB = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-}
-
 //查询某一天某个车次的某种座位等级的车票数，合适的
 func QueryTicketNumByTrainNoAndDate(date,trainNo,seatClass string,start,end int) int64{
 	//2021-1-23:K4729:1:secondSeat

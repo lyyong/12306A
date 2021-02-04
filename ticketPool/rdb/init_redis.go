@@ -21,7 +21,18 @@ func init() {
 		DB:       0,  // use default DB
 	})
 }
-
+func InitDataRedis()  {
+	//车站
+	WriteStationToRedis()
+	//车站:城市
+	WriteStationAndCityToRedis()
+	//列车信息
+	WriteTrainInfoToRedis()
+	//票池
+	WriteTicketPoolToRedis()
+	//城市之间的车次
+	WriteTrainPoolToRedis()
+}
 //假设所有车次天天会有，所以查车次不用日期
 //但可能出现停运情况,特殊考虑
 
@@ -64,7 +75,8 @@ func WriteTrainInfoToRedis() {
 		for i := 0; i < len(stations); i++ {
 			//保存各站所在城市
 			RedisDB.HSet(key, strconv.Itoa(i+1), stations[i].CityName)
-
+			//保存各站对应站序
+			RedisDB.HSet(key,stations[i].StationName,strconv.Itoa(i+1))
 			//保存站点信息
 			stationKey := trainNo + "-" + strconv.Itoa(i+1)
 			RedisDB.HSet(stationKey, "stationNo", stations[i].StationNo)
@@ -102,7 +114,21 @@ func WriteStationAndCityToRedis() {
 		RedisDB.HSet(key, stationName, city)
 	}
 }
-
+//用一个List保存所有站点
+func WriteStationToRedis()  {
+	sqlStr := "select station_name from station_province_city;"
+	rows, err := init_data.Db.Query(sqlStr)
+	if err != nil {
+		fmt.Println("query station_province_city failed, err:", err)
+		return
+	}
+	key := "stations"
+	for rows.Next() {
+		var stationName string
+		rows.Scan( &stationName)
+		RedisDB.LPush(key,stationName)
+	}
+}
 
 //初始化每趟车次的票池
 //second,first,business
@@ -110,7 +136,7 @@ func WriteStationAndCityToRedis() {
 //key=日期:车次::
 func WriteTicketPoolToRedis()  {
 	trainNos:=init_data.ReadTotalTrainNo()
-	//先写入30车次数据
+
 	for i:=0;i<len(trainNos);i++{
 		train:=trainNos[i]
 		//fmt.Println(train)
@@ -136,3 +162,4 @@ func WriteTicketPoolToRedis()  {
 		}
 	}
 }
+

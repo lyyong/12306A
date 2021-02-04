@@ -6,6 +6,9 @@ package init_data
 
 import "testing"
 
+func TestWriteTotalTrainNo(t *testing.T) {
+	WriteTotalTrainNo()
+}
 func TestReviseTotalTrainNo(t *testing.T) {
 	ReviseTotalTrainNo()
 }

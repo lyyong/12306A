@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+
 func WriteTotalTrainNo() {
 	sqlStr := "insert into total_train_no(train_no,station_num,initial_time," +
 		"terminal_time,station_no,station_name,city_name,arrive_time,depart_time,duration,mileage,price) " +
