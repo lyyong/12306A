@@ -13,6 +13,31 @@ info:
   contact: {}
   title: 用户管理 API
 paths:
+  /login:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 用户登录，参数为用户名和密码
+      operationId: login-by-username-password
+      parameters:
+      - description: 用户名
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: 用户登录
   /register:
     post:
       consumes:

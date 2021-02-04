@@ -1,3 +1,7 @@
+/**
+ * @Author fzh
+ * @Date 2020/2/1
+ */
 package cmd
 
 import (
@@ -12,7 +16,7 @@ var rootCmd = &cobra.Command{
 	Short: "",
 	Long:  "",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("欢迎使用")
+		fmt.Println("用户服务模块")
 	},
 }
 

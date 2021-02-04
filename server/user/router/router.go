@@ -1,11 +1,15 @@
-package routers
+/**
+ * @Author fzh
+ * @Date 2020/2/1
+ */
+package router
 
 import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	_ "user/docs"
-	"user/routers/user"
+	"user/router/user"
 )
 
 // 初始化路由

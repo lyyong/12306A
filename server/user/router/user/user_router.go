@@ -1,8 +1,12 @@
+/**
+ * @Author fzh
+ * @Date 2020/2/1
+ */
 package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"user/apis/user"
+	"user/api/user"
 )
 
 func Router(r *gin.RouterGroup) *gin.RouterGroup {
@@ -12,5 +16,6 @@ func Router(r *gin.RouterGroup) *gin.RouterGroup {
 	})
 
 	r.POST("/register", user.Register)
+	r.POST("/login", user.Login)
 	return r
 }
