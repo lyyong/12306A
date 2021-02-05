@@ -7,6 +7,7 @@ services:
         - "latest"
     ports:
       - "8082:8082"
+    network_mode: "host"
   candidate-server:
     build:
       context: ./server/candidate
@@ -14,6 +15,7 @@ services:
         - "latest"
     ports:
       - "8102:8102"
+    network_mode: "host"
   mysql:
     ports:
       - "3310:3306"
@@ -34,13 +36,12 @@ services:
       - "9411:9411/tcp"
     image:
       openzipkin/zipkin
-  nginx:
-    build:
-      context: ./docker/nginx
-      labels:
-        - "latest"
-    ports:
-    - "80:80"
+    # 将nginx独立, 在服务器上创建
+#  nginx:
+#    image:
+#      lyyong/12306a_nginx:v0.1.1
+#    ports:
+#    - "80:80"
 #  fabio:
 #    build:
 #      context: ./docker/fabio

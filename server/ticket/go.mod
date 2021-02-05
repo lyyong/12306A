@@ -14,7 +14,7 @@ require (
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gorm.io/driver/mysql v1.0.4
 	gorm.io/gorm v1.20.12
-	rpc v0.0.0-00010101000000-000000000000
+	rpc v0.0.0-00010101000000-000000000000 // indirect
 )
 
 replace (
