@@ -1,4 +1,4 @@
-basePath: /reticket/api/v1
+basePath: /candidate/api/v1
 definitions:
   controller.JSONResult:
     properties:
@@ -9,27 +9,117 @@ definitions:
       msg:
         type: string
     type: object
-  v1.reticketRecv:
+  v1.candidateRecv:
     properties:
-      ticket_outside_id:
+      date:
+        description: 发车日期 yyyy-mm-dd
+        type: string
+      passengers:
+        description: 乘客id
+        items:
+          type: string
+        type: array
+      train_id:
+        description: 车次
+        type: integer
+    required:
+    - date
+    - passengers
+    - train_id
+    type: object
+  v1.candidateSend:
+    properties:
+      order_outside_id:
+        description: 返回的订单编号
         type: string
     required:
-    - ticket_outside_id
+    - order_outside_id
     type: object
-host: localhost:8082
+  v1.cashRecv:
+    properties:
+      candidate_id:
+        type: string
+    required:
+    - candidate_id
+    type: object
+  v1.readRecv:
+    properties:
+      candidate_id:
+        description: 候补id
+        type: string
+    type: object
+  v1.readSend:
+    properties:
+      candidate_id:
+        type: string
+      passengers:
+        items:
+          properties:
+            certificate_number:
+              description: 证件号
+              type: string
+            name:
+              description: 乘客名
+              type: string
+            type:
+              description: 乘客类型 0为普通乘客, 1为学生
+              type: integer
+          type: object
+        type: array
+    type: object
+host: localhost:8102
 info:
   contact:
     email: ly_yong@qq.com
     name: LiuYong
   description: 负责处理与支付和退款相关的业务
-  title: 支付服务
+  title: 候补服务
   version: "1.0"
 paths:
   /:
     post:
       consumes:
       - application/json
-      description: 服务器对支付进行验证
+      description: 发送需要候补的信息给服务器, 服务器将执行候补功能
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userID
+        required: true
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 需要接受的信息
+        in: body
+        name: wantPayR
+        required: true
+        schema:
+          $ref: '#/definitions/v1.candidateRecv'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/controller.JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.candidateSend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+      summary: 请求服务器执行候补功能
+  /cash:
+    post:
+      consumes:
+      - application/json
+      description: 发送需要候补的信息给服务器, 服务器将执行候补功能
       parameters:
       - description: 用户ID
         in: query
@@ -46,7 +136,7 @@ paths:
         name: wantPayR
         required: true
         schema:
-          $ref: '#/definitions/v1.reticketRecv'
+          $ref: '#/definitions/v1.cashRecv'
       produces:
       - application/json
       responses:
@@ -58,5 +148,44 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.JSONResult'
-      summary: 告知服务器通过支付宝支付完成
+      summary: 请求服务器执行候补功能
+  /state:
+    post:
+      consumes:
+      - application/json
+      description: 发送需要候补的信息给服务器, 服务器将执行候补功能
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userID
+        required: true
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 需要接受的信息
+        in: body
+        name: wantPayR
+        required: true
+        schema:
+          $ref: '#/definitions/v1.readRecv'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/controller.JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.readSend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+      summary: 请求服务器执行候补功能
 swagger: "2.0"

@@ -59,7 +59,7 @@ func (s ServiceDiscoveryAboutBalance) Scheme() string {
 }
 
 func (s ServiceDiscoveryAboutBalance) ResolveNow(options resolver.ResolveNowOptions) {
-	fmt.Println("ResolveNew")
+	//fmt.Println("ResolveNew")
 }
 
 func (s ServiceDiscoveryAboutBalance) Close() {

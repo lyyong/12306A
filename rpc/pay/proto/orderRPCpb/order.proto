@@ -9,7 +9,7 @@ message CreateInfo {
   string Money = 2;
   string AffairID = 3;
   int32 ExpireDuration = 4;
-  string OrderOutsideID = 5;
+  string CreatedBy = 5;
 }
 
 message Info {
@@ -23,6 +23,10 @@ message Info {
 
 message SearchInfo {
   int64 UserID = 1;
+}
+
+message CreateRes {
+  string OrderOutsideID = 1;
 }
 
 message Error {
@@ -41,7 +45,7 @@ message UpdateStateWithRInfo {
 }
 
 service OrderRPCService {
-  rpc Create(CreateInfo) returns (Error) {};
+  rpc Create(CreateInfo) returns (CreateRes) {};
   rpc Read(SearchInfo) returns (Info) {};
   rpc UpdateState(UpdateStateInfo) returns (Error) {};
   rpc UpdateStateWithRelativeOrder(UpdateStateWithRInfo) returns (Error) {};

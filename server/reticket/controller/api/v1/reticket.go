@@ -15,9 +15,9 @@ type reticketRecv struct {
 	TicketOutsideID string `json:"ticket_outside_id" binding:"required"`
 }
 
-// 告知服务器支付宝支付完成了 godoc
-// @Summary 告知服务器通过支付宝支付完成
-// @Description 服务器对支付进行验证
+// Reticket 告诉服务器执行退票请求 godoc
+// @Summary 告诉服务器执行退票请求
+// @Description 服务器执行退票请求
 // @Accept json
 // @Produce json
 // @Param userID query string true "用户ID"
@@ -33,6 +33,7 @@ func Reticket(c *gin.Context) {
 	if err := c.ShouldBindJSON(&rr); err != nil {
 		logging.Error(err)
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noDate))
+		return
 	}
 	// TODO 退票逻辑
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, noDate))

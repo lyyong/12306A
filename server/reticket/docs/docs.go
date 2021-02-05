@@ -29,14 +29,14 @@ var doc = `{
     "paths": {
         "/": {
             "post": {
-                "description": "服务器对支付进行验证",
+                "description": "服务器执行退票请求",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "告知服务器通过支付宝支付完成",
+                "summary": "告诉服务器执行退票请求",
                 "parameters": [
                     {
                         "type": "string",

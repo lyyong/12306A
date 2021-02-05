@@ -5,6 +5,7 @@ package rpc
 
 import (
 	"context"
+	"pay/service"
 	"rpc/pay/proto/orderRPCpb"
 )
 
@@ -19,8 +20,13 @@ func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info 
 	return &orderRPCpb.Error{Content: "hello UpdateStateWithRelativeOrder"}, nil
 }
 
-func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateInfo) (*orderRPCpb.Error, error) {
-	return &orderRPCpb.Error{Content: "hello Create"}, nil
+func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateInfo) (*orderRPCpb.CreateRes, error) {
+	orderService := &service.OrderService{}
+	outsideID, err := orderService.AddOrder(uint(info.UserID), info.Money, info.AffairID)
+	if err != nil {
+		return nil, err
+	}
+	return &orderRPCpb.CreateRes{OrderOutsideID: outsideID}, nil
 }
 
 func (o OrderRPCService) Read(ctx context.Context, info *orderRPCpb.SearchInfo) (*orderRPCpb.Info, error) {

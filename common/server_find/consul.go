@@ -86,6 +86,7 @@ func (c *Client) register() error {
 			err := c.cli.Agent().UpdateTTL(c.serviceID, "", consulApi.HealthPassing)
 			if err != nil {
 				logging.Error("更新服务的ttl错误: %v", err)
+				break
 			}
 		}
 	}()

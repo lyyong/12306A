@@ -4,9 +4,10 @@
 package message
 
 var msg = map[int]string{
-	ERROR:        "错误",
-	PARAMS_ERROR: "参数错误",
-	OK:           "成功",
+	ERROR:                    "错误",
+	PARAMS_ERROR:             "参数错误",
+	OK:                       "成功",
+	CANDIDATE_ERROR_NO_READY: "该后补订单没有兑现条件",
 }
 
 func GetMsg(code int) string {

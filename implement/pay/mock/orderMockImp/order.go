@@ -10,11 +10,19 @@ import (
 
 type MockOrder struct{}
 
-func (*MockOrder) Create(info *orderInterfaces.CreateInfo) error {
+func (o *MockOrder) UpdateState(orderOutsideID string, state int32) error {
+	panic("implement me")
+}
+
+func (o *MockOrder) UpdateStateWithRelativeOrder(orderOutsideID string, state int32, relativeOutsideID string) error {
+	panic("implement me")
+}
+
+func (*MockOrder) Create(info *orderInterfaces.CreateInfo) (string, error) {
 	if info.UserID < 0 {
-		return errors.New("不合法的userID")
+		return "", errors.New("不合法的userID")
 	}
-	return nil
+	return "", nil
 }
 
 func (*MockOrder) Read(userID int64) (*orderInterfaces.Info, error) {

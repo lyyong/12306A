@@ -33,6 +33,7 @@ func RefundAbb(c *gin.Context) {
 	if err := c.ShouldBindJSON(&refundR); err != nil {
 		logging.Error(err)
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
+		return
 	}
 	// TODO 通过outside id 查找到订单然后通过orderInfo向支付宝请求退款 过程可能是排队的
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, noData))

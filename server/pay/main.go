@@ -15,7 +15,7 @@ import (
 	"os"
 	"os/signal"
 	"pay/router"
-	"pay/script"
+	"pay/tools/database"
 	"pay/tools/setting"
 	"strconv"
 	"strings"
@@ -28,8 +28,6 @@ func init() {
 	logging.Setup()
 	// 载入配置文件
 	setting.Setup()
-	// 运行脚本
-	script.Setup()
 	// 服务发现
 	server_find.Register(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.HttpPort), setting.Consul.ServiceID, setting.Consul.Address, setting.Consul.Interval, setting.Consul.TTL)
@@ -39,12 +37,18 @@ func init() {
 	if err != nil {
 		logging.Error(err)
 	}
+	// 加载数据库
+	err = database.Setup(setting.Database.Type, setting.Database.Username, setting.Database.Password, setting.Database.Host, setting.Database.DbName)
+	if err != nil {
+		logging.Error(err)
+	}
 }
 
 // 需要关闭的组件
 func serverClose() {
 	server_find.DeRegister()
 	router_tracer.Close()
+	database.Close()
 }
 
 func main() {

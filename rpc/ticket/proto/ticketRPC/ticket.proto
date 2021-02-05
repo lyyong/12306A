@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package ticketRPC;
+
+message Ticket {
+  int32 id = 1;
+  int32 train_id = 2;         // 列车id
+  int32 start_station_id = 3;   // 起始站
+  string start_time = 4;
+  int32 dest_station_id = 5;    // 目的站
+  string arrive_time = 6;
+  string date = 7;            // 乘车日期
+  int32 seat_type_id = 8;       // 座位类型（硬座、卧铺、一等、二等）
+  string carriage_number = 9; // 车厢号
+  string seat_number = 10;     // 座号
+  int32 passenger_id = 11;    // 乘车人id
+  int32 indent_id = 12;        // 订单号
+  int32 amount =13;
+}
+
+message Empty {
+
+}
+
+message Tickets {
+  repeated Ticket tickets = 1;
+}
+
+message GetByIndentRequest {
+  int32 indent_id = 1;
+}
+
+message GetByPassengerRequest {
+  int32 passenger_id = 1;
+}
+
+message UpdateStateRequest { // 修改 车票状态 （如退票、改签）
+  int32 ticket_id = 1;
+  string state = 2;  // 要修改的状态
+}
+
+service TicketService {
+  rpc AddTickets (Tickets) returns (Empty){}
+  rpc GetTicketByIndentId (GetByIndentRequest) returns (Tickets){}
+  rpc GetTicketByPassengerId (GetByPassengerRequest) returns (Tickets){}
+  rpc UpdateState (UpdateStateRequest) returns (Empty){}
+}
+
