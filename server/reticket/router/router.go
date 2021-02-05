@@ -4,6 +4,7 @@
 package router
 
 import (
+	"common/router_tracer"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -23,6 +24,15 @@ import (
 // @query.collection.format multi
 func InitRouter() *gin.Engine {
 	r := gin.Default()
+	// 设置使用链路追踪
+	if router_tracer.IsTracing() {
+		r.Use(func(context *gin.Context) {
+			cli, _ := router_tracer.GetClient()
+			spin := (*cli.Tracer()).StartSpan(context.FullPath())
+			defer spin.Finish()
+			context.Next()
+		})
+	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	apiV1 := r.Group("/reticket/api/v1")
 	{
