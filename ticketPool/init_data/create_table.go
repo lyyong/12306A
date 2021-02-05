@@ -21,7 +21,6 @@ func init() {
 		panic(err.Error())
 	}
 	CreateAllTables()
-
 }
 
 func DropTable(tableName string) {
@@ -153,6 +152,6 @@ func CreateAllTables() {
 		"end_time datetime);"
 	CreateTable(sqlStr3)
 	//创建分表
-	CreateTableTicketPool()
+	//CreateTableTicketPool()
 
 }

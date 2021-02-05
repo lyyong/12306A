@@ -16,6 +16,7 @@ import (
 	"time"
 )
 
+
 func WriteStationProvinceCity() {
 	//先清空表
 	Db.Exec("delete from station_province_city")

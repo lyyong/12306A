@@ -17,6 +17,9 @@ func TestWriteStationAndCityToRedis(t *testing.T) {
 	WriteStationAndCityToRedis()
 }
 
+func TestWriteStationToRedis(t *testing.T) {
+	WriteStationToRedis()
+}
 func TestWriteTicketPoolToRedis(t *testing.T) {
 	WriteTicketPoolToRedis()
 }
