@@ -19,5 +19,6 @@ func BuyTicket(c *gin.Context)  {
 	buyTicket.EndStation=c.PostForm("endStation")
 	buyTicket.SeatClass=c.PostForm("seatClass")
 	ticket:=rdb.BuyTicketByTrainNoAndDate(buyTicket)
+	//fmt.Println(ticket)
 	c.JSON(http.StatusOK,gin.H{"ticket":ticket})
 }

@@ -7,6 +7,7 @@ package v1
 import (
 	"12306A/server/search/model/outer"
 	"12306A/server/search/rdb"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -20,5 +21,6 @@ func Query(c *gin.Context)  {
 	if trains==nil{
 		return
 	}
+	fmt.Println(trains)
 	c.JSON(http.StatusOK,gin.H{"trains":trains})
 }

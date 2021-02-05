@@ -20,6 +20,8 @@ func init() {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
+	//连接redis集群
+
 }
 func InitDataRedis()  {
 	//车站

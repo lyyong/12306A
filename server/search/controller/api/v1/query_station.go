@@ -6,6 +6,7 @@ package v1
 
 import (
 	"12306A/server/search/rdb"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,6 +14,7 @@ import (
 func QueryAllStation(c *gin.Context)  {
 	stations:=rdb.QueryStation()
 
+	fmt.Println(stations)
 	c.JSON(http.StatusOK,gin.H{"stations":stations})
 	//c.String(http.StatusOK,"stations",stations)
 	//c.HTML(http.StatusOK,"stations",stations)
