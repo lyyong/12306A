@@ -23,21 +23,18 @@ func NewOrderRPCImp() (*OrderRPCImp, error) {
 }
 
 // Create 创建订单
-func (o *OrderRPCImp) Create(info *orderInterfaces.CreateInfo) error {
+func (o *OrderRPCImp) Create(info *orderInterfaces.CreateInfo) (string, error) {
 	res, err := o.client.Create(&orderRPCpb.CreateInfo{
 		UserID:         info.UserID,
 		Money:          info.Money,
 		AffairID:       info.AffairID,
 		ExpireDuration: info.ExpireDuration,
-		OrderOutsideID: info.OrderOutsideID,
+		CreatedBy:      info.CreatedBy,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
-	if res != nil && res.Content != "" {
-		return errors.New(res.Content)
-	}
-	return nil
+	return res.OrderOutsideID, nil
 }
 
 // Read 获取订单

@@ -39,7 +39,7 @@ var doc = `{
                 "summary": "请求服务器执行候补功能",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "用户ID",
                         "name": "userID",
                         "in": "query",
@@ -225,8 +225,7 @@ var doc = `{
             "required": [
                 "date",
                 "passengers",
-                "time",
-                "train_number"
+                "train_id"
             ],
             "properties": {
                 "date": {
@@ -240,13 +239,9 @@ var doc = `{
                         "type": "string"
                     }
                 },
-                "time": {
-                    "description": "发车时间 hh:mm",
-                    "type": "string"
-                },
-                "train_number": {
+                "train_id": {
                     "description": "车次",
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
@@ -325,10 +320,10 @@ type swaggerInfo struct {
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
 	Version:     "1.0",
-	Host:        "localhost:8082",
+	Host:        "localhost:8102",
 	BasePath:    "/candidate/api/v1",
 	Schemes:     []string{},
-	Title:       "支付服务",
+	Title:       "候补服务",
 	Description: "负责处理与支付和退款相关的业务",
 }
 

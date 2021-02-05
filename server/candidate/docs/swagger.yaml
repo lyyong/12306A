@@ -19,17 +19,13 @@ definitions:
         items:
           type: string
         type: array
-      time:
-        description: 发车时间 hh:mm
-        type: string
-      train_number:
+      train_id:
         description: 车次
-        type: string
+        type: integer
     required:
     - date
     - passengers
-    - time
-    - train_number
+    - train_id
     type: object
   v1.candidateSend:
     properties:
@@ -71,13 +67,13 @@ definitions:
           type: object
         type: array
     type: object
-host: localhost:8082
+host: localhost:8102
 info:
   contact:
     email: ly_yong@qq.com
     name: LiuYong
   description: 负责处理与支付和退款相关的业务
-  title: 支付服务
+  title: 候补服务
   version: "1.0"
 paths:
   /:
@@ -90,7 +86,7 @@ paths:
         in: query
         name: userID
         required: true
-        type: string
+        type: integer
       - description: 用户名
         in: query
         name: username

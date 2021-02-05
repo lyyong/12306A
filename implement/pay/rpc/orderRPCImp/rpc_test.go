@@ -7,6 +7,7 @@ import (
 	"common/router_tracer"
 	"common/server_find"
 	"interface/pay/orderInterfaces"
+	"strconv"
 	"testing"
 )
 
@@ -28,13 +29,15 @@ func TestOrderRPCImp_Create(t *testing.T) {
 		t.Error(err)
 	}
 	for i := 100; i > 0; i-- {
-		ret := rpcImp.Create(&orderInterfaces.CreateInfo{
+		ret, err := rpcImp.Create(&orderInterfaces.CreateInfo{
 			UserID:         1,
 			Money:          "123",
-			AffairID:       "asd",
+			AffairID:       "asd" + strconv.Itoa(i),
 			ExpireDuration: 0,
-			OrderOutsideID: "123zxcz",
 		})
+		if err != nil {
+			t.Error(err)
+		}
 		t.Log(ret)
 	}
 }

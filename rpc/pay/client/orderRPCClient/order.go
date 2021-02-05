@@ -34,7 +34,7 @@ func NewClient() (*OrderRPCClient, error) {
 	return client, nil
 }
 
-func (c *OrderRPCClient) Create(info *orderRPCpb.CreateInfo) (*orderRPCpb.Error, error) {
+func (c *OrderRPCClient) Create(info *orderRPCpb.CreateInfo) (*orderRPCpb.CreateRes, error) {
 	tclient := *c.pbClient
 	resp, err := tclient.Create(context.Background(), info)
 	if err != nil {

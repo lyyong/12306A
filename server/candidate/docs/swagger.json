@@ -2,14 +2,14 @@
     "swagger": "2.0",
     "info": {
         "description": "负责处理与支付和退款相关的业务",
-        "title": "支付服务",
+        "title": "候补服务",
         "contact": {
             "name": "LiuYong",
             "email": "ly_yong@qq.com"
         },
         "version": "1.0"
     },
-    "host": "localhost:8082",
+    "host": "localhost:8102",
     "basePath": "/candidate/api/v1",
     "paths": {
         "/": {
@@ -24,7 +24,7 @@
                 "summary": "请求服务器执行候补功能",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "用户ID",
                         "name": "userID",
                         "in": "query",
@@ -210,8 +210,7 @@
             "required": [
                 "date",
                 "passengers",
-                "time",
-                "train_number"
+                "train_id"
             ],
             "properties": {
                 "date": {
@@ -225,13 +224,9 @@
                         "type": "string"
                     }
                 },
-                "time": {
-                    "description": "发车时间 hh:mm",
-                    "type": "string"
-                },
-                "train_number": {
+                "train_id": {
                     "description": "车次",
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },

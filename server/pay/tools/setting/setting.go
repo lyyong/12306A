@@ -32,9 +32,18 @@ type zipkin struct {
 	HttpEndpoint string
 }
 
+type database struct {
+	Type     string
+	Username string
+	Password string
+	Host     string
+	DbName   string
+}
+
 var Server = &server{}
 var Consul = &consul{}
 var Zipkin = &zipkin{}
+var Database = &database{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -51,6 +60,7 @@ func Setup() {
 	loadConfig(Cfg, "server", Server)
 	loadConfig(Cfg, "consul", Consul)
 	loadConfig(Cfg, "zipkin", Zipkin)
+	loadConfig(Cfg, "database", Database)
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
 }

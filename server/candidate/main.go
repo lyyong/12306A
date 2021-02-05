@@ -5,7 +5,6 @@ package main
 
 import (
 	"candidate/router"
-	"candidate/script"
 	"candidate/tools/setting"
 	"common/router_tracer"
 	"common/server_find"
@@ -17,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"pay/tools/database"
 	"strconv"
 	"strings"
 	"time"
@@ -28,8 +28,6 @@ func init() {
 	logging.Setup()
 	// 载入配置文件
 	setting.Setup()
-	// 运行脚本
-	script.Setup()
 	// 服务发现
 	server_find.Register(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.HttpPort), setting.Consul.ServiceID, setting.Consul.Address, setting.Consul.Interval, setting.Consul.TTL)
@@ -39,17 +37,23 @@ func init() {
 	if err != nil {
 		logging.Error(err)
 	}
+	// 加载数据库
+	err = database.Setup(setting.Database.Type, setting.Database.Username, setting.Database.Password, setting.Database.Host, setting.Database.DbName)
+	if err != nil {
+		logging.Error(err)
+	}
 }
 
 // 需要关闭的组件
 func serverClose() {
 	server_find.DeRegister()
 	router_tracer.Close()
+	database.Close()
 }
 
 func main() {
 	ginRouter := router.InitRouter()
-	logging.Info("启动Reticket服务, 端口号: ", setting.Server.HttpPort)
+	logging.Info("启动Candidate服务, 端口号: ", setting.Server.HttpPort)
 	s := &http.Server{
 		Addr: fmt.Sprintf(":%d", setting.Server.HttpPort),
 		Handler: h2c.NewHandler(http.HandlerFunc(

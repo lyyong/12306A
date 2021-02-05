@@ -11,9 +11,9 @@ import (
 func TestMockOrder_Create(t *testing.T) {
 	var op orderInterfaces.Operator
 	op = &MockOrder{}
-	err := op.Create(&orderInterfaces.CreateInfo{UserID: 1})
+	res, err := op.Create(&orderInterfaces.CreateInfo{UserID: 1})
 	if err != nil {
 		t.Error(err)
 	}
-
+	t.Log(res)
 }
