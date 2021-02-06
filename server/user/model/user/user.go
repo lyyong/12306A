@@ -10,6 +10,9 @@ import (
 
 type User struct {
 	gorm.Model
+	CreatedBy         string
+	UpdatedBy         string
+	DeletedBy         string
 	Username          string
 	Password          string
 	State             int

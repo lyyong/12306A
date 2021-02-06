@@ -12,4 +12,5 @@ import (
 func main()  {
 	init_data.InitDataMysql()
 	rdb.InitDataRedis()
+
 }

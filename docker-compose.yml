@@ -1,5 +1,11 @@
 version: '3.5'
 services:
+  user-server:
+    build:
+      context: ./server/user
+    ports:
+      - "8222:8222"
+    network_mode: "host"
   pay-server:
     build:
       context: ./server/pay

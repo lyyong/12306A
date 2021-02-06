@@ -14,12 +14,12 @@ import (
 	"time"
 )
 
-var(
-	db *gorm.DB
+var (
+	db        *gorm.DB
 	redisPool *redis.Pool
 )
 
-func init(){
+func init() {
 	logging.Info("init DB")
 	configPath := "config/ticket-config.ini"
 	gormDB, err := NewMysqlDB(configPath)
@@ -34,7 +34,7 @@ func init(){
 	Close()
 }
 
-func NewMysqlDB(configPath string) (*gorm.DB, error){
+func NewMysqlDB(configPath string) (*gorm.DB, error) {
 	cfg, err := ini.Load(configPath)
 	if err != nil {
 		logging.Error("Fail to Load config file:", err)
@@ -79,8 +79,8 @@ func NewMysqlDB(configPath string) (*gorm.DB, error){
 }
 
 func NewRedisPool(server string) *redis.Pool {
-	return &redis.Pool {
-		MaxIdle: 3,
+	return &redis.Pool{
+		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
 
 		Dial: func() (redis.Conn, error) {
@@ -93,14 +93,14 @@ func NewRedisPool(server string) *redis.Pool {
 	}
 }
 
-func Close(){
+func Close() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
 	signal.Notify(c, syscall.SIGKILL)
-	go func(){
+	go func() {
 		<-c
-		sqlDB,_ := db.DB()
+		sqlDB, _ := db.DB()
 		sqlDB.Close()
 		redisPool.Close()
 		logging.Info("connection pool colsed")

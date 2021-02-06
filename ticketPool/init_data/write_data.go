@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/mozillazg/go-pinyin"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -21,7 +22,7 @@ func WriteStationProvinceCity() {
 	//先清空表
 	Db.Exec("delete from station_province_city")
 
-	bytes, err := ioutil.ReadFile("../stations_prov_city.json")
+	bytes, err := ioutil.ReadFile("./ticketPool/stations_prov_city.json")
 	if err != nil {
 		fmt.Println("read file failed, err:", err)
 	}
@@ -35,8 +36,8 @@ func WriteStationProvinceCity() {
 	}
 	//fmt.Println(len(station),"station")
 
-	sqlStr := "insert into station_province_city(province,city,city_code,station_name,station_telecode) " +
-		"values(?,?,?,?,?);"
+	sqlStr := "insert into station_province_city(province,city,city_code,station_name,station_telecode,station_spell) " +
+		"values(?,?,?,?,?,?);"
 	st, err := Db.Prepare(sqlStr)
 	defer st.Close()
 	if err != nil {
@@ -52,10 +53,18 @@ func WriteStationProvinceCity() {
 		province := v["province"].(string)
 		stationName := v["station_name"].(string)
 		stationTelecode := v["station_telecode"].(string)
-		//if city=="景德镇"{
-		//	fmt.Println(city,station_name,station_telecode)
-		//}
-		_, err := st.Exec(province, city, cities[city], stationName, stationTelecode)
+		//生成站点的拼音
+		a := pinyin.NewArgs()
+		spells:=pinyin.Pinyin(stationName, a)
+		var stationSpell string
+		for _,spell:=range spells{
+			for _,v:=range spell{
+				stationSpell+=v
+			}
+		}
+		//fmt.Println(stationSpell,province,stationTelecode,stationName)
+
+		_, err := st.Exec(province, city, cities[city], stationName, stationTelecode,stationSpell)
 		if err != nil {
 			fmt.Println(city, err)
 		}
@@ -65,7 +74,7 @@ func WriteStationProvinceCity() {
 //获取城市的编码
 func ReadCity() map[string]string {
 
-	bytes, err := ioutil.ReadFile("../city.json")
+	bytes, err := ioutil.ReadFile("./ticketPool/city.json")
 	if err != nil {
 		fmt.Println("read city.json failed, err:", err)
 	}
@@ -119,7 +128,7 @@ func ReadStationCity() map[string]string {
 func ReadTrainNo() []*inner.Train {
 
 	//xlsx, err := excelize.OpenFile("/Users/yutianneng/go/src/12306A/ticketPool/train_no.xlsx")
-	xlsx, err := excelize.OpenFile("../train_no.xlsx")
+	xlsx, err := excelize.OpenFile("./ticketPool/train_no.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return nil

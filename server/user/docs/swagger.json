@@ -4,13 +4,13 @@
         "title": "用户管理 API",
         "contact": {}
     },
-    "basePath": "/user",
+    "basePath": "/user/api/v1",
     "paths": {
         "/login": {
             "post": {
                 "description": "用户登录，参数为用户名和密码",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -19,18 +19,13 @@
                 "operationId": "login-by-username-password",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "密码",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "登录信息",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginJSON"
+                        }
                     }
                 ],
                 "responses": {
@@ -47,7 +42,7 @@
             "post": {
                 "description": "用户注册，参数为用户名和密码",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -56,18 +51,13 @@
                 "operationId": "register-by-username-password",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "密码",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "注册信息",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.RegisterJSON"
+                        }
                     }
                 ],
                 "responses": {
@@ -92,6 +82,28 @@
                     "type": "object"
                 },
                 "msg": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.LoginJSON": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.RegisterJSON": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

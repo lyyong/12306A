@@ -11,8 +11,8 @@ import (
 
 func Router(r *gin.RouterGroup) *gin.RouterGroup {
 	// 测试接口
-	r.GET("/test", func(c *gin.Context) {
-		c.JSON(200, "测试成功")
+	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, "pong")
 	})
 
 	r.POST("/register", user.Register)
