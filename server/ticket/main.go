@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"ticket/routers"
 	"ticket/rpc"
+	"ticket/utils/setting"
 )
 
 func main() {
@@ -24,8 +25,8 @@ func main() {
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
 
-	logging.Info("Listen")
-	rpcListen, err := net.Listen("tcp", "0.0.0.0:8000")
+	logging.Info("Listen:",setting.Server.RpcAddr)
+	rpcListen, err := net.Listen("tcp", setting.Server.RpcAddr)
 	if err != nil {
 		logging.Error("listen fail:", err)
 		return
@@ -42,12 +43,12 @@ func main() {
 	logging.Info("Register Router")
 	initRouter := routers.InitRouter()
 	server := &http.Server{
-		Addr:              ":8080",
+		Addr:              setting.Server.HttpAddr,
 		Handler:           initRouter,
 	}
 	go func(){
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed{
-			logging.Fatal("listen: ", err)
+			logging.Fatal("listen fail: ", err)
 		}
 	}()
 

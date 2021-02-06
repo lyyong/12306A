@@ -26,6 +26,6 @@ func AddMultipleTicket(db *gorm.DB, tickets *[]Ticket) error {
 	return res.Error
 }
 
-func IsConflict(db *gorm.DB, passengerId *[]int32) bool {
-	return false
+func IsConflict(db *gorm.DB, passengerId *[]int32) (bool, error) {
+	return false, nil
 }

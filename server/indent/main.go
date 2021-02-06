@@ -9,6 +9,7 @@ import (
 	"context"
 	"indent/routers"
 	"indent/rpc"
+	"indent/utils/setting"
 	"net"
 	"net/http"
 	"os"
@@ -24,10 +25,9 @@ func main() {
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
 
-	logging.Info("Listen")
-	rpcListen, err := net.Listen("tcp", "0.0.0.0:8001")
+	rpcListen, err := net.Listen("tcp", setting.Server.RpcAddr)
 	if err != nil {
-		logging.Error("listen fail:", err)
+		logging.Error("listen fail: ", err)
 		return
 	}
 
@@ -41,25 +41,14 @@ func main() {
 	/* 初始化 router */
 	initRouter := routers.InitRouter()
 	server := &http.Server{
-		Addr:              ":8084",
+		Addr:              setting.Server.HttpAddr,
 		Handler:           initRouter,
 	}
 	go func(){
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed{
-			logging.Fatal("listen: ", err)
+			logging.Fatal("listen fail: ", err)
 		}
 	}()
-
-	//
-	///* 初始化 controller (mysql连接池，redis连接池) */
-	//logging.Info("init controller mysql pool")
-	//controllerMysqlPool, err := controller.InitMysqlPool()
-	//if err != nil {
-	//	logging.Error("mysql pool init fail:", err)
-	//}
-	//logging.Info("init controller redis pool")
-	//controllerRedisPool := controller.InitRedisPool()
-
 
 
 	quit := make(chan os.Signal, 1)

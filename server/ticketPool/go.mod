@@ -5,7 +5,7 @@ go 1.15
 require (
 	common v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.6.3 // indirect
-	github.com/go-ini/ini v1.62.0 // indirect
+	github.com/go-ini/ini v1.62.0
 	github.com/gomodule/redigo v1.8.3 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
