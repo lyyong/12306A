@@ -12,14 +12,16 @@ import (
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 
-	v1:=r.Group("/search/v1/")
+	v1:=r.Group("/search/api/v1/")
 	{
 		//查询所有站点
 		v1.GET("/queryAllStations",v12.QueryAllStation)
+		//查询车次的所有站点
+		v1.GET("/queryStation",v12.QueryStationByTrainNo)
 		//查询两城市之间合适的车次及余票数量
-		v1.GET("/queryTrainNos",v12.Query)
+		v1.GET("/remainder",v12.Query)
 		//购票
-		v1.POST("/buyTicket",v12.BuyTicket)
+		v1.GET("/buyTicket",v12.BuyTicket)
 	}
 
 	r.Run(":18081")

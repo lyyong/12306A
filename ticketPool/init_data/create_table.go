@@ -118,7 +118,9 @@ func CreateAllTables() {
 		"city varchar(50)," +
 		"city_code varchar(50)," +
 		"station_name varchar(50)," +
-		"station_telecode varchar(4));"
+		"station_telecode varchar(4)," +
+		"station_spell varchar(255)" +
+		");"
 
 	CreateTable(sqlStr1)
 

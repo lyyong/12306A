@@ -4,8 +4,18 @@
  */
 package rdb
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestQueryStation(t *testing.T) {
 	QueryStation()
+}
+
+func TestQueryStationByTrainNo(t *testing.T) {
+	stations := QueryStationByTrainNo("G21")
+	for _,v:=range stations{
+		fmt.Println(v)
+	}
 }

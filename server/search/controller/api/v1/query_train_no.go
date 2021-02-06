@@ -11,16 +11,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
+//http://localhost:18081/search/api/v1/remainder?date=2021-1-23%202001:02:03&startCity=%E5%8C%97%E4%BA%AC&endCity=%E4%B8%8A%E6%B5%B7
 func Query(c *gin.Context)  {
 	search:=&outer.Search{}
-	search.Date=c.Param("date")
-	search.StartCity=c.Param("startCity")
-	search.EndCity=c.Param("endCity")
+	search.Date=c.Query("date")
+	search.StartCity=c.Query("startCity")
+	search.EndCity=c.Query("endCity")
+	fmt.Println(search)
 	trains:=rdb.Query(search)
 	if trains==nil{
-		return
+		c.JSON(http.StatusNoContent,gin.H{
+			"code":http.StatusNoContent,
+			"msg":"车次票数",
+			"data":gin.H{"list":""},
+		})
 	}
-	fmt.Println(trains)
-	c.JSON(http.StatusOK,gin.H{"trains":trains})
+
+	c.JSON(http.StatusOK,gin.H{
+		"code":http.StatusOK,
+		"msg":"车次票数",
+		"data":gin.H{"list":trains},
+	})
 }
