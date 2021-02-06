@@ -15,11 +15,12 @@ import (
 var RedisDB *redis.Client
 
 func init() {
-	RedisDB = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+	RedisDB=redis.NewClient(&redis.Options{
+		Addr: "0.0.0.0:6379",
 	})
+	//RedisDB = redis.NewClusterClient(&redis.ClusterOptions{
+	//	Addrs:  []string{"192.168.10.11:7001","192.168.10.11:7002", "192.168.10.11:7003"},
+	//})
 	//连接redis集群
 
 }
