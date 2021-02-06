@@ -1,4 +1,4 @@
-basePath: /user
+basePath: /user/api/v1
 definitions:
   resp.Response:
     properties:
@@ -9,6 +9,20 @@ definitions:
       msg:
         type: string
     type: object
+  user.LoginJSON:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  user.RegisterJSON:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   title: 用户管理 API
@@ -16,20 +30,16 @@ paths:
   /login:
     post:
       consumes:
-      - multipart/form-data
+      - application/json
       description: 用户登录，参数为用户名和密码
       operationId: login-by-username-password
       parameters:
-      - description: 用户名
-        in: formData
-        name: username
+      - description: 登录信息
+        in: body
+        name: form
         required: true
-        type: string
-      - description: 密码
-        in: formData
-        name: password
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/user.LoginJSON'
       produces:
       - application/json
       responses:
@@ -41,20 +51,16 @@ paths:
   /register:
     post:
       consumes:
-      - multipart/form-data
+      - application/json
       description: 用户注册，参数为用户名和密码
       operationId: register-by-username-password
       parameters:
-      - description: 用户名
-        in: formData
-        name: username
+      - description: 注册信息
+        in: body
+        name: form
         required: true
-        type: string
-      - description: 密码
-        in: formData
-        name: password
-        required: true
-        type: string
+        schema:
+          $ref: '#/definitions/user.RegisterJSON'
       produces:
       - application/json
       responses:

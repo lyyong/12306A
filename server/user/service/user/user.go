@@ -25,6 +25,9 @@ func Register(username, password string) error {
 
 	u := &user.User{
 		Model:             gorm.Model{},
+		CreatedBy:         "",
+		UpdatedBy:         "",
+		DeletedBy:         "",
 		Username:          username,
 		Password:          hashedPassword,
 		State:             0,
@@ -38,6 +41,7 @@ func Register(username, password string) error {
 	}
 
 	logging.Debug("[用户注册] 用户名:", username)
+	// TODO: 具体错误类型判断
 	if err := user.InsertUser(DB, u); err != nil {
 		return errortype.ErrUserNameHasExist
 	}

@@ -25,9 +25,9 @@ func InitRouter() *gin.Engine {
 
 // 用户管理模块路由
 // @title 用户管理 API
-// @BasePath /user
+// @BasePath /user/api/v1
 func InitUserRouter(r *gin.Engine) *gin.RouterGroup {
-	g := r.Group("/user")
+	g := r.Group("/user/api/v1")
 
 	// 在路由中添加Swagger
 	SwaggerRouter(g)
