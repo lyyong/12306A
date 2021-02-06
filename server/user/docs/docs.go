@@ -28,7 +28,7 @@ var doc = `{
             "post": {
                 "description": "用户登录，参数为用户名和密码",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -37,18 +37,13 @@ var doc = `{
                 "operationId": "login-by-username-password",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "密码",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "登录信息",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginJSON"
+                        }
                     }
                 ],
                 "responses": {
@@ -65,7 +60,7 @@ var doc = `{
             "post": {
                 "description": "用户注册，参数为用户名和密码",
                 "consumes": [
-                    "multipart/form-data"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -74,18 +69,13 @@ var doc = `{
                 "operationId": "register-by-username-password",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "密码",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "注册信息",
+                        "name": "form",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.RegisterJSON"
+                        }
                     }
                 ],
                 "responses": {
@@ -113,6 +103,28 @@ var doc = `{
                     "type": "string"
                 }
             }
+        },
+        "user.LoginJSON": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.RegisterJSON": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`
@@ -130,7 +142,7 @@ type swaggerInfo struct {
 var SwaggerInfo = swaggerInfo{
 	Version:     "",
 	Host:        "",
-	BasePath:    "/user",
+	BasePath:    "/user/api/v1",
 	Schemes:     []string{},
 	Title:       "用户管理 API",
 	Description: "",

@@ -1,2 +1,2 @@
 echo generate swagger docs
-swag init -g routers/router.go
+swag init -g router/router.go

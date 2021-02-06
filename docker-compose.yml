@@ -64,3 +64,9 @@ services:
       - "8500:8500/tcp"
       - "8600:8600/tcp"
       - "8600:8600/udp"
+  user-server:
+    build:
+      context: .
+      dockerfile: ./server/user/Dockerfile
+    ports:
+      - "8222:8222/tcp"
