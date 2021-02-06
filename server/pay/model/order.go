@@ -3,7 +3,10 @@
 // @Modified at 2021-02-04
 package model
 
-import "pay/tools/database"
+import (
+	"github.com/jinzhu/gorm"
+	"pay/tools/database"
+)
 
 type Order struct {
 	Model
@@ -25,10 +28,28 @@ func AddOrder(o *Order) error {
 	return nil
 }
 
-func DeleteOrder(condition map[string]interface{}) ([]*Order, error) {
+func GetOrders(condition map[string]interface{}) ([]*Order, error) {
 	var res []*Order
 	if err := database.Client().Where(condition).Find(res).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return res, nil
+}
+
+func GetOrdersByUserID(userID int) ([]*Order, error) {
+	return GetOrders(map[string]interface{}{"user_id": userID})
+}
+
+func GetOrdersByAffairID(affairID string) ([]*Order, error) {
+	return GetOrders(map[string]interface{}{"affair_id": affairID})
+}
+
+func UpdateOrder(order *Order, info map[string]interface{}) error {
+	if err := database.Client().Model(order).Updates(info).Error; err != nil {
+		return err
+	}
+	return nil
 }

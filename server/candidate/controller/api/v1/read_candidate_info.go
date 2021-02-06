@@ -25,9 +25,9 @@ type readSend struct {
 	state int // 状态 0为正在候补,1为候补成功,2为候补失败
 }
 
-// ReadState 请求服务器执行候补功能 godoc
-// @Summary 请求服务器执行候补功能
-// @Description 发送需要候补的信息给服务器, 服务器将执行候补功能
+// ReadState 请求服务器查看候补状态 godoc
+// @Summary 请求服务器查看候补状态
+// @Description 查看自己的候补订单
 // @Accept json
 // @Produce json
 // @Param userID query string true "用户ID"

@@ -1,18 +1,26 @@
 version: '3.5'
 services:
+  user-server:
+    build:
+      context: ./server/user
+    ports:
+      - "8222:8222"
+    network_mode: "host"
   pay-server:
     build:
       context: ./server/pay
-      labels:
-        - "latest"
     ports:
       - "8082:8082"
+    network_mode: "host"
+  reticket-server:
+    build:
+      context: ./server/reticket
+    ports:
+      - "8092:8092"
     network_mode: "host"
   candidate-server:
     build:
       context: ./server/candidate
-      labels:
-        - "latest"
     ports:
       - "8102:8102"
     network_mode: "host"
@@ -64,9 +72,3 @@ services:
       - "8500:8500/tcp"
       - "8600:8600/tcp"
       - "8600:8600/udp"
-  user-server:
-    build:
-      context: .
-      dockerfile: ./server/user/Dockerfile
-    ports:
-      - "8222:8222/tcp"

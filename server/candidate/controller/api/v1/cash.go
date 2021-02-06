@@ -17,9 +17,9 @@ type cashRecv struct {
 	CandidateID string `json:"candidate_id" binding:"required"`
 }
 
-// Candidate 请求服务器执行候补功能 godoc
-// @Summary 请求服务器执行候补功能
-// @Description 发送需要候补的信息给服务器, 服务器将执行候补功能
+// Cash 请求服务器兑现候补 godoc
+// @Summary 请求服务器兑现候补
+// @Description 发送需要候补的ID, 服务器将候补兑现然后生成票
 // @Accept json
 // @Produce json
 // @Param userID query string true "用户ID"

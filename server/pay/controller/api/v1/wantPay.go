@@ -42,5 +42,7 @@ func WantPayAbb(c *gin.Context) {
 	}
 	var wantPayS wantPayAbbSend
 	// TODO 亲求支付宝获取OrderInfo, 然后填充wantPayS
+	wantPayS.OrderInfo = "asdiuyUYGFYGV7567hgvfhjv"
+	wantPayS.OrderOutsideID = wantPayR.OrderOutsideID
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, wantPayS))
 }
