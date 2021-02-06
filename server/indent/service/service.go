@@ -19,18 +19,11 @@ var (
 	redisPool *redis.Pool
 )
 
-<<<<<<< HEAD
-func init(){
+func init() {
 	logging.Info("init DataBase")
 
 	var err error
 	db, err = NewMysqlDB()
-=======
-func init() {
-	logging.Info("init DB")
-	configPath := "config/ticket-config.ini"
-	gormDB, err := NewMysqlDB(configPath)
->>>>>>> f15c521e22e4d2ab3e86054efc96e43c9e465f3a
 	if err != nil {
 		logging.Error("Fail to init DB:", err)
 	}
@@ -40,32 +33,8 @@ func init() {
 	Close()
 }
 
-<<<<<<< HEAD
-func NewMysqlDB() (*gorm.DB, error){
+func NewMysqlDB() (*gorm.DB, error) {
 
-=======
-func NewMysqlDB(configPath string) (*gorm.DB, error) {
-	cfg, err := ini.Load(configPath)
-	if err != nil {
-		logging.Error("Fail to Load config file:", err)
-		return nil, err
-	}
-	sec, err := cfg.GetSection("database")
-	if err != nil {
-		logging.Error("Fail to get section 'database':", err)
-	}
-	dbType := sec.Key("dbtype").String()
-	userName := sec.Key("username").String()
-	password := sec.Key("password").String()
-	dbname := sec.Key("dbname").String()
-	charset := sec.Key("charset").String()
-	maxIdleConns, err := sec.Key("maxIdleConns").Int()
-	maxOpenConns, err := sec.Key("MaxOpenConns").Int()
-	if err != nil {
-		logging.Error("error config:", err)
-		return nil, err
-	}
->>>>>>> f15c521e22e4d2ab3e86054efc96e43c9e465f3a
 	// dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
 	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?charset=%s&parseTime=True&loc=Local", setting.DataBase.UserName, setting.DataBase.PassWord, setting.DataBase.DBName, setting.DataBase.Charset)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -89,17 +58,10 @@ func NewMysqlDB(configPath string) (*gorm.DB, error) {
 	return db, nil
 }
 
-<<<<<<< HEAD
 func NewRedisPool() *redis.Pool {
 	return &redis.Pool {
-		MaxIdle: setting.Redis.MaxIdle,
+		MaxIdle: 	 setting.Redis.MaxIdle,
 		IdleTimeout: setting.Redis.IdleTimeout,
-=======
-func NewRedisPool(server string) *redis.Pool {
-	return &redis.Pool{
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
->>>>>>> f15c521e22e4d2ab3e86054efc96e43c9e465f3a
 
 		Dial: func() (redis.Conn, error) {
 			conn, err := redis.Dial("tcp", setting.Redis.Host)
