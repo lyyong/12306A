@@ -26,15 +26,21 @@ func init() {
 }
 func InitDataRedis()  {
 	//车站
+	fmt.Println("初始化redis：station")
 	WriteStationToRedis()
 	//车站:城市
+	fmt.Println("初始化redis：station-city映射")
 	WriteStationAndCityToRedis()
 	//列车信息
+	fmt.Println("开始初始化redis：列车基本信息")
 	WriteTrainInfoToRedis()
 	//票池
+	fmt.Println("开始初始化redis：票池")
 	WriteTicketPoolToRedis()
 	//城市之间的车次
+	fmt.Println("开始初始redis：城市之间车次")
 	WriteTrainPoolToRedis()
+
 }
 //假设所有车次天天会有，所以查车次不用日期
 //但可能出现停运情况,特殊考虑

@@ -7,7 +7,6 @@ package v1
 import (
 	"12306A/server/search/model/outer"
 	"12306A/server/search/rdb"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -24,11 +23,11 @@ func BuyTicket(c *gin.Context)  {
 	//buyTicket.StartStation=c.PostForm("startStation")
 	//buyTicket.EndStation=c.PostForm("endStation")
 	//buyTicket.SeatClass=c.PostForm("seatClass")
-	fmt.Println(buyTicket)
+	//fmt.Println(buyTicket)
 	ticket:=rdb.BuyTicketByTrainNoAndDate(buyTicket)
-	fmt.Println(ticket)
+	//fmt.Println(ticket)
 	if ticket==nil{
-		c.JSON(http.StatusNoContent,gin.H{
+		c.JSON(http.StatusOK,gin.H{
 			"code":http.StatusNoContent,
 			"ticket":ticket,
 		})

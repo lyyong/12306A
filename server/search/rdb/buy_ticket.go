@@ -31,14 +31,14 @@ func BuyTicketByTrainNoAndDate(buyTicket *outer.BuyTicket) *outer.Ticket {
 		fmt.Println("buy ticket by lua script failed, err:",err)
 		return nil
 	}
-	fmt.Println(res)
+	//fmt.Println(res)
 	result:=res.([]interface{})
 	if strings.Compare(endStationNo,result[0].(string))!=0{
 		//余票写回
 		remainderEndStationNo,_:=strconv.ParseFloat(result[0].(string),64)
 		remainderKey:=date+":"+buyTicket.TrainNo+":"+endStationNo+":"+buyTicket.SeatClass
-		remainderRes:=RedisDB.ZAdd(remainderKey,redis.Z{Score: remainderEndStationNo,Member: result[1].(string)})
-		fmt.Println(remainderRes)
+		RedisDB.ZAdd(remainderKey,redis.Z{Score: remainderEndStationNo,Member: result[1].(string)})
+		//fmt.Println(remainderRes)
 	}
 	//result[1]=车厢号:座位号
 	carriageAndSeatNo:=strings.Split(result[1].(string),":")
@@ -53,6 +53,6 @@ func BuyTicketByTrainNoAndDate(buyTicket *outer.BuyTicket) *outer.Ticket {
 	ticket.SeatClass=buyTicket.SeatClass
 	ticket.CarriageNo=carriageNo
 	ticket.SeatNo=seatNo
-	fmt.Println(ticket)
+	//fmt.Println(ticket)
 	return ticket
 }

@@ -7,7 +7,6 @@ package v1
 import (
 	"12306A/server/search/model/outer"
 	"12306A/server/search/rdb"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -17,19 +16,20 @@ func Query(c *gin.Context)  {
 	search.Date=c.Query("date")
 	search.StartCity=c.Query("startCity")
 	search.EndCity=c.Query("endCity")
-	fmt.Println(search)
+	//fmt.Println(search)
 	trains:=rdb.Query(search)
 	if trains==nil{
-		c.JSON(http.StatusNoContent,gin.H{
+		c.JSON(http.StatusOK,gin.H{
 			"code":http.StatusNoContent,
 			"msg":"车次票数",
 			"data":gin.H{"list":""},
 		})
+	}else {
+		c.JSON(http.StatusOK,gin.H{
+			"code":http.StatusOK,
+			"msg":"车次票数",
+			"data":gin.H{"list":trains},
+		})
 	}
 
-	c.JSON(http.StatusOK,gin.H{
-		"code":http.StatusOK,
-		"msg":"车次票数",
-		"data":gin.H{"list":trains},
-	})
 }

@@ -6,8 +6,6 @@ package rdb
 
 import (
 	"12306A/server/search/model/outer"
-	"encoding/json"
-	"fmt"
 	"strings"
 )
 //总查询
@@ -16,7 +14,7 @@ func Query(search *outer.Search) []*outer.Train {
 	date:=res[0]
 
 	//日期：2021-1-23
-	fmt.Println(date)
+	//fmt.Println(date)
 	var trains []*outer.Train
 	//根据城市查车次
 	trainNos := QueryTrainByCity(search.StartCity, search.EndCity)
@@ -31,10 +29,9 @@ func Query(search *outer.Search) []*outer.Train {
 		trainNo.SecondSeat=int(secondSeat)
 		businessSeat:=QueryTicketNumByTrainNoAndDate(date,trainNo.TrainNo,"businessSeat",int(trainNo.StartStationNo),int(trainNo.EndStationNo))
 		trainNo.BusinessSeat=int(businessSeat)
-		fmt.Println(trainNo)
+		//fmt.Println(trainNo)
 		trains=append(trains,trainNo)
 	}
-	b,_:=json.Marshal(trains)
-	fmt.Println(string(b))
+
 	return trains
 }

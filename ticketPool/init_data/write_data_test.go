@@ -19,6 +19,9 @@ func TestReadCity(t *testing.T) {
 
 func TestReadTrainNo(t *testing.T) {
 	trains := ReadTrainNo()
+	//for _,t:=range trains{
+	//	fmt.Println(t)
+	//}
 	fmt.Println(len(trains))
 }
 

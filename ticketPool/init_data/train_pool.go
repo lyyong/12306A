@@ -12,6 +12,7 @@ import (
 //初始化train_pool，用于查找两个城市之间的车次
 //共有36万条记录
 func WriteTrainPool() {
+	fmt.Println("开始初始化train_pool表")
 	trains := ReadTotalTrainNo()
 
 	sqlStr := "insert into train_pool(initial_time,terminal_time,train_no,start_city,start_time,end_city,end_time) " +

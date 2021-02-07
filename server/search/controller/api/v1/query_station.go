@@ -6,7 +6,6 @@ package v1
 
 import (
 	"12306A/server/search/rdb"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,9 +13,9 @@ import (
 func QueryAllStation(c *gin.Context)  {
 	stations:=rdb.QueryStation()
 
-	fmt.Println(stations)
+	//fmt.Println(stations)
 	if stations==nil{
-		c.JSON(http.StatusNoContent,gin.H{
+		c.JSON(http.StatusOK,gin.H{
 			"code":http.StatusNoContent,
 			"stations":"",
 		})
@@ -32,9 +31,10 @@ func QueryAllStation(c *gin.Context)  {
 
 func QueryStationByTrainNo(c *gin.Context)  {
 	trainNo:=c.Query("train_no")
+	//fmt.Println(trainNo)
 	stations:=rdb.QueryStationByTrainNo(trainNo)
 	if stations==nil{
-		c.JSON(http.StatusNoContent,gin.H{
+		c.JSON(http.StatusOK,gin.H{
 			"code":http.StatusNoContent,
 			"data":gin.H{"stations":""},
 		})
@@ -44,5 +44,4 @@ func QueryStationByTrainNo(c *gin.Context)  {
 			"data":gin.H{"stations":stations},
 		})
 	}
-
 }

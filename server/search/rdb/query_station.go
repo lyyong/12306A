@@ -20,10 +20,10 @@ func QueryStation() []string {
 		fmt.Println("query stations failed, err:",err)
 		return nil
 	}
-	for _,v:=range stations{
-		fmt.Println(v)
-	}
-	fmt.Println(len(stations))
+	//for _,v:=range stations{
+	//	fmt.Println(v)
+	//}
+	//fmt.Println(len(stations))
 	return stations
 }
 

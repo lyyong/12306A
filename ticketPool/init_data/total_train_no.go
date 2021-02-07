@@ -12,6 +12,7 @@ import (
 
 
 func WriteTotalTrainNo() {
+	fmt.Println("开始初始化total_train_no表")
 	sqlStr := "insert into total_train_no(train_no,station_num,initial_time," +
 		"terminal_time,station_no,station_name,city_name,arrive_time,depart_time,duration,mileage,price) " +
 		"values (?,?,?,?,?,?,?,?,?,?,?,?);"
@@ -28,6 +29,7 @@ func WriteTotalTrainNo() {
 
 		for _, station := range train.Stations {
 			cityName := stationCity[station.StationName]
+			fmt.Println(station.Duration)
 			_, err := st.Exec(train.TrainNo, train.StationNum, train.InitialTime, train.TerminalTime,
 				station.StationNo, station.StationName, cityName, station.ArriveTime, station.DepartTime,
 				station.Duration, station.Mileage, station.Price)
@@ -103,9 +105,11 @@ func ReadTotalTrainNo() []*inner.Train {
 			s.Duration, _ = time.ParseInLocation("2006-01-02 15:04:05", station.Duration, time.Local)
 			s.Price = station.Price
 			stations = append(stations, s)
+			//fmt.Println(station.Duration)
 		}
 		train.Stations = stations
 		trains = append(trains, train)
+
 	}
 	fmt.Println(len(trains))
 	return trains

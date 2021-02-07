@@ -5,12 +5,13 @@
 package main
 
 import (
-	"12306A/ticketPool/init_data"
 	"12306A/ticketPool/rdb"
+	"fmt"
 )
 
 func main()  {
-	init_data.InitDataMysql()
+	//init_data.InitDataMysql()
 	rdb.InitDataRedis()
+	fmt.Println("初始化结束")
 
 }

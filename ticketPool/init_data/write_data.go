@@ -19,6 +19,7 @@ import (
 
 
 func WriteStationProvinceCity() {
+	fmt.Println("开始初始化station_prov_city表")
 	//先清空表
 	Db.Exec("delete from station_province_city")
 
@@ -100,7 +101,7 @@ func ReadCity() map[string]string {
 			cities[name] = label
 		}
 	}
-	fmt.Println("city_code:", len(cities))
+	fmt.Println("city_num:", len(cities))
 	return cities
 }
 
@@ -171,6 +172,7 @@ func ReadTrainNo() []*inner.Train {
 			dura = dura.Add(hours)
 			dura = dura.Add(mins)
 			sta.Duration = dura
+			//fmt.Println(sta.Duration)
 			//到站时间
 			s1 := strings.Split(row[2], ":")
 			hours1, _ := time.ParseDuration(s1[0] + "h")
