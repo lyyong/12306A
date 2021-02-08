@@ -12,13 +12,17 @@ message CreateInfo {
   string CreatedBy = 5;
 }
 
-message Info {
+message OrderInfo {
   int64 UserID = 1;
   string Money = 2;
   string AffairID = 3;
   int32 ExpireDuration = 4;
   string OrderOutsideID = 5;
   int32 State = 6;
+}
+
+message ReadInfo {
+  repeated OrderInfo infos = 1;
 }
 
 message SearchInfo {
@@ -46,7 +50,7 @@ message UpdateStateWithRInfo {
 
 service OrderRPCService {
   rpc Create(CreateInfo) returns (CreateRes) {};
-  rpc Read(SearchInfo) returns (Info) {};
+  rpc Read(SearchInfo) returns (ReadInfo) {};
   rpc UpdateState(UpdateStateInfo) returns (Error) {};
   rpc UpdateStateWithRelativeOrder(UpdateStateWithRInfo) returns (Error) {};
 }

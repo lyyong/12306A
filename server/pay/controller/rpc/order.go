@@ -5,6 +5,8 @@ package rpc
 
 import (
 	"context"
+	"errors"
+	"pay/model"
 	"pay/service"
 	"rpc/pay/proto/orderRPCpb"
 )
@@ -12,30 +14,57 @@ import (
 type OrderRPCService struct {
 }
 
+// UpdateState RPC更新订单状态
 func (o OrderRPCService) UpdateState(ctx context.Context, info *orderRPCpb.UpdateStateInfo) (*orderRPCpb.Error, error) {
-	return &orderRPCpb.Error{Content: "hello UpdateState"}, nil
+	orderService := service.OrderService{}
+	err := orderService.UpdateOrderState(info.OutsideID, int(info.State))
+	if err != nil {
+		return &orderRPCpb.Error{Content: err.Error()}, nil
+	}
+	return nil, nil
 }
 
+// UpdateStateWithRelativeOrder RPC更新订单状态添加相关订单
 func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info *orderRPCpb.UpdateStateWithRInfo) (*orderRPCpb.Error, error) {
+	orderService := service.OrderService{}
+	err := orderService.UpdateOrderStateWithRelative(info.OutsideID, int(info.State), info.ROutsideID)
+	if err != nil {
+		return &orderRPCpb.Error{Content: err.Error()}, nil
+	}
 	return &orderRPCpb.Error{Content: "hello UpdateStateWithRelativeOrder"}, nil
 }
 
+// Create RPC创建订单
 func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateInfo) (*orderRPCpb.CreateRes, error) {
 	orderService := &service.OrderService{}
-	outsideID, err := orderService.AddOrder(uint(info.UserID), info.Money, info.AffairID)
+	// 判断该用户时是否有未完成的订单
+	orders := orderService.GetOrdersByUserID(int(info.UserID))
+	for _, order := range orders {
+		if order.State == model.ORDER_NOT_FINISH {
+			return nil, errors.New("客户存在未完成的订单")
+		}
+	}
+	outsideID, err := orderService.CreateOrder(uint(info.UserID), info.Money, info.AffairID, info.CreatedBy)
 	if err != nil {
 		return nil, err
 	}
 	return &orderRPCpb.CreateRes{OrderOutsideID: outsideID}, nil
 }
 
-func (o OrderRPCService) Read(ctx context.Context, info *orderRPCpb.SearchInfo) (*orderRPCpb.Info, error) {
-	return &orderRPCpb.Info{
-		UserID:         0,
-		Money:          "30",
-		AffairID:       "123zsd",
-		ExpireDuration: 0,
-		OrderOutsideID: "",
-		State:          0,
-	}, nil
+// Read 获取用户的相关订单
+func (o OrderRPCService) Read(ctx context.Context, info *orderRPCpb.SearchInfo) (*orderRPCpb.ReadInfo, error) {
+	orderService := &service.OrderService{}
+	orders := orderService.GetOrdersByUserID(int(info.UserID))
+	var readInfo orderRPCpb.ReadInfo
+	for _, order := range orders {
+		readInfo.Infos = append(readInfo.Infos, &orderRPCpb.OrderInfo{
+			UserID:         int64(order.UserID),
+			Money:          order.Money,
+			AffairID:       order.AffairID,
+			ExpireDuration: int32(order.ExpireDuration),
+			OrderOutsideID: order.OutsideID,
+			State:          int32(order.State),
+		})
+	}
+	return &readInfo, nil
 }

@@ -2,9 +2,10 @@ version: '3.5'
 services:
   user-server:
     build:
-      context: ./server/user
+      context: .
+      dockerfile: ./server/user/Dockerfile
     ports:
-      - "8222:8222"
+      - "8222:8222/tcp"
     network_mode: "host"
   pay-server:
     build:

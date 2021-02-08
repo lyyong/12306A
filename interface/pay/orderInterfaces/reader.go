@@ -15,5 +15,5 @@ type Info struct {
 
 type Reader interface {
 	// 获取订单信息
-	Read(userID int64) (*Info, error)
+	Read(userID int64) ([]*Info, error)
 }

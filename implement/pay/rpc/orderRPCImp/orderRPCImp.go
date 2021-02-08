@@ -39,19 +39,23 @@ func (o *OrderRPCImp) Create(info *orderInterfaces.CreateInfo) (string, error) {
 
 // Read 获取订单
 // userID 为用户的逐渐
-func (o *OrderRPCImp) Read(userID int64) (*orderInterfaces.Info, error) {
-	res, err := o.client.Read(&orderRPCpb.SearchInfo{UserID: userID})
+func (o *OrderRPCImp) Read(userID int64) ([]*orderInterfaces.Info, error) {
+	resp, err := o.client.Read(&orderRPCpb.SearchInfo{UserID: userID})
 	if err != nil {
 		return nil, err
 	}
-	return &orderInterfaces.Info{
-		UserID:         res.UserID,
-		Money:          res.Money,
-		AffairID:       res.AffairID,
-		ExpireDuration: res.ExpireDuration,
-		OrderOutsideID: res.OrderOutsideID,
-		State:          res.State,
-	}, nil
+	res := make([]*orderInterfaces.Info, len(resp.Infos))
+	for _, info := range resp.Infos {
+		res = append(res, &orderInterfaces.Info{
+			UserID:         info.UserID,
+			Money:          info.Money,
+			AffairID:       info.AffairID,
+			ExpireDuration: info.ExpireDuration,
+			OrderOutsideID: info.OrderOutsideID,
+			State:          info.State,
+		})
+	}
+	return res, nil
 }
 
 func (o *OrderRPCImp) UpdateState(orderOutsideID string, state int32) error {
