@@ -5,6 +5,7 @@
 package user
 
 import (
+	userToken "common/middleware/token/user"
 	"common/tools/logging"
 	"crypto/md5"
 	"errors"
@@ -69,7 +70,7 @@ func Login(username, password string) (string, error) {
 	}
 
 	logging.Debug(username, "登录成功")
-	token, _ := generateToken(username, password)
+	token, _ := userToken.Generate(u.ID, u.Username)
 	return token, nil
 }
 
