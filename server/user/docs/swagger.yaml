@@ -1,0 +1,72 @@
+basePath: /user/api/v1
+definitions:
+  resp.Response:
+    properties:
+      code:
+        type: string
+      data:
+        type: object
+      msg:
+        type: string
+    type: object
+  user.LoginJSON:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  user.RegisterJSON:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: 用户管理 API
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录，参数为用户名和密码
+      operationId: login-by-username-password
+      parameters:
+      - description: 登录信息
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: 用户登录
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: 用户注册，参数为用户名和密码
+      operationId: register-by-username-password
+      parameters:
+      - description: 注册信息
+        in: body
+        name: form
+        required: true
+        schema:
+          $ref: '#/definitions/user.RegisterJSON'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.Response'
+      summary: 用户注册
+swagger: "2.0"

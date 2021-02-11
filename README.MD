@@ -25,3 +25,12 @@
 |------ticketPool&emsp;&emsp;&emsp;&emsp; 线程池服务,主要是对内提供服务</br>
 |------interface&emsp;&emsp;&emsp;&emsp; 每个服务能够提供的接口</br>
 |------implement&emsp;&emsp;&emsp;&emsp; 每个服务的接口实现</br>
+
+
+this is dev brench
+
+## 说明
+1. 项目使用consul作为服务发现
+2. 使用nginx将https请求转为内部http请求
+3. 使用自建gin反向代理作为token鉴权并进行为url加入用户信息
+4. 使用fabio作为gin反向代理之后的三级代理,目的是做到负载均衡和按照服务名转发

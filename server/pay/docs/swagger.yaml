@@ -1,0 +1,159 @@
+basePath: /pay/api/v1
+definitions:
+  controller.JSONResult:
+    properties:
+      code:
+        type: integer
+      data:
+        type: object
+      msg:
+        type: string
+    type: object
+  v1.payOKAbbRecv:
+    properties:
+      order_info:
+        type: string
+      order_outside_id:
+        type: string
+    required:
+    - order_info
+    - order_outside_id
+    type: object
+  v1.refundAbbRecv:
+    properties:
+      order_outside_id:
+        type: string
+    required:
+    - order_outside_id
+    type: object
+  v1.wantPayAbbRecv:
+    properties:
+      order_outside_id:
+        type: string
+    required:
+    - order_outside_id
+    type: object
+  v1.wantPayAbbSend:
+    properties:
+      order_info:
+        type: string
+      order_outside_id:
+        type: string
+    type: object
+host: localhost:8082
+info:
+  contact:
+    email: ly_yong@qq.com
+    name: LiuYong
+  description: 负责处理与支付和退款相关的业务
+  title: 支付服务
+  version: "1.0"
+paths:
+  /ok/abb:
+    post:
+      consumes:
+      - application/json
+      description: 服务器对支付进行验证
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userID
+        required: true
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 需要接受的信息
+        in: body
+        name: wantPayR
+        required: true
+        schema:
+          $ref: '#/definitions/v1.payOKAbbRecv'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回成功
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+      summary: 告知服务器通过支付宝支付完成
+  /refund/abb:
+    post:
+      consumes:
+      - application/json
+      description: 给订单号然后进行退款操作
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userID
+        required: true
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 订单信息
+        in: body
+        name: refundR
+        required: true
+        schema:
+          $ref: '#/definitions/v1.refundAbbRecv'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功信息
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+      summary: 请求退款
+  /want/abb:
+    post:
+      consumes:
+      - application/json
+      description: 获得支付需要的来自支付宝的OrderInfo
+      parameters:
+      - description: 用户ID
+        in: query
+        name: userID
+        required: true
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        required: true
+        type: string
+      - description: 需要接受的信息
+        in: body
+        name: wantPayR
+        required: true
+        schema:
+          $ref: '#/definitions/v1.wantPayAbbRecv'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回订单号和OrderInfo
+          schema:
+            allOf:
+            - $ref: '#/definitions/controller.JSONResult'
+            - properties:
+                data:
+                  $ref: '#/definitions/v1.wantPayAbbSend'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+      summary: 告知服务器想要支付
+swagger: "2.0"
