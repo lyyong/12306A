@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	tp *TicketPool
-	db *gorm.DB
+	Tp *TicketPool
+	Db *gorm.DB
 )
 
 //func init(){
@@ -82,23 +82,21 @@ func Close(){
 	signal.Notify(c, syscall.SIGKILL)
 	go func(){
 		<-c
-		sqlDB,_ := db.DB()
+		sqlDB,_ := Db.DB()
 		sqlDB.Close()
 		logging.Info("connection pool is closed")
 	}()
 }
 
 
-func initMockData(){
-	// 连接db
-
+func InitMockData(){
 	// 初始化票池
-	tp = &TicketPool{
+	Tp = &TicketPool{
 		trainMap:            make(map[int32]*Train),
 		carriageSeatInfoMap: make(map[int32]*SeatInfo),
 	}
 	// 初始化车厢类型
-	carriageSeatInfoMap := tp.carriageSeatInfoMap
+	carriageSeatInfoMap := Tp.carriageSeatInfoMap
 	/*
 	   mock数据:
 		[ 	carriageTypeId : 0
@@ -164,10 +162,10 @@ func initMockData(){
 	*/
 
 	train := &Train{
-		stopStationMap: make(map[int32]*Station),
+		stopStationMap: make(map[int32]*StopStation),
 		carriageMap:    make(map[string]*Carriages),
 	}
-	tp.trainMap[0] = train
+	Tp.trainMap[0] = train
 
 	t, err := time.Parse("2006-01-02 15:04", "2021-02-16 9:30")
 	if err != nil {
@@ -176,10 +174,10 @@ func initMockData(){
 	// 20个站点
 	stationNumber := 20
 	for i := 0 ; i < stationNumber; i++ {
-		train.stopStationMap[int32(i)] = &Station{
-			seq:        i,
-			arriveTime: t.Format("2006-01-02 15:04"),
-			startTime:  t.Add(time.Minute * 10).Format("2006-01-02 15:04"),
+		train.stopStationMap[int32(i)] = &StopStation{
+			Seq:        i,
+			ArriveTime: t.Format("2006-01-02 15:04"),
+			StartTime:  t.Add(time.Minute * 10).Format("2006-01-02 15:04"),
 		}
 		t = t.Add(time.Hour)
 	}
@@ -197,9 +195,9 @@ func initMockData(){
 	business := make([]*FullTicket, carriageCount)
 	for i := 0 ; i < carriageCount; i++ {
 		business[i] = &FullTicket{
-			seat:              tp.carriageSeatInfoMap[0],
+			seat:              Tp.carriageSeatInfoMap[0],
 			carriageSeq:       strconv.Itoa(index),
-			maxSeatCount:      tp.carriageSeatInfoMap[0].maxSeatCount,
+			maxSeatCount:      Tp.carriageSeatInfoMap[0].maxSeatCount,
 			currentSeatNumber: 0,
 		}
 		index++
@@ -208,9 +206,9 @@ func initMockData(){
 	first := make([]*FullTicket, carriageCount)
 	for i := 0 ; i < carriageCount; i++ {
 		first[i] = &FullTicket{
-			seat:              tp.carriageSeatInfoMap[1],
+			seat:              Tp.carriageSeatInfoMap[1],
 			carriageSeq:       strconv.Itoa(index),
-			maxSeatCount:      tp.carriageSeatInfoMap[1].maxSeatCount,
+			maxSeatCount:      Tp.carriageSeatInfoMap[1].maxSeatCount,
 			currentSeatNumber: 0,
 		}
 		index++
@@ -219,9 +217,9 @@ func initMockData(){
 	second := make([]*FullTicket, carriageCount)
 	for i := 0 ; i < carriageCount; i++ {
 		second[i] = &FullTicket{
-			seat:              tp.carriageSeatInfoMap[2],
+			seat:              Tp.carriageSeatInfoMap[2],
 			carriageSeq:       strconv.Itoa(index),
-			maxSeatCount:      tp.carriageSeatInfoMap[2].maxSeatCount,
+			maxSeatCount:      Tp.carriageSeatInfoMap[2].maxSeatCount,
 			currentSeatNumber: 0,
 		}
 		index++
@@ -252,4 +250,27 @@ func generateFullTicketValue(stationNumber int) uint64 {
 	fullTicketValue <<= stationNumber-1
 	fullTicketValue -= 1
 	return fullTicketValue
+}
+
+
+func showTicketPoolInfo(){
+	for key, value := range Tp.carriageSeatInfoMap {
+		fmt.Println("carriageTypeId:[", key, "]; seatInfo:[", value, "]")
+	}
+	for key, value := range Tp.trainMap {
+		fmt.Println("trainId:[", key, "]; train:[", value, "]")
+		train := value
+		for stationId, station := range train.stopStationMap {
+			fmt.Println("stationId:[", stationId, "]; station:[", station, "]")
+		}
+		for date, carriages := range train.carriageMap {
+			fmt.Println("date:[", date, "]; carriages:[", carriages, "]")
+			for seatTypeId, csi := range carriages.carriageSeatInfo{
+				fmt.Println("seatTypeId:[", seatTypeId, "]; csi:[", csi, "]")
+				for _,v := range csi.fullTickets {
+					fmt.Println("carriage:", v)
+				}
+			}
+		}
+	}
 }

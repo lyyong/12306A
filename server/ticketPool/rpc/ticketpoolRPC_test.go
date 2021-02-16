@@ -2,19 +2,21 @@
 // @Created at 2021/2/16
 // @Modified at 2021/2/16
 
-package ticketpool
+package rpc
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	pb "rpc/ticketPool/proto/ticketPoolRPC"
 	"sync"
 	"testing"
+	"ticketPool/ticketpool"
 	"time"
 )
 
 func TestGetTicket_Validity(t *testing.T) {
-	initMockData()
+	ticketpool.InitMockData()
 
 	reqCount := 1000
 	req := generateGetTicketData(reqCount)
@@ -36,11 +38,11 @@ func TestGetTicket_Validity(t *testing.T) {
 	fmt.Println("No Repeat Ticket!")
 }
 
-func TestGetTicket_Efficient(t *testing.T) {
+func TestGetTicket_Efficient(t *testing.T) {// result: about  250Request/ms
 	//初始化票池
-	initMockData()
+	ticketpool.InitMockData()
 	// 生成测试数据
-	reqCount := 10000
+	reqCount := 1000
 	req := generateGetTicketData(reqCount)
 
 	// 出票并统计耗时
@@ -51,22 +53,22 @@ func TestGetTicket_Efficient(t *testing.T) {
 	// 打印出票结果
 	printResponse(resp)
 
-	fmt.Println("requestCount:", reqCount, "   time-expend:", expend)
+	fmt.Printf("\n[requestCount:%d   time-expend:%v]\n", reqCount, expend)
 }
 
-func TestSearchTicketCount(t *testing.T) {
-	initMockData()
+func TestGetTicketNumber(t *testing.T) {
+	ticketpool.InitMockData()
 	reqCount := 2000
 	getNumberReq := generateGetTicketNumberData(reqCount)
 	getTicketReq := generateGetTicketData(reqCount)
-
+	tps := &TicketPoolServer{}
 	start := time.Now()
 	var wg sync.WaitGroup
 	for i := 0; i < reqCount; i++ {
 		wg.Add(1)
 		go func(j int) {
-			tp.GetTicket(getTicketReq[j])
-			fmt.Println(tp.SearchTicketCount(getNumberReq[j]))	// 打印操作比较耗时，测试效率时删掉输出
+			_, _ = tps.GetTicket(context.Background(), getTicketReq[j])
+			fmt.Println(tps.GetTicketNumber(context.Background(), getNumberReq[j]))	// 打印操作比较耗时，测试效率时删掉输出
 			wg.Done()
 		}(i)
 
@@ -76,32 +78,35 @@ func TestSearchTicketCount(t *testing.T) {
 	fmt.Println("requestCount:", reqCount, "   time-expend:", expend)
 }
 
-func TestSearchTicketCount_Validity(t *testing.T) {
-	initMockData()
+func TestGetTicketNumber_Validity(t *testing.T) {
+	ticketpool.InitMockData()
 	reqCount := 20
 	getTicketReq := generateGetTicketData(reqCount)
 
-	getNumberReq := pb.GetTicketNumberRequest{
+	getNumberReq := &pb.GetTicketNumberRequest{
 		TrainId:        []int32{0},
 		StartStationId: 0,
 		DestStationId:  5,
 		Date:           "2021-02-16",
 	}
+
+	tps := &TicketPoolServer{}
 	for i := 0; i < reqCount; i++ {
-		fmt.Println(tp.GetTicket(getTicketReq[i]))
-		fmt.Println(tp.SearchTicketCount(getNumberReq))
+		fmt.Println(tps.GetTicket(context.Background(), getTicketReq[i]))
+		fmt.Println(tps.GetTicketNumber(context.Background(), getNumberReq))
 		fmt.Println()
 	}
 }
 
-func execBuyTicket(req []pb.GetTicketRequest) []pb.GetTicketResponse {
-	resp := make([]pb.GetTicketResponse, len(req))
+func execBuyTicket(req []*pb.GetTicketRequest) []*pb.GetTicketResponse {
+	tps := &TicketPoolServer{}
+	resp := make([]*pb.GetTicketResponse, len(req))
 	var wg sync.WaitGroup
 	for i := 0; i < len(req); i++ {
 		wg.Add(1)
 		go func(j int) {
 			// 请求传入票池，出票
-			resp[j] = tp.GetTicket(req[j])
+			resp[j],_ = tps.GetTicket(context.Background(),req[j])
 			wg.Done()
 		}(i)
 	}
@@ -109,9 +114,9 @@ func execBuyTicket(req []pb.GetTicketRequest) []pb.GetTicketResponse {
 	return resp
 }
 
-func generateGetTicketData(reqCount int) []pb.GetTicketRequest {
+func generateGetTicketData(reqCount int) []*pb.GetTicketRequest {
 	// 请求个数，每个请求包含随机 1~5 张票
-	req := make([]pb.GetTicketRequest, reqCount)
+	req := make([]*pb.GetTicketRequest, reqCount)
 
 	var maxStationNum int32 = 19
 
@@ -132,7 +137,7 @@ func generateGetTicketData(reqCount int) []pb.GetTicketRequest {
 		}
 
 		destStation := rand.Int31n(maxStationNum)+1 	// 0 < destStationId <= maxStationNum
-		req[i] = pb.GetTicketRequest{
+		req[i] = &pb.GetTicketRequest{
 			TrainId:        0,
 			StartStationId: rand.Int31n(destStation),	// 0 <= startStationId < destStationId 	----- [0,destStation)
 			DestStationId:  destStation,
@@ -143,14 +148,14 @@ func generateGetTicketData(reqCount int) []pb.GetTicketRequest {
 	return req
 }
 
-func generateGetTicketNumberData(requestCount int) []pb.GetTicketNumberRequest{
+func generateGetTicketNumberData(requestCount int) []*pb.GetTicketNumberRequest{
 	var maxStationNum int32 = 19
 
-	req := make([]pb.GetTicketNumberRequest, requestCount)
+	req := make([]*pb.GetTicketNumberRequest, requestCount)
 
 	for i := 0; i < requestCount; i++ {
 		destStation := rand.Int31n(maxStationNum)+1
-		req[i] = pb.GetTicketNumberRequest{
+		req[i] = &pb.GetTicketNumberRequest{
 			TrainId:        []int32{0},
 			StartStationId: rand.Int31n(destStation),
 			DestStationId:  destStation,
@@ -161,8 +166,7 @@ func generateGetTicketNumberData(requestCount int) []pb.GetTicketNumberRequest{
 	return req
 }
 
-func printResponse(resp []pb.GetTicketResponse){
-
+func printResponse(resp []*pb.GetTicketResponse){
 	for i := 0; i < len(resp); i++ {
 		response := resp[i]
 		fmt.Printf("response %d:\n", i)
@@ -170,30 +174,15 @@ func printResponse(resp []pb.GetTicketResponse){
 			fmt.Println(ticket)
 		}
 	}
-
 }
 
-func TestInit(t *testing.T) {
-	initMockData()
-	for key, value := range tp.carriageSeatInfoMap {
-		fmt.Println("carriageTypeId:[", key, "]; seatInfo:[", value, "]")
-	}
-	for key, value := range tp.trainMap {
-		fmt.Println("trainId:[", key, "]; train:[", value, "]")
-		train := value
-		for stationId, station := range train.stopStationMap {
-			fmt.Println("stationId:[", stationId, "]; station:[", station, "]")
-		}
-		for date, carriages := range train.carriageMap {
-			fmt.Println("date:[", date, "]; carriages:[", carriages, "]")
-			for seatTypeId, csi := range carriages.carriageSeatInfo{
-				fmt.Println("seatTypeId:[", seatTypeId, "]; csi:[", csi, "]")
-				for _,v := range csi.fullTickets {
-					fmt.Println("carriage:", v)
-				}
-			}
-		}
-	}
+func generateRequestValue(startStation, destStation int) uint64{
+	var value uint64 = 1
+	value <<= destStation - startStation
+	value -= 1
+	value <<= startStation
+	return value
 }
+
 
 
