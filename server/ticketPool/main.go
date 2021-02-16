@@ -18,6 +18,9 @@ func main() {
 
 	logging.Info("TicketPool Service....")
 
+	/* 初始化票池 */
+
+
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()

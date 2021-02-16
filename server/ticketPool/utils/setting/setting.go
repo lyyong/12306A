@@ -38,7 +38,7 @@ type redis struct {
 var Redis = &redis{}
 
 
-func init() {
+func InitSetting() {
 	cfg, err := ini.Load("config/ticketPool-config.ini")
 	if err != nil {
 		logging.Fatal("Setting -- Load config fail:", err)
