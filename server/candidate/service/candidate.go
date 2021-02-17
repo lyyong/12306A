@@ -5,20 +5,20 @@ package service
 
 import (
 	"candidate/tools/setting"
-	"implement/pay/rpc/orderRPCImp"
-	"interface/pay/orderInterfaces"
+	"rpc/pay/client/orderRPCClient"
+	"rpc/pay/proto/orderRPCpb"
 	"strconv"
 	"time"
 )
 
 type candidateService struct {
-	orderOp orderInterfaces.Operator
+	orderOp *orderRPCClient.OrderRPCClient
 }
 
 func NewCandidateService() (*candidateService, error) {
 	cs := &candidateService{}
 	var err error
-	cs.orderOp, err = orderRPCImp.NewOrderRPCImp()
+	cs.orderOp, err = orderRPCClient.NewClient()
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func NewCandidateService() (*candidateService, error) {
 func (c candidateService) CacheCandidate(userID, trainId int, date string, passengers []string) (string, error) {
 	money := 100
 	// 创建订单, 获得外部id
-	orderOutsideID, err := c.orderOp.Create(&orderInterfaces.CreateInfo{
+	resp, err := c.orderOp.Create(&orderRPCpb.CreateInfo{
 		UserID:         int64(userID),
 		Money:          strconv.Itoa(money),
 		AffairID:       "CAN" + time.Now().Format("2006-01-02-15:04:05.000-") + strconv.Itoa(userID),
@@ -41,5 +41,5 @@ func (c candidateService) CacheCandidate(userID, trainId int, date string, passe
 	}
 
 	// TODO 创建候补存入缓存, 支付完成后, 支付服务通过队列通知候补服务, 候补将该候补信息写入mysql
-	return orderOutsideID, err
+	return resp.OrderOutsideID, err
 }
