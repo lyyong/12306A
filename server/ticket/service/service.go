@@ -83,6 +83,6 @@ func Close(){
 		sqlDB,_ := db.DB()
 		sqlDB.Close()
 		redisPool.Close()
-		logging.Info("connection pool colsed")
+		logging.Info("connection pool closed")
 	}()
 }

@@ -13,7 +13,7 @@ import (
 	"user/utils/resp"
 )
 
-type RegisterJSON struct {
+type RegisterRequest struct {
 	Username string
 	Password string
 }
@@ -24,16 +24,16 @@ type RegisterJSON struct {
 // @ID register-by-username-password
 // @Accept json
 // @Produce json
-// @Param form body RegisterJSON true "注册信息"
+// @Param form body RegisterRequest true "注册信息"
 // @Success 200 {object} resp.Response
 // @Router /register [post]
 func Register(c *gin.Context) {
-	j := new(RegisterJSON)
-	if err := c.ShouldBindJSON(j); err != nil {
+	req := new(RegisterRequest)
+	if err := c.ShouldBindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, resp.R(struct{}{}).SetMsg("JSON格式错误"))
 	}
 
-	if err := user.Register(j.Username, j.Password); err != nil {
+	if err := user.Register(req.Username, req.Password); err != nil {
 		if errors.Is(err, errortype.ErrUserNameHasExist) {
 			c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("用户已注册"))
 		} else {
