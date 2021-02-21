@@ -20,7 +20,7 @@ type Train struct {
 // GetTrainsByCondition 通过条件获取车次
 func GetTrainsByCondition(condition map[string]interface{}) []*Train {
 	ts := make([]*Train, 0)
-	err := database.DB.Find(&ts).Where(condition).Error
+	err := database.DB.Where(condition).Find(&ts).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil
 	}
@@ -30,7 +30,7 @@ func GetTrainsByCondition(condition map[string]interface{}) []*Train {
 // GetTrainsByNumberLike 通过车次编号模糊查找 %为通配符
 func GetTrainsByNumberLike(like string) []*Train {
 	ts := make([]*Train, 0)
-	err := database.DB.Find(&ts).Where("number LIKE ?", like).Error
+	err := database.DB.Where("number LIKE ?", like).Find(&ts).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil
 	}

@@ -6,22 +6,16 @@ package ticketpool
 
 import (
 	"common/tools/logging"
-	"encoding/json"
 	"fmt"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
-	"os"
-	"os/signal"
 	"strconv"
-	"syscall"
+	"strings"
+	"ticketPool/model"
 	"ticketPool/skiplist"
-	"ticketPool/utils/setting"
 	"time"
 )
 
 var (
 	Tp *TicketPool
-	Db *gorm.DB
 )
 
 //func init(){
@@ -37,59 +31,152 @@ var (
 //	Close()
 //}
 
-func initTicketPool() *TicketPool {
+const ( // seatTypeID
+	BUSINESS_SEAT_ID = iota
+	FIRST_SEAT_ID
+	SECOND_SEAT_ID
+)
+
+var (
+	allCarriages []*model.CarriageType
+	allSeatInfos map[string]*SeatInfo // 每个车厢对应对应作为类型的SeatInfo, key格式为carriage_id:seatTypeID
+)
+
+func InitTicketPool() *TicketPool {
 	ticketPool := &TicketPool{
 		trainMap:            make(map[uint32]*Train),
 		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
-	//carriageSeatInfoMap := ticketPool.carriageSeatInfoMap
+	// carriageSeatInfoMap := ticketPool.carriageSeatInfoMap
 
+	genStaticInfo()
+
+	// 暂时只初始化G开头的车辆
+	// 得到G开头的车次
+	trains := model.GetTrainsByNumberLike("G%")
+	//trains:=model.GetTrainsByCondition(map[string]interface{}{"number":"G71"})
+	for _, train := range trains {
+		// 获得列车类型
+		trainType := model.GetTrainTypeByID(train.TrainType)
+		// 得到车厢列表
+		tcList := strings.Split(trainType.CarriageList, ",")
+		// 得到真正的车厢列表
+		carriageList := make([]*model.CarriageType, len(tcList))
+		for i, tc := range tcList {
+			cid, _ := strconv.Atoi(tc)
+			carriageList[i] = model.GetCarriageTypesByID(uint(cid))
+		}
+		// 得到停靠站信息
+		stopInfos := model.GetStopInfoByTrainID(train.ID)
+		ssm := make(map[uint32]*StopStation)
+		for _, stopInfo := range stopInfos {
+			ssm[uint32(stopInfo.ID)] = &StopStation{
+				Seq:        stopInfo.StopSeq,
+				ArriveTime: stopInfo.ArrivedTime,
+				StartTime:  stopInfo.LeaveTime,
+			}
+		}
+
+		// 创建今天开始往后30天的carriageMap
+		cm := make(map[string]*Carriages)
+		t := time.Now()
+
+		for i := 0; i < 30; i++ {
+			cm[t.Format("2006-01-02")] = genCarriages(stopInfos, carriageList)
+			t.Add(time.Hour * 24)
+		}
+		ticketPool.trainMap[uint32(train.ID)] = &Train{
+			stopStationMap: ssm,
+			carriageMap:    cm,
+		}
+
+	}
 
 	return ticketPool
 }
 
-func newMysqlDB() (*gorm.DB, error) {
-
-	// dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?charset=%s&parseTime=True&loc=Local", setting.DataBase.UserName, setting.DataBase.PassWord, setting.DataBase.DBName, setting.DataBase.Charset)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		logging.Error("Fail to open db connect:", err)
-		return nil, err
+// genStaticInfo 获得车厢信息,生成一些静态数据
+func genStaticInfo() {
+	allCarriages = model.GetCarriageTypes()
+	allSeatInfos = make(map[string]*SeatInfo) // 每个车厢对应对应作为类型的SeatInfo, key格式为carriage_id:seatTypeID
+	for _, carriage := range allCarriages {
+		if carriage.BusinessSeatNumber > 0 {
+			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)] = &SeatInfo{
+				seatType:     "商务座",
+				maxSeatCount: int32(carriage.BusinessSeatNumber),
+				seats:        strings.Split(carriage.BusinessSeat, ","),
+			}
+		}
+		if carriage.FirstSeatNumber > 0 {
+			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)] = &SeatInfo{
+				seatType:     "一等座",
+				maxSeatCount: int32(carriage.FirstSeatNumber),
+				seats:        strings.Split(carriage.FirstSeat, ","),
+			}
+		}
+		if carriage.SecondSeatNumber > 0 {
+			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)] = &SeatInfo{
+				seatType:     "二等座",
+				maxSeatCount: int32(carriage.SecondSeatNumber),
+				seats:        strings.Split(carriage.SecondSeat, ","),
+			}
+		}
+		// TODO 添加其他座位类型
 	}
-	// 获取通用数据库对象 sql.DB ，然后使用其提供的功能
-	sqlDB, err := db.DB()
-
-	// SetMaxIdleConns 用于设置连接池中空闲连接的最大数量。
-	sqlDB.SetMaxIdleConns(setting.DataBase.MaxIdleConns)
-	// SetMaxOpenConns 设置打开数据库连接的最大数量。
-	sqlDB.SetMaxOpenConns(setting.DataBase.MaxOpenConns)
-	// SetConnMaxLifetime 设置了连接可复用的最大时间。
-	sqlDB.SetConnMaxLifetime(time.Hour)
-
-	stats, err := json.Marshal(sqlDB.Stats())
-	logging.Info("Mysql Connection Pool stats:" + string(stats))
-
-	return db, nil
 }
 
-func Close(){
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-	signal.Notify(c, syscall.SIGKILL)
-	go func(){
-		<-c
-		sqlDB,_ := Db.DB()
-		sqlDB.Close()
-		logging.Info("connection pool is closed")
-	}()
+func genCarriages(stopInfos []*model.StopInfo, carriageList []*model.CarriageType) *Carriages {
+	carriages := &Carriages{carriageSeatInfo: make(map[uint32]*CarriageSeatInfo)}
+	fullV := generateFullTicketValue(len(stopInfos))
+	// 检查车厢,  将座位类型作为上一级, 暂时只有商务座,一等座和二等座
+	business := make([]*FullTicket, 0) // 商务座切片
+	first := make([]*FullTicket, 0)    // 一等座
+	second := make([]*FullTicket, 0)   // 二等座
+	for i, carriage := range carriageList {
+		if carriage.BusinessSeatNumber > 0 {
+			business = append(business, &FullTicket{
+				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)],
+				carriageSeq:       strconv.Itoa(i),
+				currentSeatNumber: int32(carriage.BusinessSeatNumber),
+			})
+		}
+		if carriage.FirstSeatNumber > 0 {
+			first = append(first, &FullTicket{
+				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)],
+				carriageSeq:       strconv.Itoa(i),
+				currentSeatNumber: int32(carriage.FirstSeatNumber),
+			})
+		}
+		if carriage.SecondSeatNumber > 0 {
+			second = append(second, &FullTicket{
+				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)],
+				carriageSeq:       strconv.Itoa(i),
+				currentSeatNumber: int32(carriage.SecondSeatNumber),
+			})
+		}
+		// TODO 添加更多座位类型
+	}
+	carriages.carriageSeatInfo[BUSINESS_SEAT_ID] = &CarriageSeatInfo{
+		fullValue:   fullV,
+		fullTickets: business,
+		sl:          skiplist.NewSkipList(),
+	}
+	carriages.carriageSeatInfo[FIRST_SEAT_ID] = &CarriageSeatInfo{
+		fullValue:   fullV,
+		fullTickets: first,
+		sl:          skiplist.NewSkipList(),
+	}
+	carriages.carriageSeatInfo[SECOND_SEAT_ID] = &CarriageSeatInfo{
+		fullValue:   fullV,
+		fullTickets: second,
+		sl:          skiplist.NewSkipList(),
+	}
+	return carriages
 }
 
-
-func InitMockData(){
+func InitMockData() {
 	// 初始化票池
 	Tp = &TicketPool{
 		trainMap:            make(map[uint32]*Train),
@@ -98,19 +185,19 @@ func InitMockData(){
 	// 初始化车厢类型
 	carriageSeatInfoMap := Tp.carriageSeatInfoMap
 	/*
-	   mock数据:
-		[ 	carriageTypeId : 0
-			carriageType:商务
-			maxSeatCount:100
-		]
-		[ 	carriageTypeId : 1
-			carriageType:一等
-			maxSeatCount:100
-		]
-		[ 	carriageTypeId : 2
-			carriageType:二等
-			maxSeatCount:140
-		]
+		   mock数据:
+			[ 	carriageTypeId : 0
+				carriageType:商务
+				maxSeatCount:100
+			]
+			[ 	carriageTypeId : 1
+				carriageType:一等
+				maxSeatCount:100
+			]
+			[ 	carriageTypeId : 2
+				carriageType:二等
+				maxSeatCount:140
+			]
 	*/
 	seats := make([]string, 100)
 	index := 0
@@ -120,7 +207,7 @@ func InitMockData(){
 			if j == 4 {
 				continue
 			}
-			seat := fmt.Sprintf("%c%d", s + int32(j),i)
+			seat := fmt.Sprintf("%c%d", s+int32(j), i)
 			seats[index] = seat
 			index++
 		}
@@ -145,7 +232,7 @@ func InitMockData(){
 			if j == 4 {
 				continue
 			}
-			seat := fmt.Sprintf("%c%d", s + int32(j),i)
+			seat := fmt.Sprintf("%c%d", s+int32(j), i)
 			seatsLevelSecond[index] = seat
 			index++
 		}
@@ -157,8 +244,8 @@ func InitMockData(){
 	}
 
 	/* 获取所有列车信息，循环对每一个列车初始化，此处假数据只生成一辆列车
-		1.根据列车 id 查询并初始化经停站信息
-		2.根据列车 id 查询并初始化车厢信息
+	1.根据列车 id 查询并初始化经停站信息
+	2.根据列车 id 查询并初始化车厢信息
 	*/
 
 	train := &Train{
@@ -173,7 +260,7 @@ func InitMockData(){
 	}
 	// 20个站点
 	stationNumber := 20
-	for i := 0 ; i < stationNumber; i++ {
+	for i := 0; i < stationNumber; i++ {
 		train.stopStationMap[uint32(i)] = &StopStation{
 			Seq:        i,
 			ArriveTime: t.Format("2006-01-02 15:04"),
@@ -193,7 +280,7 @@ func InitMockData(){
 	carriageCount := 6
 	index = 1
 	business := make([]*FullTicket, carriageCount)
-	for i := 0 ; i < carriageCount; i++ {
+	for i := 0; i < carriageCount; i++ {
 		business[i] = &FullTicket{
 			seat:              Tp.carriageSeatInfoMap[0],
 			carriageSeq:       strconv.Itoa(index),
@@ -203,7 +290,7 @@ func InitMockData(){
 	}
 	// 6个一等座车厢
 	first := make([]*FullTicket, carriageCount)
-	for i := 0 ; i < carriageCount; i++ {
+	for i := 0; i < carriageCount; i++ {
 		first[i] = &FullTicket{
 			seat:              Tp.carriageSeatInfoMap[1],
 			carriageSeq:       strconv.Itoa(index),
@@ -213,7 +300,7 @@ func InitMockData(){
 	}
 	// 6个二等座车厢
 	second := make([]*FullTicket, carriageCount)
-	for i := 0 ; i < carriageCount; i++ {
+	for i := 0; i < carriageCount; i++ {
 		second[i] = &FullTicket{
 			seat:              Tp.carriageSeatInfoMap[2],
 			carriageSeq:       strconv.Itoa(index),
@@ -244,13 +331,12 @@ func InitMockData(){
 // 根据经停站个数，产生fullTicketValue
 func generateFullTicketValue(stationNumber int) uint64 {
 	var fullTicketValue uint64 = 1
-	fullTicketValue <<= stationNumber-1
+	fullTicketValue <<= stationNumber - 1
 	fullTicketValue -= 1
 	return fullTicketValue
 }
 
-
-func showTicketPoolInfo(){
+func showTicketPoolInfo() {
 	for key, value := range Tp.carriageSeatInfoMap {
 		fmt.Println("carriageTypeId:[", key, "]; seatInfo:[", value, "]")
 	}
@@ -262,9 +348,9 @@ func showTicketPoolInfo(){
 		}
 		for date, carriages := range train.carriageMap {
 			fmt.Println("date:[", date, "]; carriages:[", carriages, "]")
-			for seatTypeId, csi := range carriages.carriageSeatInfo{
+			for seatTypeId, csi := range carriages.carriageSeatInfo {
 				fmt.Println("seatTypeId:[", seatTypeId, "]; csi:[", csi, "]")
-				for _,v := range csi.fullTickets {
+				for _, v := range csi.fullTickets {
 					fmt.Println("carriage:", v)
 				}
 			}

@@ -41,10 +41,10 @@ func GetCarriageTypes() []*CarriageType {
 
 // GetCarriageTypesByID 通过id获取车厢类型, 出错返回nil
 func GetCarriageTypesByID(id uint) *CarriageType {
-	var ct *CarriageType
-	if err := database.DB.Find(ct).Where("id = ?", id).Error; err != nil && err != gorm.ErrRecordNotFound {
+	var ct CarriageType
+	if err := database.DB.Where("id = ?", id).Find(&ct).Error; err != nil && err != gorm.ErrRecordNotFound {
 		logging.Error(err)
 		return nil
 	}
-	return ct
+	return &ct
 }
