@@ -13,7 +13,7 @@ import (
 )
 
 
-func CheckUnHandleIndent(userId int32) (bool, error) {
+func CheckUnHandleIndent(userId uint32) (bool, error) {
 	indentConn, err := grpc.Dial("0.0.0.0:9440", grpc.WithInsecure())
 	if err != nil {
 		return false, err
@@ -28,7 +28,7 @@ func CheckUnHandleIndent(userId int32) (bool, error) {
 
 }
 
-func CheckConflict(passengerId *[]int32 ,date string) (bool, error){
+func CheckConflict(passengerId *[]uint32 ,date string) (bool, error){
 	isConflict, err := ticket.IsConflict(db, passengerId, date)
 	if err != nil {
 		return false, err

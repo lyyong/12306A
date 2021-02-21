@@ -9,9 +9,9 @@ import (
 
 type TicketPoolServer struct {
 	/*
-		rpc2 GetTicket (GetTicketRequest) returns (GetTicketResponse){}
-	  	rpc2 GetTicketNumber (GetTicketNumberRequest) returns (GetTicketNumberResponse){}
-	  	rpc2 RefundTicket (RefundTicketRequest) returns (RefundTicketResponse){}
+		rpc GetTicket (GetTicketRequest) returns (GetTicketResponse){}
+	  	rpc GetTicketNumber (GetTicketNumberRequest) returns (GetTicketNumberResponse){}
+	  	rpc RefundTicket (RefundTicketRequest) returns (RefundTicketResponse){}
 	*/
 }
 
@@ -19,7 +19,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	tp := ticketpool.Tp
 	train := tp.GetTrain(req.TrainId)
 
-	seatCountMap := make(map[int32]int32)
+	seatCountMap := make(map[uint32]int32)
 	for i := 0; i < len(req.Passengers); i++ {
 		seatTypeId := req.Passengers[i].SeatTypeId
 		seatCountMap[seatTypeId]++

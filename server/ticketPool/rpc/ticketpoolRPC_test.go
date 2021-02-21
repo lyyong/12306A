@@ -136,10 +136,10 @@ func generateGetTicketData(reqCount int) []*pb.GetTicketRequest {
 			}
 		}
 
-		destStation := rand.Int31n(maxStationNum)+1 	// 0 < destStationId <= maxStationNum
+		destStation := rand.Uint32(maxStationNum)+1 	// 0 < destStationId <= maxStationNum
 		req[i] = &pb.GetTicketRequest{
 			TrainId:        0,
-			StartStationId: rand.Int31n(destStation),	// 0 <= startStationId < destStationId 	----- [0,destStation)
+			StartStationId: rand.Uint32(destStation),	// 0 <= startStationId < destStationId 	----- [0,destStation)
 			DestStationId:  destStation,
 			Date:           "2021-02-16",
 			Passengers:     passengers,

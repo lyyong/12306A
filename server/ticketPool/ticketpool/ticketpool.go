@@ -12,12 +12,12 @@ import (
 )
 
 type TicketPool struct {
-	trainMap  			map[int32]*Train 	// key: trainId
-	carriageSeatInfoMap map[int32]*SeatInfo	// key: carriageTypeId
+	trainMap  			map[uint32]*Train 	// key: trainId
+	carriageSeatInfoMap map[uint32]*SeatInfo	// key: carriageTypeId
 }
 
 type Train struct {
-	stopStationMap 	map[int32]*StopStation // key: stationId
+	stopStationMap 	map[uint32]*StopStation // key: stationId
 	carriageMap		map[string]*Carriages // key: date  根据日期获得某一天的所有车厢Carriages
 }
 
@@ -28,7 +28,7 @@ type StopStation struct{
 }
 
 type Carriages struct {
-	carriageSeatInfo 	map[int32]*CarriageSeatInfo // key: seatTypeId  根据 seatTypeId 获取该类型座位的车厢切片
+	carriageSeatInfo 	map[uint32]*CarriageSeatInfo // key: seatTypeId  根据 seatTypeId 获取该类型座位的车厢切片
 }
 
 type CarriageSeatInfo struct {
@@ -40,7 +40,6 @@ type CarriageSeatInfo struct {
 type FullTicket struct {
 	seat				*SeatInfo
 	carriageSeq			string
-	maxSeatCount		int32
 	currentSeatNumber	int32		// 从 0 开始，表示当前已分配出去的座位号
 }
 
@@ -51,7 +50,7 @@ type SeatInfo struct {	// 描述车厢的座位信息，同一种车厢共用一
 }
 
 
-func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId int32, date string, seatCountMap map[int32]int32) (map[int32][]string, error) {
+func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
 	// 根据请求在票池中获取车辆信息，经停站信息，计算 requestValue
 	train := tp.trainMap[trainId]
 	startStation := train.stopStationMap[startStationId]
@@ -61,7 +60,7 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId int32, dat
 	carriages := train.carriageMap[date]
 
 	csiNodeMap := make(map[*CarriageSeatInfo]*skiplist.Node)
-	seatsMap := make(map[int32][]string,len(seatCountMap))
+	seatsMap := make(map[uint32][]string,len(seatCountMap))
 
 	for seatType, count := range seatCountMap {
 		// csi 为描述某种座位余票的结构体
@@ -91,7 +90,7 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId int32, dat
 
 }
 
-func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId int32, date string) map[int32]int32 {
+func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId uint32, date string) map[uint32]int32 {
 
 	train := tp.trainMap[trainId]
 	startStation := train.stopStationMap[startStationId]
@@ -99,7 +98,7 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId i
 	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
 	carriages := train.carriageMap[date]
 
-	seatCountMap := make(map[int32]int32)
+	seatCountMap := make(map[uint32]int32)
 
 	for seatTypeId, csi := range carriages.carriageSeatInfo {
 		seatCountMap[seatTypeId] = csi.getTicketCount(requestValue)
@@ -108,7 +107,7 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId i
 	return seatCountMap
 }
 
-func(tp *TicketPool) GetTrain(trainId int32) *Train{
+func(tp *TicketPool) GetTrain(trainId uint32) *Train{
 	return tp.trainMap[trainId]
 }
 
@@ -143,7 +142,7 @@ func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*sk
 	return nil, nil
 }
 
-func(t *Train) GetStopStation (stationId int32) *StopStation {
+func(t *Train) GetStopStation (stationId uint32) *StopStation {
 	return t.stopStationMap[stationId]
 }
 
@@ -154,12 +153,13 @@ func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 	for i := 0; i < len(csi.fullTickets); i++ {
 		for {
 			ft := csi.fullTickets[i]
+			maxSeatCount := ft.seat.maxSeatCount
 			csn := ft.currentSeatNumber
-			if csn >= ft.maxSeatCount {
+			if csn >= maxSeatCount {
 				// 当前车厢全票已拆完
 				break
 			}
-			split := ft.maxSeatCount - csn
+			split := maxSeatCount - csn
 			if split >= count {
 				split = count
 			}
@@ -193,7 +193,7 @@ func(csi *CarriageSeatInfo) getTicketCount(requestValue uint64) int32 {
 	fullTickets := csi.fullTickets
 	var count int32 = 0
 	for i := 0; i < len(fullTickets); i++{
-		count += fullTickets[i].maxSeatCount - fullTickets[i].currentSeatNumber
+		count += fullTickets[i].seat.maxSeatCount - fullTickets[i].currentSeatNumber
 
 	}
 	// 全票全部被拆分后去票池搜索

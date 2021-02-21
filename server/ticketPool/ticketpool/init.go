@@ -39,8 +39,8 @@ var (
 
 func initTicketPool() *TicketPool {
 	ticketPool := &TicketPool{
-		trainMap:            make(map[int32]*Train),
-		carriageSeatInfoMap: make(map[int32]*SeatInfo),
+		trainMap:            make(map[uint32]*Train),
+		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
@@ -92,8 +92,8 @@ func Close(){
 func InitMockData(){
 	// 初始化票池
 	Tp = &TicketPool{
-		trainMap:            make(map[int32]*Train),
-		carriageSeatInfoMap: make(map[int32]*SeatInfo),
+		trainMap:            make(map[uint32]*Train),
+		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
 	}
 	// 初始化车厢类型
 	carriageSeatInfoMap := Tp.carriageSeatInfoMap
@@ -162,7 +162,7 @@ func InitMockData(){
 	*/
 
 	train := &Train{
-		stopStationMap: make(map[int32]*StopStation),
+		stopStationMap: make(map[uint32]*StopStation),
 		carriageMap:    make(map[string]*Carriages),
 	}
 	Tp.trainMap[0] = train
@@ -174,7 +174,7 @@ func InitMockData(){
 	// 20个站点
 	stationNumber := 20
 	for i := 0 ; i < stationNumber; i++ {
-		train.stopStationMap[int32(i)] = &StopStation{
+		train.stopStationMap[uint32(i)] = &StopStation{
 			Seq:        i,
 			ArriveTime: t.Format("2006-01-02 15:04"),
 			StartTime:  t.Add(time.Minute * 10).Format("2006-01-02 15:04"),
@@ -185,7 +185,7 @@ func InitMockData(){
 	// 初始化 2021-02-16 这一天的票
 	date, _ := time.Parse("2006-01-02", "2021-02-16")
 	carriages := &Carriages{
-		carriageSeatInfo: make(map[int32]*CarriageSeatInfo),
+		carriageSeatInfo: make(map[uint32]*CarriageSeatInfo),
 	}
 	train.carriageMap[date.Format("2006-01-02")] = carriages
 
@@ -197,7 +197,6 @@ func InitMockData(){
 		business[i] = &FullTicket{
 			seat:              Tp.carriageSeatInfoMap[0],
 			carriageSeq:       strconv.Itoa(index),
-			maxSeatCount:      Tp.carriageSeatInfoMap[0].maxSeatCount,
 			currentSeatNumber: 0,
 		}
 		index++
@@ -208,7 +207,6 @@ func InitMockData(){
 		first[i] = &FullTicket{
 			seat:              Tp.carriageSeatInfoMap[1],
 			carriageSeq:       strconv.Itoa(index),
-			maxSeatCount:      Tp.carriageSeatInfoMap[1].maxSeatCount,
 			currentSeatNumber: 0,
 		}
 		index++
@@ -219,7 +217,6 @@ func InitMockData(){
 		second[i] = &FullTicket{
 			seat:              Tp.carriageSeatInfoMap[2],
 			carriageSeq:       strconv.Itoa(index),
-			maxSeatCount:      Tp.carriageSeatInfoMap[2].maxSeatCount,
 			currentSeatNumber: 0,
 		}
 		index++

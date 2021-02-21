@@ -8,5 +8,6 @@ import (
 func InitRouter() *gin.Engine {
 	r := gin.Default()
 	r.POST("/buyTicket", controller.BuyTicket)
+	r.POST("/RefundTicket", controller.RefundTicket)
 	return r
 }

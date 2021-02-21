@@ -8,7 +8,7 @@ import (
 type Ticket struct{
 	gorm.Model
 
-	TrainId int32
+	TrainId uint32
 	StartStation string
 	DestStation string
 	StartTime time.Time
@@ -16,8 +16,8 @@ type Ticket struct{
 	CarriageNumber string
 	SeatNumber string
 	Amount string
-	IndentId int32
-	PassengerId int32
+	IndentId uint32
+	PassengerId uint32
 	State int8
 }
 
@@ -26,6 +26,10 @@ func AddMultipleTicket(db *gorm.DB, tickets *[]Ticket) error {
 	return res.Error
 }
 
-func IsConflict(db *gorm.DB, passengerId *[]int32, date string) (bool, error) {
+func UpdateState(db *gorm.DB, ticketId uint32, state string) (bool, error) {
+	return false, nil
+}
+
+func IsConflict(db *gorm.DB, passengerId *[]uint32, date string) (bool, error) {
 	return false, nil
 }
