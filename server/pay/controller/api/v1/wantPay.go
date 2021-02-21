@@ -4,7 +4,7 @@
 package v1
 
 import (
-	"common/middleware/token/user"
+	"common/middleware/token/usertoken"
 	"common/tools/logging"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -42,7 +42,7 @@ func WantPayAbb(c *gin.Context) {
 		return
 	}
 	// 检查该用户是持有该订单
-	userInfo, ok := user.GetUserInfo(c)
+	userInfo, ok := usertoken.GetUserInfo(c)
 	if !ok {
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
 		return

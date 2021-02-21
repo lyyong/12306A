@@ -85,7 +85,7 @@ func InitTicketPool() *TicketPool {
 
 		for i := 0; i < 30; i++ {
 			cm[t.Format("2006-01-02")] = genCarriages(stopInfos, carriageList)
-			t.Add(time.Hour * 24)
+			t = t.Add(time.Hour * 24)
 		}
 		ticketPool.trainMap[uint32(train.ID)] = &Train{
 			stopStationMap: ssm,

@@ -34,7 +34,7 @@ func NewClient() (*OrderRPCClient, error) {
 	return client, nil
 }
 
-func (c *OrderRPCClient) Create(info *orderRPCpb.CreateInfo) (*orderRPCpb.CreateRes, error) {
+func (c *OrderRPCClient) Create(info *orderRPCpb.CreateRequest) (*orderRPCpb.CreateRespond, error) {
 	tclient := *c.pbClient
 	resp, err := tclient.Create(context.Background(), info)
 	if err != nil {
@@ -43,7 +43,7 @@ func (c *OrderRPCClient) Create(info *orderRPCpb.CreateInfo) (*orderRPCpb.Create
 	return resp, nil
 }
 
-func (c *OrderRPCClient) Read(info *orderRPCpb.SearchInfo) (*orderRPCpb.ReadInfo, error) {
+func (c *OrderRPCClient) Read(info *orderRPCpb.SearchCondition) (*orderRPCpb.ReadRespond, error) {
 	tclient := *c.pbClient
 	resp, err := tclient.Read(context.Background(), info)
 	if err != nil {
@@ -52,7 +52,7 @@ func (c *OrderRPCClient) Read(info *orderRPCpb.SearchInfo) (*orderRPCpb.ReadInfo
 	return resp, err
 }
 
-func (c *OrderRPCClient) UpdateState(info *orderRPCpb.UpdateStateInfo) (*orderRPCpb.Error, error) {
+func (c *OrderRPCClient) UpdateState(info *orderRPCpb.UpdateStateRequest) (*orderRPCpb.Respond, error) {
 	tclient := *c.pbClient
 	resp, err := tclient.UpdateState(context.Background(), info)
 	if err != nil {
@@ -61,9 +61,18 @@ func (c *OrderRPCClient) UpdateState(info *orderRPCpb.UpdateStateInfo) (*orderRP
 	return resp, err
 }
 
-func (c *OrderRPCClient) UpdateStateWithRelativeOrder(info *orderRPCpb.UpdateStateWithRInfo) (*orderRPCpb.Error, error) {
+func (c *OrderRPCClient) UpdateStateWithRelativeOrder(info *orderRPCpb.UpdateStateWithRRequest) (*orderRPCpb.Respond, error) {
 	tclient := *c.pbClient
 	resp, err := tclient.UpdateStateWithRelativeOrder(context.Background(), info)
+	if err != nil {
+		return nil, err
+	}
+	return resp, err
+}
+
+func (c *OrderRPCClient) GetNoFinishOrder(info *orderRPCpb.SearchCondition) (*orderRPCpb.OrderInfo, error) {
+	tclient := *c.pbClient
+	resp, err := tclient.GetNoFinishOrder(context.Background(), info)
 	if err != nil {
 		return nil, err
 	}

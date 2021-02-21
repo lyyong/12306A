@@ -15,3 +15,12 @@ func TestInitTicketPool(t *testing.T) {
 	InitTicketPool()
 	database.Close()
 }
+
+func BenchmarkName(b *testing.B) {
+	setting.InitSetting()
+	database.Setup()
+	for i := 0; i < 1; i++ {
+		InitTicketPool()
+	}
+	database.Close()
+}

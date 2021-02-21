@@ -13,7 +13,7 @@ type OrderService struct {
 }
 
 // CreateOrder 创建一个订单
-func (s OrderService) CreateOrder(userID uint, money, affairID, createdBy string) (string, error) {
+func (s OrderService) CreateOrder(userID uint, money int, affairID, createdBy string) (string, error) {
 	order := model.Order{
 		Model:    model.Model{CreatedBy: createdBy},
 		UserID:   userID,
@@ -82,4 +82,16 @@ func (s OrderService) GetOrdersByUserID(userID uint) []*model.Order {
 		return nil
 	}
 	return orders
+}
+
+func (s OrderService) GetOrdersByUserIDAndUnfinish(userID uint) *model.Order {
+	orders, err := model.GetOrders(map[string]interface{}{"user_id": userID, "state": 0})
+	if err != nil {
+		logging.Error(err)
+		return nil
+	}
+	if orders == nil || len(orders) == 0 {
+		return nil
+	}
+	return orders[0]
 }

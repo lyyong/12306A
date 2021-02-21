@@ -7,7 +7,7 @@ import (
 	"candidate/controller"
 	"candidate/service"
 	"candidate/tools/message"
-	"common/middleware/token/user"
+	"common/middleware/token/usertoken"
 	"common/tools/logging"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -42,7 +42,7 @@ func Candidate(c *gin.Context) {
 		send.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
 		return
 	}
-	userInfo, ok := user.GetUserInfo(c)
+	userInfo, ok := usertoken.GetUserInfo(c)
 	if !ok {
 		// token数据出错
 		send.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
