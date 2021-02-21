@@ -2,10 +2,10 @@
  * @Author fzh
  * @Date 2020/2/1
  */
-package user
+package service
 
 import (
-	userToken "common/middleware/token/user"
+	"common/middleware/token/usertoken"
 	"common/tools/logging"
 	"crypto/md5"
 	"errors"
@@ -16,7 +16,7 @@ import (
 	"time"
 	. "user/global/database"
 	"user/global/errortype"
-	"user/model/user"
+	"user/model"
 )
 
 // 用户注册
@@ -24,7 +24,7 @@ func Register(username, password string) error {
 	salt := generateSalt()
 	hashedPassword := hash2(password, salt)
 
-	u := &user.User{
+	u := &model.User{
 		Model:             gorm.Model{},
 		CreatedBy:         "",
 		UpdatedBy:         "",
@@ -43,7 +43,7 @@ func Register(username, password string) error {
 
 	logging.Debug("[用户注册] 用户名:", username)
 	// TODO: 具体错误类型判断
-	if err := user.InsertUser(DB, u); err != nil {
+	if err := model.InsertUser(DB, u); err != nil {
 		return errortype.ErrUserNameHasExist
 	}
 	return nil
@@ -52,7 +52,7 @@ func Register(username, password string) error {
 // 用户登录 返回token
 func Login(username, password string) (string, error) {
 	// 根据用户名获取用户信息
-	u, err := user.GetUserByUsername(DB, username)
+	u, err := model.GetUserByUsername(DB, username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.Debug("[用户登录] 用户名不存在:", username)
@@ -70,7 +70,7 @@ func Login(username, password string) (string, error) {
 	}
 
 	logging.Debug(username, "登录成功")
-	token, _ := userToken.Generate(u.ID, u.Username)
+	token, _ := usertoken.Generate(u.ID, u.Username)
 	return token, nil
 }
 
@@ -88,4 +88,18 @@ func hash2(s1 string, s2 string) string {
 		logging.Error(err)
 	}
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func GetUser(id uint) (*model.User, error) {
+	u, err := model.GetUserById(DB, id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.Debug("[用户信息查询] 用户ID不存在:", id)
+			return nil, errortype.ErrUserNotExist
+		} else {
+			logging.Error(err)
+			return nil, errortype.ErrUnknown
+		}
+	}
+	return u, nil
 }

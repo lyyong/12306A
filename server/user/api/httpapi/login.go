@@ -2,15 +2,15 @@
  * @Author fzh
  * @Date 2021/2/6
  */
-package user
+package httpapi
 
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"user/global/errortype"
-	"user/service/user"
-	"user/utils/resp"
+	"user/service"
+	"user/util/resp"
 )
 
 type LoginRequest struct {
@@ -37,7 +37,7 @@ func Login(c *gin.Context) {
 		Token string `json:"token"`
 	}{}
 
-	if token, err := user.Login(req.Username, req.Password); err != nil {
+	if token, err := service.Login(req.Username, req.Password); err != nil {
 		if errors.Is(err, errortype.ErrUserNotExist) || errors.Is(err, errortype.ErrWrongPassword) {
 			c.JSON(http.StatusOK, resp.R(r).SetMsg("用户名或密码不正确"))
 		} else {

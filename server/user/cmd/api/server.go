@@ -5,6 +5,7 @@
 package api
 
 import (
+	"common/rpc_manage"
 	"common/tools/logging"
 	"fmt"
 	"github.com/spf13/cobra"
@@ -12,7 +13,11 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"net"
+	"rpc/user/userpb"
+	"sync"
 	"time"
+	"user/api/rpcapi"
 	"user/global/config"
 	"user/global/database"
 	"user/router"
@@ -26,8 +31,22 @@ var (
 		PreRun: func(cmd *cobra.Command, args []string) {
 			setup()
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return run()
+		Run: func(cmd *cobra.Command, args []string) {
+			var wg sync.WaitGroup
+			wg.Add(2)
+			go func() {
+				if err := run(); err != nil {
+					logging.Fatal(err)
+				}
+				defer wg.Done()
+			}()
+			go func() {
+				if err := runRpc(); err != nil {
+					logging.Fatal(err)
+				}
+				defer wg.Done()
+			}()
+			wg.Wait()
 		},
 	}
 )
@@ -49,6 +68,21 @@ func run() error {
 	// 启动
 	err := r.Run(fmt.Sprintf(":%d", config.Cfg.Server.Port))
 
+	return err
+}
+
+func runRpc() error {
+	rpcServer := rpc_manage.NewGRPCServer()
+	userpb.RegisterUserServiceServer(rpcServer, new(rpcapi.UserService))
+	logging.Info("rpc服务启动中...")
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", config.Cfg.Server.RpcPort))
+	if err != nil {
+		logging.Fatal("rpc服务启动失败", err)
+	}
+
+	if err = rpcServer.Serve(listen); err != nil {
+		logging.Fatal("rpc服务启动失败", err)
+	}
 	return err
 }
 

@@ -5,7 +5,7 @@
 package router
 
 import (
-	userToken "common/middleware/token/user"
+	"common/middleware/token/usertoken"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -19,7 +19,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 
 	// Token解析中间件
-	r.Use(userToken.TokenParser())
+	r.Use(usertoken.TokenParser())
 
 	// 初始化各个模块的路由
 	InitUserRouter(r)

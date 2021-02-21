@@ -2,15 +2,15 @@
  * @Author fzh
  * @Date 2020/2/1
  */
-package user
+package httpapi
 
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"user/global/errortype"
-	"user/service/user"
-	"user/utils/resp"
+	"user/service"
+	"user/util/resp"
 )
 
 type RegisterRequest struct {
@@ -33,7 +33,7 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, resp.R(struct{}{}).SetMsg("JSON格式错误"))
 	}
 
-	if err := user.Register(req.Username, req.Password); err != nil {
+	if err := service.Register(req.Username, req.Password); err != nil {
 		if errors.Is(err, errortype.ErrUserNameHasExist) {
 			c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("用户已注册"))
 		} else {

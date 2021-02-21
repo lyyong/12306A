@@ -2,7 +2,7 @@
  * @Author fzh
  * @Date 2021/2/8
  */
-package user
+package usertoken
 
 import (
 	"common/tools/logging"
