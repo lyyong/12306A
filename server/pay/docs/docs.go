@@ -40,15 +40,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
-                        "name": "userID",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
+                        "description": "认证信息",
+                        "name": "token",
                         "in": "query",
                         "required": true
                     },
@@ -91,15 +84,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
-                        "name": "userID",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
+                        "description": "认证信息",
+                        "name": "token",
                         "in": "query",
                         "required": true
                     },
@@ -142,15 +128,8 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
-                        "name": "userID",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
+                        "description": "认证信息",
+                        "name": "token",
                         "in": "query",
                         "required": true
                     },

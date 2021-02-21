@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package userrpc;
+
+message UserRequest {
+  uint32 id = 1;
+}
+
+message UserResponse {
+  uint32 id = 1;
+  string username = 2;
+  int32 state = 3;
+  int32 certificate_type = 4;
+  string name = 5;
+  string certificate_number = 6;
+  string phone_number = 7;
+  string email = 8;
+  int32 passenger_type = 9;
+}
+
+service UserService {
+  rpc GetUser(UserRequest) returns (UserResponse) {}
+}

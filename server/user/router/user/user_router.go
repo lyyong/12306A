@@ -6,7 +6,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"user/api/user"
+	"user/api/httpapi"
 )
 
 func Router(r *gin.RouterGroup) *gin.RouterGroup {
@@ -15,7 +15,7 @@ func Router(r *gin.RouterGroup) *gin.RouterGroup {
 		c.JSON(200, "pong")
 	})
 
-	r.POST("/register", user.Register)
-	r.POST("/login", user.Login)
+	r.POST("/register", httpapi.Register)
+	r.POST("/login", httpapi.Login)
 	return r
 }

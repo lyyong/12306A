@@ -17,7 +17,6 @@ import (
 	"time"
 )
 
-
 func WriteStationProvinceCity() {
 	fmt.Println("开始初始化station_prov_city表")
 	//先清空表
@@ -56,16 +55,16 @@ func WriteStationProvinceCity() {
 		stationTelecode := v["station_telecode"].(string)
 		//生成站点的拼音
 		a := pinyin.NewArgs()
-		spells:=pinyin.Pinyin(stationName, a)
+		spells := pinyin.Pinyin(stationName, a)
 		var stationSpell string
-		for _,spell:=range spells{
-			for _,v:=range spell{
-				stationSpell+=v
+		for _, spell := range spells {
+			for _, v := range spell {
+				stationSpell += v
 			}
 		}
 		//fmt.Println(stationSpell,province,stationTelecode,stationName)
 
-		_, err := st.Exec(province, city, cities[city], stationName, stationTelecode,stationSpell)
+		_, err := st.Exec(province, city, cities[city], stationName, stationTelecode, stationSpell)
 		if err != nil {
 			fmt.Println(city, err)
 		}
@@ -165,7 +164,7 @@ func ReadTrainNo() []*inner.Train {
 			sta.Mileage, _ = strconv.ParseInt(row[5], 10, 64)
 			//历时
 			//00:00:00没法写入mysql，最小时间
-			dura, _ := time.ParseInLocation("2006-01-02 15:04:05", "0001-01-01 00:00:00", time.Local)
+			dura, _ := time.ParseInLocation("2006-01-02 15:04:05", "2001-01-01 01:00:00", time.Local)
 			s := strings.Split(row[4], ":")
 			hours, _ := time.ParseDuration(s[0] + "h")
 			mins, _ := time.ParseDuration(s[1] + "m")

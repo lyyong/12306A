@@ -10,7 +10,8 @@ type Config struct {
 }
 
 type Server struct {
-	Port int `ini:"port"`
+	Port    int `ini:"port"`
+	RpcPort int `ini:"rpc_port"`
 }
 
 type Database struct {

@@ -15,7 +15,7 @@ var Db *sql.DB
 var err error
 
 func init() {
-	Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306A")
+	Db, err = sql.Open("mysql", "root:12306A.12306A@tcp(localhost:3310)/12306a_yutianneng_test")
 	Db.SetMaxOpenConns(0)
 	if err != nil {
 		panic(err.Error())

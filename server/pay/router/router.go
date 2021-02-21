@@ -4,6 +4,7 @@
 package router
 
 import (
+	"common/middleware/token/user"
 	"common/router_tracer"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -24,6 +25,7 @@ import (
 // @query.collection.format multi
 func InitRouter() *gin.Engine {
 	r := gin.Default()
+	r.Use(user.TokenParser())
 	// 设置使用链路追踪
 	if router_tracer.IsTracing() {
 		r.Use(func(context *gin.Context) {
@@ -47,6 +49,10 @@ func InitRouter() *gin.Engine {
 		refundGroup := apiV1.Group("/refund")
 		{
 			refundGroup.POST("/abb", v1.RefundAbb)
+		}
+		orderGroup := apiV1.Group("/order")
+		{
+			orderGroup.GET("/myOrders", v1.GetUserOrders)
 		}
 	}
 

@@ -5,15 +5,15 @@ package proto;
 option go_package=".;orderRPCpb";
 
 message CreateInfo {
-  int64 UserID = 1;
+  uint64 UserID = 1;
   string Money = 2;
   string AffairID = 3;
   int32 ExpireDuration = 4;
   string CreatedBy = 5;
 }
 
-message Info {
-  int64 UserID = 1;
+message OrderInfo {
+  uint64 UserID = 1;
   string Money = 2;
   string AffairID = 3;
   int32 ExpireDuration = 4;
@@ -21,8 +21,12 @@ message Info {
   int32 State = 6;
 }
 
+message ReadInfo {
+  repeated OrderInfo infos = 1;
+}
+
 message SearchInfo {
-  int64 UserID = 1;
+  uint64 UserID = 1;
 }
 
 message CreateRes {
@@ -46,7 +50,7 @@ message UpdateStateWithRInfo {
 
 service OrderRPCService {
   rpc Create(CreateInfo) returns (CreateRes) {};
-  rpc Read(SearchInfo) returns (Info) {};
+  rpc Read(SearchInfo) returns (ReadInfo) {};
   rpc UpdateState(UpdateStateInfo) returns (Error) {};
   rpc UpdateStateWithRelativeOrder(UpdateStateWithRInfo) returns (Error) {};
 }

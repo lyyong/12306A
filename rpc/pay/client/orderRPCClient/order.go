@@ -16,7 +16,7 @@ type OrderRPCClient struct {
 // 唯一
 var client *OrderRPCClient
 
-const targetServiceName = "pay-server"
+const targetServiceName = "nginx:18082"
 
 // NewClient 创建一个 OrderRPCClient
 func NewClient() (*OrderRPCClient, error) {
@@ -43,7 +43,7 @@ func (c *OrderRPCClient) Create(info *orderRPCpb.CreateInfo) (*orderRPCpb.Create
 	return resp, nil
 }
 
-func (c *OrderRPCClient) Read(info *orderRPCpb.SearchInfo) (*orderRPCpb.Info, error) {
+func (c *OrderRPCClient) Read(info *orderRPCpb.SearchInfo) (*orderRPCpb.ReadInfo, error) {
 	tclient := *c.pbClient
 	resp, err := tclient.Read(context.Background(), info)
 	if err != nil {
