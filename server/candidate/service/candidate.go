@@ -26,13 +26,13 @@ func NewCandidateService() (*candidateService, error) {
 }
 
 // CacheCandidate 创建候补订单存入缓存,后将返回点单号给前端, 前端根据订单号支付
-func (c candidateService) CacheCandidate(userID, trainId int, date string, passengers []string) (string, error) {
+func (c candidateService) CacheCandidate(userID, trainId uint, date string, passengers []string) (string, error) {
 	money := 100
 	// 创建订单, 获得外部id
 	resp, err := c.orderOp.Create(&orderRPCpb.CreateInfo{
-		UserID:         int64(userID),
+		UserID:         uint64(userID),
 		Money:          strconv.Itoa(money),
-		AffairID:       "CAN" + time.Now().Format("2006-01-02-15:04:05.000-") + strconv.Itoa(userID),
+		AffairID:       "CAN" + time.Now().Format("2006-01-02-15:04:05.000-") + strconv.Itoa(int(userID)),
 		ExpireDuration: 1800,
 		CreatedBy:      setting.Server.Name,
 	})

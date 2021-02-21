@@ -11,15 +11,25 @@ import (
 	"os/signal"
 	"syscall"
 	"ticketPool/rpc"
+	"ticketPool/utils/database"
 	"ticketPool/utils/setting"
 )
+
+func init() {
+	logging.Setup()
+	setting.InitSetting()
+	database.Setup()
+}
+
+func Close() {
+	database.Close()
+}
 
 func main() {
 
 	logging.Info("TicketPool Service....")
 
 	/* 初始化票池 */
-
 
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
@@ -32,14 +42,12 @@ func main() {
 		return
 	}
 
-	go func(){
+	go func() {
 		if err := rpcServer.Serve(rpcListen); err != nil {
 			logging.Fatal("rpc server: ", err)
 			return
 		}
 	}()
-
-
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
@@ -48,5 +56,7 @@ func main() {
 	<-quit
 
 	logging.Info("TicketPool Server Closed")
-
+	defer func() {
+		Close()
+	}()
 }

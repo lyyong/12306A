@@ -12,6 +12,7 @@ require (
 	github.com/swaggo/swag v1.7.0
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
 	pay v0.0.0-00010101000000-000000000000
+	rpc v0.0.0-00010101000000-000000000000
 )
 
 replace (

@@ -40,7 +40,7 @@ func AddOrder(o *Order) error {
 // GetOrders 通过不同的条件拆查询订单
 func GetOrders(condition map[string]interface{}) ([]*Order, error) {
 	var res []*Order
-	if err := database.Client().Where(condition).Find(res).Error; err != nil {
+	if err := database.Client().Where(condition).Find(&res).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, nil
 		}
@@ -50,7 +50,7 @@ func GetOrders(condition map[string]interface{}) ([]*Order, error) {
 }
 
 // GetOrdersByUserID 通过用户id查询订单信息
-func GetOrdersByUserID(userID int) ([]*Order, error) {
+func GetOrdersByUserID(userID uint) ([]*Order, error) {
 	return GetOrders(map[string]interface{}{"user_id": userID})
 }
 

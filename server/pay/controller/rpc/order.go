@@ -38,7 +38,7 @@ func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info 
 func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateInfo) (*orderRPCpb.CreateRes, error) {
 	orderService := &service.OrderService{}
 	// 判断该用户时是否有未完成的订单
-	orders := orderService.GetOrdersByUserID(int(info.UserID))
+	orders := orderService.GetOrdersByUserID(uint(info.UserID))
 	for _, order := range orders {
 		if order.State == model.ORDER_NOT_FINISH {
 			return nil, errors.New("客户存在未完成的订单")
@@ -54,11 +54,11 @@ func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateInfo
 // Read 获取用户的相关订单
 func (o OrderRPCService) Read(ctx context.Context, info *orderRPCpb.SearchInfo) (*orderRPCpb.ReadInfo, error) {
 	orderService := &service.OrderService{}
-	orders := orderService.GetOrdersByUserID(int(info.UserID))
+	orders := orderService.GetOrdersByUserID(uint(info.UserID))
 	var readInfo orderRPCpb.ReadInfo
 	for _, order := range orders {
 		readInfo.Infos = append(readInfo.Infos, &orderRPCpb.OrderInfo{
-			UserID:         int64(order.UserID),
+			UserID:         uint64(order.UserID),
 			Money:          order.Money,
 			AffairID:       order.AffairID,
 			ExpireDuration: int32(order.ExpireDuration),

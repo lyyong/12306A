@@ -72,7 +72,7 @@ func (s OrderService) UpdateOrderStateWithRelative(outsideID string, state int, 
 	return nil
 }
 
-func (s OrderService) GetOrdersByUserID(userID int) []*model.Order {
+func (s OrderService) GetOrdersByUserID(userID uint) []*model.Order {
 	orders, err := model.GetOrdersByUserID(userID)
 	if err != nil {
 		logging.Error(err)

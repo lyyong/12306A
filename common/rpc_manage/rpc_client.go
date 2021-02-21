@@ -5,14 +5,8 @@ package rpc_manage
 
 import (
 	"common/router_tracer"
-	"common/server_find"
-	"errors"
-	"fmt"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/resolver"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -31,41 +25,23 @@ const (
 // targetService - 目标服务如果没有开启服务发现, 可以直接是host, 如果开启了服务发现最好直接使用目标的服务名
 // targetService 值为nginx:port将启动nginx负载均衡,  这里的port是nginx要监听的端口号
 func NewGRPCClientConn(targetService string) (*grpc.ClientConn, error) {
-	if strings.Contains(targetService, "nginx") {
-		s := strings.Split(targetService, ":")
-		if len(s) != 2 {
-			return nil, errors.New("参数出错, nginx后没有端口号")
-		}
-		_, err := strconv.Atoi(s[1])
-		if err != nil {
-			return nil, errors.New("参数出错, nginx后没有端口号")
-		}
-		if router_tracer.IsTracing() {
-			// 开启了链路追踪
-			zkClient, _ := router_tracer.GetClient()
-			return grpc.Dial(":"+s[1],
-				grpc.WithUnaryInterceptor(
-					otgrpc.OpenTracingClientInterceptor(*zkClient.Tracer(), otgrpc.LogPayloads())),
-				grpc.WithInsecure())
-		}
-	}
 
-	if router_tracer.IsTracing() && server_find.IsRegister() {
-		// 开启链路追踪和服务注册
-		zkClient, _ := router_tracer.GetClient()
-		cClient, _ := server_find.GetClient()
-		disc, err := server_find.NewServiceDiscoveryAboutBalance(cClient, targetService)
-		if err != nil {
-			return nil, err
-		}
-		// 注册Builder
-		resolver.Register(disc)
-		return grpc.Dial(server_find.SCHEME+":///",
-			grpc.WithUnaryInterceptor(
-				otgrpc.OpenTracingClientInterceptor(*zkClient.Tracer(), otgrpc.LogPayloads())),
-			grpc.WithInsecure(),
-			grpc.WithDefaultServiceConfig(fmt.Sprintf(SERVICE_CONFIG, ROUND_ROBIN)))
-	}
+	// if router_tracer.IsTracing() && server_find.IsRegister() {
+	// 	// 开启链路追踪和服务注册
+	// 	zkClient, _ := router_tracer.GetClient()
+	// 	cClient, _ := server_find.GetClient()
+	// 	disc, err := server_find.NewServiceDiscoveryAboutBalance(cClient, targetService)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	// 注册Builder
+	// 	resolver.Register(disc)
+	// 	return grpc.Dial(server_find.SCHEME+":///",
+	// 		grpc.WithUnaryInterceptor(
+	// 			otgrpc.OpenTracingClientInterceptor(*zkClient.Tracer(), otgrpc.LogPayloads())),
+	// 		grpc.WithInsecure(),
+	// 		grpc.WithDefaultServiceConfig(fmt.Sprintf(SERVICE_CONFIG, ROUND_ROBIN)))
+	// }
 
 	if router_tracer.IsTracing() {
 		// 开启了链路追踪
@@ -76,19 +52,19 @@ func NewGRPCClientConn(targetService string) (*grpc.ClientConn, error) {
 			grpc.WithInsecure())
 	}
 
-	if server_find.IsRegister() {
-		// 开启了服务发现
-		cClient, _ := server_find.GetClient()
-		disc, err := server_find.NewServiceDiscoveryAboutBalance(cClient, targetService)
-		if err != nil {
-			return nil, err
-		}
-		// 注册Builder
-		resolver.Register(disc)
-		return grpc.Dial(server_find.SCHEME+":///",
-			grpc.WithInsecure(),
-			grpc.WithDefaultServiceConfig(fmt.Sprintf(SERVICE_CONFIG, ROUND_ROBIN)))
-	}
+	// if server_find.IsRegister() {
+	// 	// 开启了服务发现
+	// 	cClient, _ := server_find.GetClient()
+	// 	disc, err := server_find.NewServiceDiscoveryAboutBalance(cClient, targetService)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	// 注册Builder
+	// 	resolver.Register(disc)
+	// 	return grpc.Dial(server_find.SCHEME+":///",
+	// 		grpc.WithInsecure(),
+	// 		grpc.WithDefaultServiceConfig(fmt.Sprintf(SERVICE_CONFIG, ROUND_ROBIN)))
+	// }
 	// 都没有开启
 	return grpc.Dial(targetService, grpc.WithInsecure())
 }

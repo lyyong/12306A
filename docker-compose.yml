@@ -6,25 +6,16 @@ services:
       dockerfile: ./server/user/Dockerfile
     ports:
       - "8222:8222/tcp"
-    network_mode: "host"
   pay-server:
     build:
       context: ./server/pay
     ports:
       - "8082:8082"
-    network_mode: "host"
-  reticket-server:
-    build:
-      context: ./server/reticket
-    ports:
-      - "8092:8092"
-    network_mode: "host"
   candidate-server:
     build:
       context: ./server/candidate
     ports:
       - "8102:8102"
-    network_mode: "host"
   mysql:
     ports:
       - "3310:3306"
@@ -34,31 +25,27 @@ services:
       - "MYSQL_ROOT_PASSWORD=12306A.12306A"
     image:
       mysql
-  redis:
+  main-redis:
     ports:
       - "6379:6379"
     image:
       redis
+  slave-redis:
+    build:
+      context: ./docker/redis/slave_tp
+    ports:
+      - "6380:6380"
   zipkin:
     ports:
       - "9410:9410/tcp"
       - "9411:9411/tcp"
     image:
       openzipkin/zipkin
-    # 将nginx独立, 在服务器上创建
-#  nginx:
-#    image:
-#      lyyong/12306a_nginx:v0.1.1
-#    ports:
-#    - "80:80"
-#  fabio:
-#    build:
-#      context: ./docker/fabio
-#      labels:
-#        - "latest"
-#    ports:
-#    - "9999:9999"
-#    - "9998:9998"
+  nginx:
+    build:
+      context: ./docker/nginx
+    ports:
+      - "80:80"
   consul:
     build:
       context: ./docker/consul

@@ -16,7 +16,7 @@ type OrderRPCClient struct {
 // 唯一
 var client *OrderRPCClient
 
-const targetServiceName = "pay-server"
+const targetServiceName = "nginx:18082"
 
 // NewClient 创建一个 OrderRPCClient
 func NewClient() (*OrderRPCClient, error) {
