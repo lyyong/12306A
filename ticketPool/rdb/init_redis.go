@@ -13,17 +13,28 @@ import (
 )
 
 var RedisDB *redis.Client
+var shaBuyTicket string
+var err error
 
 func init() {
 	RedisDB=redis.NewClient(&redis.Options{
 		Addr: "0.0.0.0:6379",
 	})
+
+	//加载脚本
+	buyTicketScript:=CreateScriptBuyTicket()
+	shaBuyTicket,err=buyTicketScript.Load(RedisDB).Result()
+	if err!=nil{
+		fmt.Println("buyTicket lua script load failed ,err:",err)
+		return
+	}
 	//RedisDB = redis.NewClusterClient(&redis.ClusterOptions{
 	//	Addrs:  []string{"192.168.10.11:7001","192.168.10.11:7002", "192.168.10.11:7003"},
 	//})
 	//连接redis集群
 
 }
+
 func InitDataRedis()  {
 	//车站
 	fmt.Println("初始化redis：station")

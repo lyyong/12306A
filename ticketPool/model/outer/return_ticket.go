@@ -5,6 +5,7 @@
 package outer
 
 
+//已购票信息
 type Ticket struct {
 	Date         string
 	TrainNo      string
