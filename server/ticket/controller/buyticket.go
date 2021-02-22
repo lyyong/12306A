@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	indentPb "rpc/indent/proto/indentRPC"
+	orderPb "rpc/pay/proto/orderRPCpb"
 	ticketPoolPb "rpc/ticketPool/proto/ticketPoolRPC"
 	"ticket/service"
 )
@@ -99,19 +99,20 @@ func BuyTicket(c *gin.Context){
 		return
 	}
 
-	createIndentReq := &indentPb.CreateRequest{
-		UserId:         int32(btReq.UserId),
-		TrainId:        int32(btReq.TrainId),
-		StartStationId: int32(btReq.StartStationId),
-		StartTime:      tickets[0].StartTime,
-		DestStationId:  int32(btReq.DestStationId),
-		ArriveTime:     tickets[0].ArriveTime,
-		Date:           tickets[0].Date,
-		ExpiredTime:	1800,
-		TicketNumber:   int32(len(tickets)),
-		Amount:         8850,
+	err = service.SaveTickets(btReq.UserId, tickets, 1800)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "缓存车票失败", Data: nil})
+		return
 	}
-	indent, err := service.CreateIndent(createIndentReq)
+
+	createOrderReq := &orderPb.CreateRequest{
+		UserID:         uint64(btReq.UserId),
+		Money:          8888,
+		AffairID:       "",
+		ExpireDuration: 0,
+		CreatedBy:      "ticket",
+	}
+	order, err := service.CreateOrder(createOrderReq)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "创建订单失败", Data: nil})
 		return
@@ -128,7 +129,7 @@ func BuyTicket(c *gin.Context){
 		}
 	}
 	btResp := &BuyTicketResponse{
-		IndentOuterId:  indent.IndentOuterId,
+		IndentOuterId:  order.OrderOutsideID,
 		TrainId:        btReq.TrainId,
 		StartStationId: btReq.StartStationId,
 		StartTime:      tickets[0].StartTime,

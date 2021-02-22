@@ -6,27 +6,13 @@ package service
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"google.golang.org/grpc"
-	indentPb "rpc/indent/proto/indentRPC"
+	orderPb "rpc/pay/proto/orderRPCpb"
 	ticketPoolPb "rpc/ticketPool/proto/ticketPoolRPC"
 	"ticket/models/ticket"
 )
-
-
-func CheckUnHandleIndent(userId uint32) (bool, error) {
-	indentConn, err := grpc.Dial("0.0.0.0:9440", grpc.WithInsecure())
-	if err != nil {
-		return false, err
-	}
-	defer indentConn.Close()
-	indentClient := indentPb.NewIndentServiceClient(indentConn)
-	resp, err := indentClient.HasUnfinishedIndent(context.Background(), &indentPb.UnfinishedRequest{UserId: userId})
-	if err != nil {
-		return false, err
-	}
-	return resp.HasUnfinishedIndent, nil
-
-}
 
 func CheckConflict(passengerId *[]uint32 ,date string) (bool, error){
 	isConflict, err := ticket.IsConflict(db, passengerId, date)
@@ -51,17 +37,46 @@ func GetTickets(getTicketReq *ticketPoolPb.GetTicketRequest) ([]*ticketPoolPb.Ti
 	return tickets.Tickets, nil
 }
 
-func CreateIndent(createIndentReq *indentPb.CreateRequest) (*indentPb.CreateResponse, error) {
-	indentConn, err := grpc.Dial("0.0.0.0:9440", grpc.WithInsecure())
+func CheckUnHandleIndent(userId uint32) (bool, error) {
+	orderConn, err := grpc.Dial("0.0.0.0:8082", grpc.WithInsecure())
+	if err != nil {
+		return false, err
+	}
+	defer orderConn.Close()
+	orderClient := orderPb.NewOrderRPCServiceClient(orderConn)
+	resp, err := orderClient.GetNoFinishOrder(context.Background(), &orderPb.SearchCondition{UserID: uint64(userId)})
+	if err != nil {
+		return false, err
+	}
+	if resp == nil {
+		return false, nil
+	}else {
+		return true, nil
+	}
+}
+
+func CreateOrder(createReq *orderPb.CreateRequest) (*orderPb.CreateRespond, error) {
+	orderConn, err := grpc.Dial("0.0.0.0:8082", grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
-	defer indentConn.Close()
-	indentClient := indentPb.NewIndentServiceClient(indentConn)
-	resp, err := indentClient.CreateIndent(context.Background(), createIndentReq)
+	defer orderConn.Close()
+	orderClient := orderPb.NewOrderRPCServiceClient(orderConn)
+	resp, err := orderClient.Create(context.Background(), createReq)
 	if err != nil {
 		return nil, err
 	}
 	return resp, nil
 }
 
+func SaveTickets(userId uint32, tickets []*ticketPoolPb.Ticket, expireTime int32) error {
+	conn := redisPool.Get()
+	defer conn.Close()
+	data, err := json.Marshal(tickets)
+	if err != nil {
+		return err
+	}
+	key := fmt.Sprintf("%d_ticket", userId)
+	conn.Do("SET", key, data, "EX", expireTime)
+	return nil
+}

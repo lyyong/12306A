@@ -11,10 +11,11 @@ import (
 )
 
 type database struct {
-	UserName string
-	PassWord string
-	DBName string
-	Charset string
+	Host 		 string
+	UserName 	 string
+	PassWord 	 string
+	DBName 		 string
+	Charset 	 string
 	MaxIdleConns int
 	MaxOpenConns int
 }
