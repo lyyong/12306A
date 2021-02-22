@@ -17,5 +17,8 @@ func Router(r *gin.RouterGroup) *gin.RouterGroup {
 
 	r.POST("/register", httpapi.Register)
 	r.POST("/login", httpapi.Login)
+	r.POST("/passenger", httpapi.InsertPassenger)
+	r.PUT("/passenger", httpapi.UpdatePassenger)
+	r.GET("/passenger", httpapi.ListPassenger)
 	return r
 }

@@ -23,6 +23,7 @@ type User struct {
 	PhoneNumber       string
 	Email             string
 	PassengerType     int
+	Passengers        []Passenger `gorm:"many2many:user_passengers;"`
 }
 
 func InsertUser(db *gorm.DB, user *User) error {
