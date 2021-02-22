@@ -56,6 +56,54 @@ func TestGetTicket_Efficient(t *testing.T) {// result: about  250Request/ms
 	fmt.Printf("\n[requestCount:%d   time-expend:%v]\n", reqCount, expend)
 }
 
+func TestCanSaleAllTicket(t *testing.T) {
+	ticketpool.InitMockData()
+	reqCount := 1000
+	seatMap := make(map[string]uint64)
+	allTicketNumReq := getAllConditionTicketNumberData()
+	// 生成测试数据
+
+	tps := &TicketPoolServer{}
+	for i := 0 ; i < len(allTicketNumReq); i++ {
+		number, _ := tps.GetTicketNumber(context.Background(), allTicketNumReq[i])
+		seatInfo := number.TrainsTicketInfo[0].SeatInfo
+		for j := 0; j < len(seatInfo); j++ {
+			if seatInfo[j].SeatNumber != 0 {
+				// 如果存在有票的区间，随机生成购票请求去购票
+				req := generateGetTicketData(reqCount)
+				// 执行购票操作
+				resp := execBuyTicket(req)
+				// 记录出票结果
+				for i := 0; i < len(resp); i++ {
+					response := resp[i]
+					for _,ticket := range response.Tickets {
+						ticketValue := generateRequestValue(int(ticket.StartStationId),int(ticket.DestStationId))
+						seat := ticket.CarriageNumber + "车" + ticket.SeatNumber
+						if ticketValue & seatMap[seat] == 0 {
+							seatMap[seat] = seatMap[seat] | ticketValue
+						}else {
+							t.Fatal("Repeat Ticket")
+						}
+					}
+				}
+				// i = 0 再次重新查票
+				i = 0
+			}
+		}
+	}
+	seatCount := len(seatMap)
+	if seatCount != 2040 {
+		t.Fatal("存在未售出的车票")
+	}
+	fmt.Println("seatCount:", seatCount)
+	for key, value := range seatMap {
+		if value != 524287 {
+			t.Fatal("存在未售出的车票")
+		}
+		fmt.Printf("key:%s, value:%d\n", key, value)
+	}
+}
+
 func TestGetTicketNumber(t *testing.T) {
 	ticketpool.InitMockData()
 	reqCount := 2000
@@ -84,7 +132,7 @@ func TestGetTicketNumber_Validity(t *testing.T) {
 	getTicketReq := generateGetTicketData(reqCount)
 
 	getNumberReq := &pb.GetTicketNumberRequest{
-		TrainId:        []int32{0},
+		TrainId:        []uint32{0},
 		StartStationId: 0,
 		DestStationId:  5,
 		Date:           "2021-02-16",
@@ -131,16 +179,16 @@ func generateGetTicketData(reqCount int) []*pb.GetTicketRequest {
 			// 随机座位类型，忽略 passengerId 和选座 字段
 			passengers[j] = &pb.PassengerInfo{
 				PassengerId: 0,
-				SeatTypeId:  rand.Int31n(3), // 座位类型 id 随机0-2之间[0,3) [0:商务座，1:一等座，2:二等座]
+				SeatTypeId:  uint32(rand.Int31n(3)), // 座位类型 id 随机0-2之间[0,3) [0:商务座，1:一等座，2:二等座]
 				ChooseSeat:  "",
 			}
 		}
 
-		destStation := rand.Uint32(maxStationNum)+1 	// 0 < destStationId <= maxStationNum
+		destStation := rand.Int31n(maxStationNum)+1 	// 0 < destStationId <= maxStationNum
 		req[i] = &pb.GetTicketRequest{
 			TrainId:        0,
-			StartStationId: rand.Uint32(destStation),	// 0 <= startStationId < destStationId 	----- [0,destStation)
-			DestStationId:  destStation,
+			StartStationId: uint32(rand.Int31n(destStation)),	// 0 <= startStationId < destStationId 	----- [0,destStation)
+			DestStationId:  uint32(destStation),
 			Date:           "2021-02-16",
 			Passengers:     passengers,
 		}
@@ -156,10 +204,33 @@ func generateGetTicketNumberData(requestCount int) []*pb.GetTicketNumberRequest{
 	for i := 0; i < requestCount; i++ {
 		destStation := rand.Int31n(maxStationNum)+1
 		req[i] = &pb.GetTicketNumberRequest{
-			TrainId:        []int32{0},
-			StartStationId: rand.Int31n(destStation),
-			DestStationId:  destStation,
+			TrainId:        []uint32{0},
+			StartStationId: uint32(rand.Int31n(destStation)),
+			DestStationId:  uint32(destStation),
 			Date:           "2021-02-16",
+		}
+	}
+
+	return req
+}
+
+func getAllConditionTicketNumberData() []*pb.GetTicketNumberRequest{
+	maxStationNum := 20
+	count := 0
+	for i := 1; i < maxStationNum; i++ {
+		count += i;
+	}
+	req := make([]*pb.GetTicketNumberRequest, count)
+	index:=0
+	for i := 0; i < maxStationNum-1; i++ {
+		for j := i + 1; j < maxStationNum; j++{
+			req[index] = &pb.GetTicketNumberRequest{
+				TrainId:        []uint32{0},
+				StartStationId: uint32(i),
+				DestStationId:  uint32(j),
+				Date:           "2021-02-16",
+			}
+			index++
 		}
 	}
 

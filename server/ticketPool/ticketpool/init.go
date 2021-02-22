@@ -42,7 +42,7 @@ var (
 	allSeatInfos map[string]*SeatInfo // 每个车厢对应对应作为类型的SeatInfo, key格式为carriage_id:seatTypeID
 )
 
-func InitTicketPool() *TicketPool {
+func InitTicketPool() {
 	ticketPool := &TicketPool{
 		trainMap:            make(map[uint32]*Train),
 		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
@@ -94,7 +94,7 @@ func InitTicketPool() *TicketPool {
 
 	}
 
-	return ticketPool
+	Tp = ticketPool
 }
 
 // genStaticInfo 获得车厢信息,生成一些静态数据
@@ -139,21 +139,21 @@ func genCarriages(stopInfos []*model.StopInfo, carriageList []*model.CarriageTyp
 			business = append(business, &FullTicket{
 				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)],
 				carriageSeq:       strconv.Itoa(i),
-				currentSeatNumber: int32(carriage.BusinessSeatNumber),
+				currentSeatNumber: 0,
 			})
 		}
 		if carriage.FirstSeatNumber > 0 {
 			first = append(first, &FullTicket{
 				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)],
 				carriageSeq:       strconv.Itoa(i),
-				currentSeatNumber: int32(carriage.FirstSeatNumber),
+				currentSeatNumber: 0,
 			})
 		}
 		if carriage.SecondSeatNumber > 0 {
 			second = append(second, &FullTicket{
 				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)],
 				carriageSeq:       strconv.Itoa(i),
-				currentSeatNumber: int32(carriage.SecondSeatNumber),
+				currentSeatNumber: 0,
 			})
 		}
 		// TODO 添加更多座位类型
