@@ -16,6 +16,7 @@ import (
 
 var (
 	Tp *TicketPool
+
 )
 
 //func init(){
@@ -46,6 +47,7 @@ func InitTicketPool() {
 	ticketPool := &TicketPool{
 		trainMap:            make(map[uint32]*Train),
 		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
+
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
@@ -84,7 +86,8 @@ func InitTicketPool() {
 		t := time.Now()
 
 		for i := 0; i < 30; i++ {
-			cm[t.Format("2006-01-02")] = genCarriages(stopInfos, carriageList)
+			date := t.Format("2006-01-02")
+			cm[date] = genCarriages(train.ID, date, stopInfos, carriageList)
 			t = t.Add(time.Hour * 24)
 		}
 		ticketPool.trainMap[uint32(train.ID)] = &Train{
@@ -93,7 +96,6 @@ func InitTicketPool() {
 		}
 
 	}
-
 	Tp = ticketPool
 }
 
@@ -127,7 +129,7 @@ func genStaticInfo() {
 	}
 }
 
-func genCarriages(stopInfos []*model.StopInfo, carriageList []*model.CarriageType) *Carriages {
+func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carriageList []*model.CarriageType) *Carriages {
 	carriages := &Carriages{carriageSeatInfo: make(map[uint32]*CarriageSeatInfo)}
 	fullV := generateFullTicketValue(len(stopInfos))
 	// 检查车厢,  将座位类型作为上一级, 暂时只有商务座,一等座和二等座
@@ -161,17 +163,17 @@ func genCarriages(stopInfos []*model.StopInfo, carriageList []*model.CarriageTyp
 	carriages.carriageSeatInfo[BUSINESS_SEAT_ID] = &CarriageSeatInfo{
 		fullValue:   fullV,
 		fullTickets: business,
-		sl:          skiplist.NewSkipList(),
+		sl:          skiplist.NewSkipList(uint32(trainId), date, BUSINESS_SEAT_ID),
 	}
 	carriages.carriageSeatInfo[FIRST_SEAT_ID] = &CarriageSeatInfo{
 		fullValue:   fullV,
 		fullTickets: first,
-		sl:          skiplist.NewSkipList(),
+		sl:          skiplist.NewSkipList(uint32(trainId), date, FIRST_SEAT_ID),
 	}
 	carriages.carriageSeatInfo[SECOND_SEAT_ID] = &CarriageSeatInfo{
 		fullValue:   fullV,
 		fullTickets: second,
-		sl:          skiplist.NewSkipList(),
+		sl:          skiplist.NewSkipList(uint32(trainId), date, SECOND_SEAT_ID),
 	}
 	return carriages
 }
@@ -313,19 +315,18 @@ func InitMockData() {
 	carriages.carriageSeatInfo[0] = &CarriageSeatInfo{
 		fullValue:   fullTicketValue,
 		fullTickets: business,
-		sl:          skiplist.NewSkipList(),
+		sl:          skiplist.NewSkipList(0, "2021-02-16", 0),
 	}
 	carriages.carriageSeatInfo[1] = &CarriageSeatInfo{
 		fullValue:   fullTicketValue,
 		fullTickets: first,
-		sl:          skiplist.NewSkipList(),
+		sl:          skiplist.NewSkipList(0, "2021-02-16", 1),
 	}
 	carriages.carriageSeatInfo[2] = &CarriageSeatInfo{
 		fullValue:   fullTicketValue,
 		fullTickets: second,
-		sl:          skiplist.NewSkipList(),
+		sl:          skiplist.NewSkipList(0, "2021-02-16", 2),
 	}
-
 }
 
 // 根据经停站个数，产生fullTicketValue

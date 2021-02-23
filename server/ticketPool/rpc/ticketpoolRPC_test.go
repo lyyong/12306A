@@ -12,12 +12,16 @@ import (
 	"sync"
 	"testing"
 	"ticketPool/ticketpool"
+	"ticketPool/utils/database"
+	"ticketPool/utils/setting"
 	"time"
 )
 
 func TestGetTicket_Validity(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+	defer database.Close()
 	ticketpool.InitMockData()
-
 	reqCount := 1000
 	req := generateGetTicketData(reqCount)
 
@@ -39,6 +43,9 @@ func TestGetTicket_Validity(t *testing.T) {
 }
 
 func TestGetTicket_Efficient(t *testing.T) {// result: about  250Request/ms
+	setting.InitSetting()
+	database.Setup()
+	defer database.Close()
 	//初始化票池
 	ticketpool.InitMockData()
 	// 生成测试数据
@@ -54,9 +61,13 @@ func TestGetTicket_Efficient(t *testing.T) {// result: about  250Request/ms
 	printResponse(resp)
 
 	fmt.Printf("\n[requestCount:%d   time-expend:%v]\n", reqCount, expend)
+
 }
 
 func TestCanSaleAllTicket(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+	defer database.Close()
 	ticketpool.InitMockData()
 	reqCount := 1000
 	seatMap := make(map[string]uint64)
@@ -102,9 +113,13 @@ func TestCanSaleAllTicket(t *testing.T) {
 		}
 		fmt.Printf("key:%s, value:%d\n", key, value)
 	}
+	time.Sleep(10 * time.Second)
 }
 
 func TestGetTicketNumber(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+	defer database.Close()
 	ticketpool.InitMockData()
 	reqCount := 2000
 	getNumberReq := generateGetTicketNumberData(reqCount)
@@ -127,6 +142,9 @@ func TestGetTicketNumber(t *testing.T) {
 }
 
 func TestGetTicketNumber_Validity(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+	defer database.Close()
 	ticketpool.InitMockData()
 	reqCount := 20
 	getTicketReq := generateGetTicketData(reqCount)
@@ -144,6 +162,7 @@ func TestGetTicketNumber_Validity(t *testing.T) {
 		fmt.Println(tps.GetTicketNumber(context.Background(), getNumberReq))
 		fmt.Println()
 	}
+
 }
 
 func execBuyTicket(req []*pb.GetTicketRequest) []*pb.GetTicketResponse {
