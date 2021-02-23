@@ -27,7 +27,7 @@ type wantPayAbbSend struct {
 // @Description 获得支付需要的来自支付宝的OrderInfo
 // @Accept json
 // @Produce json
-// @Param token query string true "认证信息"
+// @Param token header string true "认证信息"
 // @Param wantPayR body v1.wantPayAbbRecv true "需要接受的信息"
 // @Success 200 {object} controller.JSONResult{data=v1.wantPayAbbSend} "返回订单号和OrderInfo"
 // @Failure 400 {object} controller.JSONResult{}

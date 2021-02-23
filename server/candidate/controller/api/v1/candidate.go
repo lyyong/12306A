@@ -28,7 +28,7 @@ type candidateSend struct {
 // @Description 发送需要候补的信息给服务器, 服务器将执行候补功能
 // @Accept json
 // @Produce json
-// @Param token query string true "认证信息"
+// @Param token header string true "认证信息"
 // @Param candidateRecv body v1.candidateRecv true "需要接受的信息"
 // @Success 200 {object} controller.JSONResult{data=v1.candidateSend} "返回成功"
 // @Failure 400 {object} controller.JSONResult{}

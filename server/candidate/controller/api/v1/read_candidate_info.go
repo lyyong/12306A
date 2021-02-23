@@ -30,8 +30,7 @@ type readSend struct {
 // @Description 查看自己的候补订单
 // @Accept json
 // @Produce json
-// @Param userID query string true "用户ID"
-// @Param username query string true "用户名"
+// @Param token header string true "认证信息"
 // @Param wantPayR body v1.readRecv true "需要接受的信息"
 // @Success 200 {object} controller.JSONResult{data=v1.readSend} "返回成功"
 // @Failure 400 {object} controller.JSONResult{}

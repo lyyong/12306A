@@ -5,8 +5,6 @@ package router_tracer
 
 import (
 	"fmt"
-	"github.com/opentracing/opentracing-go"
-	zipkinot "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	"github.com/openzipkin/zipkin-go"
 	zgrp "github.com/openzipkin/zipkin-go/reporter"
 )
@@ -23,10 +21,10 @@ type Client struct {
 	serviceHost   string
 	servicePort   string
 	zkHttp        string
-	tracer        *opentracing.Tracer
+	tracer        *zipkin.Tracer
 }
 
-func (c *Client) Tracer() *opentracing.Tracer {
+func (c *Client) Tracer() *zipkin.Tracer {
 	return c.tracer
 }
 
@@ -53,14 +51,14 @@ func (c *Client) setup(zkReporter *zgrp.Reporter) error {
 		return fmt.Errorf("创建节点出错: %v", err)
 	}
 
-	nativeTracer, err := zipkin.NewTracer(*zkReporter, zipkin.WithLocalEndpoint(endpoint))
+	tracer, err := zipkin.NewTracer(*zkReporter, zipkin.WithLocalEndpoint(endpoint))
 	if err != nil {
 		return fmt.Errorf("创建追踪器错误: %v", err)
 	}
 
 	// 把追踪器包装成opentracing
-	t := zipkinot.Wrap(nativeTracer)
-	c.tracer = &t
+	// t := zipkinot.Wrap(nativeTracer)
+	c.tracer = tracer
 	return nil
 }
 

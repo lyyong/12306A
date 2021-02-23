@@ -50,13 +50,40 @@ info:
   version: "1.0"
 paths:
   /ok/abb:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 认证信息
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 需要接受的信息
+        in: body
+        name: wantPayR
+        required: true
+        schema:
+          $ref: '#/definitions/v1.payOKAbbRecv'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回成功
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.JSONResult'
+      summary: 用户获取自己的订单信息
     post:
       consumes:
       - application/json
       description: 服务器对支付进行验证
       parameters:
       - description: 认证信息
-        in: query
+        in: header
         name: token
         required: true
         type: string
@@ -85,7 +112,7 @@ paths:
       description: 给订单号然后进行退款操作
       parameters:
       - description: 认证信息
-        in: query
+        in: header
         name: token
         required: true
         type: string
@@ -114,7 +141,7 @@ paths:
       description: 获得支付需要的来自支付宝的OrderInfo
       parameters:
       - description: 认证信息
-        in: query
+        in: header
         name: token
         required: true
         type: string

@@ -40,10 +40,20 @@ type database struct {
 	DbName   string
 }
 
+type redis struct {
+	Host         string
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+	PoolSize     int
+	MinIdleConns int
+	IdelTimeout  time.Duration
+}
+
 var Server = &server{}
 var Consul = &consul{}
 var Zipkin = &zipkin{}
 var Database = &database{}
+var Redis = &redis{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -61,8 +71,12 @@ func Setup() {
 	loadConfig(Cfg, "consul", Consul)
 	loadConfig(Cfg, "zipkin", Zipkin)
 	loadConfig(Cfg, "database", Database)
+	loadConfig(Cfg, "redis", Redis)
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
+	Redis.WriteTimeout *= time.Second
+	Redis.ReadTimeout *= time.Second
+	Redis.IdelTimeout *= time.Minute
 }
 
 func loadConfig(Cfg *ini.File, section string, data interface{}) {

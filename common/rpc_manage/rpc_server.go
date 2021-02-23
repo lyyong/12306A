@@ -5,8 +5,7 @@ package rpc_manage
 
 import (
 	"common/router_tracer"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
+	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 	"google.golang.org/grpc"
 )
 
@@ -20,8 +19,9 @@ func NewGRPCServer(opt ...grpc.ServerOption) *grpc.Server {
 		return grpc.NewServer(opt...)
 	}
 	zpClient, _ := router_tracer.GetClient()
-	return grpc.NewServer(grpc_middleware.WithUnaryServerChain(
-		// 链路追踪拦截器
-		otgrpc.OpenTracingServerInterceptor(*zpClient.Tracer(), otgrpc.LogPayloads()),
-	))
+	// return grpc.NewServer(grpc_middleware.WithUnaryServerChain(
+	// 	// 链路追踪拦截器
+	// 	otgrpc.OpenTracingServerInterceptor(*zpClient.Tracer(), otgrpc.LogPayloads()),
+	// ))
+	return grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(zpClient.Tracer())))
 }

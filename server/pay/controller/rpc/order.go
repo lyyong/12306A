@@ -6,7 +6,6 @@ package rpc
 import (
 	"context"
 	"errors"
-	"pay/model"
 	"pay/service"
 	"rpc/pay/proto/orderRPCpb"
 )
@@ -54,11 +53,9 @@ func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info 
 func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateRequest) (*orderRPCpb.CreateRespond, error) {
 	orderService := &service.OrderService{}
 	// 判断该用户时是否有未完成的订单
-	orders := orderService.GetOrdersByUserID(uint(info.UserID))
-	for _, order := range orders {
-		if order.State == model.ORDER_NOT_FINISH {
-			return nil, errors.New("客户存在未完成的订单")
-		}
+	order := orderService.GetOrdersByUserIDAndUnfinish(uint(info.UserID))
+	if order != nil {
+		return nil, errors.New("客户存在未完成的订单")
 	}
 	outsideID, err := orderService.CreateOrder(uint(info.UserID), int(info.Money), info.AffairID, info.CreatedBy)
 	if err != nil {
