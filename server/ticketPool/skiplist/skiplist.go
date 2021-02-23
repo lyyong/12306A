@@ -73,14 +73,6 @@ func(sl *SkipList) DealWithRequest(){
 				key := req.args[0].(uint64)
 				value := req.args[1].([]string)
 				if key == 0 {
-					persistence.Do(&persistence.PersistentRequest{
-						Option:     "DELETE",
-						TrainId:    sl.trainId,
-						Date:       sl.date,
-						SeatTypeId: sl.seatTypeId,
-						Key:        key,
-						Value:      value,
-					})
 					continue
 				}
 				sl.Put(key, value)
@@ -96,8 +88,18 @@ func(sl *SkipList) DealWithRequest(){
 				key := req.args[0].(uint64)
 				count := req.args[1].(int)
 				respChan := req.args[2].(chan *Node)
-				respChan <- sl.Allocate(key, count)
-
+				node := sl.Allocate(key, count)
+				respChan <- node
+				for ; node != nil; node = node.Next{
+					persistence.Do(&persistence.PersistentRequest{
+						Option:     "DELETE",
+						TrainId:    sl.trainId,
+						Date:       sl.date,
+						SeatTypeId: sl.seatTypeId,
+						Key:        node.Key,
+						Value:      node.Value,
+					})
+				}
 			case "Search":
 				key := req.args[0].(uint64)
 				respChan := req.args[1].(chan int32)
