@@ -11,13 +11,17 @@ import (
 	cache2 "pay/tools/cache"
 )
 
-type OrderService struct {
+type orderService struct {
 }
 
 const orderExpTime = 1800
 
+func NewOrderService() *orderService {
+	return &orderService{}
+}
+
 // CreateOrder 创建一个订单
-func (s OrderService) CreateOrder(userID uint, money int, affairID, createdBy string) (string, error) {
+func (s orderService) CreateOrder(userID uint, money int, affairID, createdBy string) (string, error) {
 	order := model.Order{
 		Model:    model.Model{CreatedBy: createdBy},
 		UserID:   userID,
@@ -28,7 +32,6 @@ func (s OrderService) CreateOrder(userID uint, money int, affairID, createdBy st
 	orderCache := cache.OrderCache{
 		UserID:    userID,
 		OutsideID: order.OutsideID,
-		AffairID:  order.AffairID,
 	}
 	// 添加到redis设置30分钟期限
 	cache2.Set(orderCache.GetNoFinishOrderKey(), order, orderExpTime)
@@ -42,7 +45,7 @@ func (s OrderService) CreateOrder(userID uint, money int, affairID, createdBy st
 	return order.OutsideID, nil
 }
 
-func (s OrderService) UpdateOrderState(outsideID string, state int) error {
+func (s orderService) UpdateOrderState(outsideID string, state int) error {
 	order := getOrderByOutsideID(outsideID)
 	var err error = nil
 	if order == nil {
@@ -54,7 +57,7 @@ func (s OrderService) UpdateOrderState(outsideID string, state int) error {
 	return nil
 }
 
-func (s OrderService) UpdateOrderStateWithRelative(outsideID string, state int, relativeID string) error {
+func (s orderService) UpdateOrderStateWithRelative(outsideID string, state int, relativeID string) error {
 	order := getOrderByOutsideID(outsideID)
 	if order == nil {
 		err := errors.New("订单id错误")
@@ -73,7 +76,7 @@ func (s OrderService) UpdateOrderStateWithRelative(outsideID string, state int, 
 }
 
 // GetOrdersByUserID 得到已完成的订单
-func (s OrderService) GetOrdersByUserID(userID uint) []*model.Order {
+func (s orderService) GetOrdersByUserID(userID uint) []*model.Order {
 	orderCache := cache.OrderCache{
 		UserID: userID,
 	}
@@ -95,7 +98,7 @@ func (s OrderService) GetOrdersByUserID(userID uint) []*model.Order {
 	return orders
 }
 
-func (s OrderService) GetOrdersByUserIDAndUnfinish(userID uint) *model.Order {
+func (s orderService) GetOrdersByUserIDAndUnfinish(userID uint) *model.Order {
 	orderCache := cache.OrderCache{
 		UserID: userID,
 	}
@@ -139,7 +142,6 @@ func saveOrderWithStateChange(order *model.Order, state int) {
 	orderCache := cache.OrderCache{
 		UserID:    order.UserID,
 		OutsideID: order.OutsideID,
-		AffairID:  order.AffairID,
 	}
 	if order.State == 0 {
 		// 未完成的订单需要存入数据库

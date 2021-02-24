@@ -14,7 +14,7 @@ type OrderRPCService struct {
 }
 
 func (o OrderRPCService) GetNoFinishOrder(ctx context.Context, condition *orderRPCpb.SearchCondition) (*orderRPCpb.OrderInfo, error) {
-	orderService := service.OrderService{}
+	orderService := service.NewOrderService()
 	order := orderService.GetOrdersByUserIDAndUnfinish(uint(condition.UserID))
 	if order == nil {
 		return nil, nil
@@ -31,7 +31,7 @@ func (o OrderRPCService) GetNoFinishOrder(ctx context.Context, condition *orderR
 
 // UpdateState RPC更新订单状态
 func (o OrderRPCService) UpdateState(ctx context.Context, info *orderRPCpb.UpdateStateRequest) (*orderRPCpb.Respond, error) {
-	orderService := service.OrderService{}
+	orderService := service.NewOrderService()
 	err := orderService.UpdateOrderState(info.OutsideID, int(info.State))
 	if err != nil {
 		return &orderRPCpb.Respond{Content: err.Error()}, nil
@@ -41,7 +41,7 @@ func (o OrderRPCService) UpdateState(ctx context.Context, info *orderRPCpb.Updat
 
 // UpdateStateWithRelativeOrder RPC更新订单状态添加相关订单
 func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info *orderRPCpb.UpdateStateWithRRequest) (*orderRPCpb.Respond, error) {
-	orderService := service.OrderService{}
+	orderService := service.NewOrderService()
 	err := orderService.UpdateOrderStateWithRelative(info.OutsideID, int(info.State), info.ROutsideID)
 	if err != nil {
 		return &orderRPCpb.Respond{Content: err.Error()}, nil
@@ -51,7 +51,7 @@ func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info 
 
 // Create RPC创建订单
 func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateRequest) (*orderRPCpb.CreateRespond, error) {
-	orderService := &service.OrderService{}
+	orderService := service.NewOrderService()
 	// 判断该用户时是否有未完成的订单
 	order := orderService.GetOrdersByUserIDAndUnfinish(uint(info.UserID))
 	if order != nil {
@@ -66,7 +66,7 @@ func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateRequ
 
 // Read 获取用户的相关订单
 func (o OrderRPCService) Read(ctx context.Context, info *orderRPCpb.SearchCondition) (*orderRPCpb.ReadRespond, error) {
-	orderService := &service.OrderService{}
+	orderService := service.NewOrderService()
 	orders := orderService.GetOrdersByUserID(uint(info.UserID))
 	var readRespond orderRPCpb.ReadRespond
 	for _, order := range orders {

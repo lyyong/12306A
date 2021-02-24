@@ -5,6 +5,7 @@ package service
 
 import (
 	"candidate/tools/setting"
+	"common/tools/logging"
 	"rpc/pay/client/orderRPCClient"
 	"rpc/pay/proto/orderRPCpb"
 	"strconv"
@@ -18,7 +19,8 @@ type candidateService struct {
 func NewCandidateService() (*candidateService, error) {
 	cs := &candidateService{}
 	var err error
-	cs.orderOp, err = orderRPCClient.NewClient()
+	cs.orderOp, err = orderRPCClient.NewClientWithMQHost(setting.Kafka.Host)
+	cs.orderOp.SetDealPayOK(payOK)
 	if err != nil {
 		return nil, err
 	}
@@ -42,4 +44,8 @@ func (c candidateService) CacheCandidate(userID, trainId uint, date string, pass
 
 	// TODO 创建候补存入缓存, 支付完成后, 支付服务通过队列通知候补服务, 候补将该候补信息写入mysql
 	return resp.OrderOutsideID, err
+}
+
+func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
+	logging.Info(payOKInfo.AffairID)
 }

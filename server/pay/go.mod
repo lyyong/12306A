@@ -9,6 +9,7 @@ require (
 	github.com/go-ini/ini v1.62.0
 	github.com/go-redis/redis/v8 v8.6.0
 	github.com/jinzhu/gorm v1.9.16
+	github.com/segmentio/kafka-go v0.4.10
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
 	github.com/swaggo/gin-swagger v1.3.0

@@ -49,11 +49,16 @@ type redis struct {
 	IdelTimeout  time.Duration
 }
 
+type kafka struct {
+	Host string
+}
+
 var Server = &server{}
 var Consul = &consul{}
 var Zipkin = &zipkin{}
 var Database = &database{}
 var Redis = &redis{}
+var Kafka = &kafka{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -72,6 +77,7 @@ func Setup() {
 	loadConfig(Cfg, "zipkin", Zipkin)
 	loadConfig(Cfg, "database", Database)
 	loadConfig(Cfg, "redis", Redis)
+	loadConfig(Cfg, "kafka", Kafka)
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
 	Redis.WriteTimeout *= time.Second

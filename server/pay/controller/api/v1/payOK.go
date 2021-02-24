@@ -4,10 +4,12 @@
 package v1
 
 import (
+	"common/middleware/token/usertoken"
 	"common/tools/logging"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"pay/controller"
+	"pay/service"
 	"pay/tools/message"
 )
 
@@ -35,6 +37,17 @@ func PayOKAbb(c *gin.Context) {
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
 		return
 	}
-	// TODO 支付成功逻辑 查询支付宝看是否支付成功, 然后执行一些支付完成的逻辑
+	userInfo, ok := usertoken.GetUserInfo(c)
+	if !ok {
+		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
+		return
+	}
+	payService := service.NewPayService()
+	err := payService.PayOK(userInfo.UserId, payOKR.OrderInfo, payOKR.OrderOutsideID)
+	if err != nil {
+		logging.Error(err)
+		sender.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
+		return
+	}
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.PAYOK, noData))
 }

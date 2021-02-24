@@ -49,7 +49,7 @@ func WantPayAbb(c *gin.Context) {
 	}
 
 	var wantPayS wantPayAbbSend
-	var payService service.PayService
+	payService := service.NewPayService()
 	// 这里并没有接入支付宝所以只是用一个固定的OrderInfo
 	wantPayS.OrderInfo = payService.WantPay(userInfo.UserId, wantPayR.OrderOutsideID)
 	wantPayS.OrderOutsideID = wantPayR.OrderOutsideID
