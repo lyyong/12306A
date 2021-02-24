@@ -37,6 +37,7 @@ type CarriageSeatInfo struct {
 	sl 				*skiplist.SkipList
 }
 
+
 type FullTicket struct {
 	seat				*SeatInfo
 	carriageSeq			string
@@ -48,6 +49,7 @@ type SeatInfo struct {	// 描述车厢的座位信息，同一种车厢共用一
 	maxSeatCount 	int32
 	seats 			[]string // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
 }
+
 
 
 func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
@@ -87,7 +89,6 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, da
 		}
 	}
 	return seatsMap, nil
-
 }
 
 func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId uint32, date string) map[uint32]int32 {
@@ -184,8 +185,9 @@ func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 		}
 	}
 	// 所有车厢全票之和不足count，返回nil，分配出的票插入票池（有可能别的线程也进行了分配，所以不能再减回去）
-	csi.put(csi.fullValue, seats[:len(seats)-int(count)])
-
+	if len(seats) > int(count) {
+		csi.put(csi.fullValue, seats[:len(seats)-int(count)])
+	}
 	return nil
 }
 
@@ -234,4 +236,5 @@ func generateRequestValue(startStation, destStation int) uint64{
 	value <<= startStation
 	return value
 }
+
 

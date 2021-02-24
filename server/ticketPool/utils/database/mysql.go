@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	DB *gorm.DB = nil
+	DB *gorm.DB
 )
 
 func Setup() {

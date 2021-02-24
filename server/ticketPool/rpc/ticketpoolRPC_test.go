@@ -12,12 +12,15 @@ import (
 	"sync"
 	"testing"
 	"ticketPool/ticketpool"
+	"ticketPool/utils/database"
+	"ticketPool/utils/setting"
 	"time"
 )
 
 func TestGetTicket_Validity(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
 	ticketpool.InitMockData()
-
 	reqCount := 1000
 	req := generateGetTicketData(reqCount)
 
@@ -36,9 +39,12 @@ func TestGetTicket_Validity(t *testing.T) {
 		}
 	}
 	fmt.Println("No Repeat Ticket!")
+	database.Close()
 }
 
 func TestGetTicket_Efficient(t *testing.T) {// result: about  250Request/ms
+	setting.InitSetting()
+	database.Setup()
 	//初始化票池
 	ticketpool.InitMockData()
 	// 生成测试数据
@@ -54,9 +60,13 @@ func TestGetTicket_Efficient(t *testing.T) {// result: about  250Request/ms
 	printResponse(resp)
 
 	fmt.Printf("\n[requestCount:%d   time-expend:%v]\n", reqCount, expend)
+	database.Close()
 }
 
 func TestCanSaleAllTicket(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+
 	ticketpool.InitMockData()
 	reqCount := 1000
 	seatMap := make(map[string]uint64)
@@ -102,9 +112,14 @@ func TestCanSaleAllTicket(t *testing.T) {
 		}
 		fmt.Printf("key:%s, value:%d\n", key, value)
 	}
+	time.Sleep(1 * time.Minute)
+	database.Close()
 }
 
 func TestGetTicketNumber(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+
 	ticketpool.InitMockData()
 	reqCount := 2000
 	getNumberReq := generateGetTicketNumberData(reqCount)
@@ -124,9 +139,13 @@ func TestGetTicketNumber(t *testing.T) {
 	wg.Wait()
 	expend := time.Since(start)
 	fmt.Println("requestCount:", reqCount, "   time-expend:", expend)
+	database.Close()
 }
 
 func TestGetTicketNumber_Validity(t *testing.T) {
+	setting.InitSetting()
+	database.Setup()
+
 	ticketpool.InitMockData()
 	reqCount := 20
 	getTicketReq := generateGetTicketData(reqCount)
@@ -144,6 +163,40 @@ func TestGetTicketNumber_Validity(t *testing.T) {
 		fmt.Println(tps.GetTicketNumber(context.Background(), getNumberReq))
 		fmt.Println()
 	}
+	database.Close()
+}
+
+func TestPersistence(t *testing.T){
+	setting.InitSetting()
+	database.Setup()
+
+	ticketpool.InitMockData()
+	req := pb.GetTicketRequest{
+		TrainId:        0,
+		StartStationId: 0,
+		DestStationId:  5,
+		Date:           "2021-02-16",
+		Passengers:     []*pb.PassengerInfo{&pb.PassengerInfo{
+			PassengerId: 0,
+			SeatTypeId:  0,
+			ChooseSeat:  "",
+		}},
+	}
+	req2 := pb.GetTicketRequest{
+		TrainId:        0,
+		StartStationId: 5,
+		DestStationId:  19,
+		Date:           "2021-02-16",
+		Passengers:     []*pb.PassengerInfo{&pb.PassengerInfo{
+			PassengerId: 0,
+			SeatTypeId:  0,
+			ChooseSeat:  "",
+		}},
+	}
+	tps := &TicketPoolServer{}
+	tps.GetTicket(context.Background(), &req)
+	tps.GetTicket(context.Background(), &req2)
+	database.Close()
 }
 
 func execBuyTicket(req []*pb.GetTicketRequest) []*pb.GetTicketResponse {
