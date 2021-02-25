@@ -1,13 +1,15 @@
-package ticket
+package models
 
 import (
 	"gorm.io/gorm"
+	"ticket/utils/database"
 	"time"
 )
 
 type Ticket struct{
 	gorm.Model
 
+	UserId			uint32
 	TrainId 		uint32
 	TrainNum 		string
 	StartStationId 	uint32
@@ -16,26 +18,25 @@ type Ticket struct{
 	DestStationId 	uint32
 	DestStation 	string
 	DestTime 		time.Time
-	SeatTypeId 		uint32
 	SeatType 		string
 	CarriageNumber 	string
 	SeatNumber 		string
-	Price 			uint32
-	OrderId 		uint32
+	Price 			int32
+	OrderOutsideId 	string
 	PassengerName 	string
 	PassengerId 	uint32
 	State 			uint8
 }
 
-func AddMultipleTicket(db *gorm.DB, tickets *[]Ticket) error {
-	res := db.Create(tickets)
+func AddMultipleTicket(tickets *[]Ticket) error {
+	res := database.DB.Create(tickets)
 	return res.Error
 }
 
-func UpdateState(db *gorm.DB, ticketId uint32, state string) (bool, error) {
+func UpdateState(ticketId uint32, state string) (bool, error) {
 	return false, nil
 }
 
-func IsConflict(db *gorm.DB, passengerId *[]uint32, date string) (bool, error) {
+func IsConflict(passengerId *[]uint32, date string) (bool, error) {
 	return false, nil
 }

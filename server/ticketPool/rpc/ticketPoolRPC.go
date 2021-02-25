@@ -2,9 +2,11 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	pb "rpc/ticketPool/proto/ticketPoolRPC"
 	"strings"
 	"ticketPool/ticketpool"
+	"time"
 )
 
 type TicketPoolServer struct {
@@ -32,6 +34,14 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 
 	startStation := train.GetStopStation(req.StartStationId)
 	destStation := train.GetStopStation(req.DestStationId)
+	st, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, startStation.StartTime))
+	at, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, destStation.ArriveTime))
+	if at.Before(st) {
+		at.AddDate(0, 0, 1)
+	}
+	startTime := st.Format("2006-01-02 15:04")
+	arriveTime := at.Format("2006-01-02 15:04")
+
 	tickets := make([]*pb.Ticket, len(req.Passengers))
 	ticketIndex := 0
 	for seatTypeId, seats := range seatsMap {
@@ -42,16 +52,17 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 			if seatTypeId == passengerInfo.SeatTypeId {
 				carriageAndSeat := strings.Split(seats[seatIndex], " ")
 				// 生成车票信息
+
 				tickets[ticketIndex] = &pb.Ticket{
 					Id:             0,
 					TrainId:        req.TrainId,
 					TrainNum:       train.TrainNum,
 					StartStationId: req.StartStationId,
 					StartStation:   startStation.StationName,
-					StartTime:      startStation.StartTime,
+					StartTime:      startTime,
 					DestStationId:  req.DestStationId,
 					DestStation:    destStation.StationName,
-					ArriveTime:     destStation.ArriveTime,
+					ArriveTime:     arriveTime,
 					SeatTypeId:     seatTypeId,
 					SeatType:       seatType,
 					CarriageNumber: carriageAndSeat[0],

@@ -19,25 +19,44 @@ type database struct {
 	MaxIdleConns int
 	MaxOpenConns int
 }
-
 var DataBase = &database{}
 
 
 type server struct {
-	HttpAddr string
-	RpcAddr string
+	Name 		string
+	Host 		string
+	HttpAddr 	string
+	RPCAddr 	string
+	HttpPort	int
 }
-
 var Server = &server{}
 
 type redis struct {
-	Host string
-	MaxIdle int
+	Host 		string
+	MaxIdle 	int
 	IdleTimeout time.Duration
 }
-
 var Redis = &redis{}
 
+type kafka struct {
+	Host string
+}
+var Kafka = &kafka{}
+
+type consul struct {
+	Address     string
+	Interval    int
+	TTL         int
+	ServiceHost string
+	ServiceID   string
+}
+var Consul = &consul{}
+
+type zipkin struct {
+	ServiceID    string
+	HttpEndpoint string
+}
+var Zipkin = &zipkin{}
 
 func init() {
 	cfg, err := ini.Load("config/ticket-config.ini")
@@ -47,7 +66,9 @@ func init() {
 	mapToStruct(cfg.Section("server"), Server)
 	mapToStruct(cfg.Section("database"), DataBase)
 	mapToStruct(cfg.Section("redis"), Redis)
-
+	mapToStruct(cfg.Section("kafka"), Kafka)
+	mapToStruct(cfg.Section("consul"), Consul)
+	mapToStruct(cfg.Section("zipkin"), Zipkin)
 	Redis.IdleTimeout = Redis.IdleTimeout * time.Second
 }
 

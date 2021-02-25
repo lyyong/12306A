@@ -19,7 +19,7 @@ message Ticket {
   string passenger_name = 14;
   uint32 passenger_id = 15;       // 乘车人id
   uint32 order_id = 16;           // 订单号
-  int32  price =17;
+  int32  price = 17;
 }
 
 // 出票
