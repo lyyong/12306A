@@ -30,12 +30,13 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 		return &pb.GetTicketResponse{Tickets: nil}, err
 	}
 
-	startTime := train.GetStopStation(req.StartStationId).StartTime
-	arriveTime := train.GetStopStation(req.DestStationId).ArriveTime
+	startStation := train.GetStopStation(req.StartStationId)
+	destStation := train.GetStopStation(req.DestStationId)
 	tickets := make([]*pb.Ticket, len(req.Passengers))
 	ticketIndex := 0
 	for seatTypeId, seats := range seatsMap {
 		seatIndex := 0
+		seatType := tp.GetSeatInfo(seatTypeId).SeatType
 		for i := 0; i < len(req.Passengers); i++ {
 			passengerInfo := req.Passengers[i]
 			if seatTypeId == passengerInfo.SeatTypeId {
@@ -44,17 +45,21 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 				tickets[ticketIndex] = &pb.Ticket{
 					Id:             0,
 					TrainId:        req.TrainId,
+					TrainNum:       train.TrainNum,
 					StartStationId: req.StartStationId,
-					StartTime:      startTime,
+					StartStation:   startStation.StationName,
+					StartTime:      startStation.StartTime,
 					DestStationId:  req.DestStationId,
-					ArriveTime:     arriveTime,
-					Date:           req.Date,
+					DestStation:    destStation.StationName,
+					ArriveTime:     destStation.ArriveTime,
 					SeatTypeId:     seatTypeId,
+					SeatType:       seatType,
 					CarriageNumber: carriageAndSeat[0],
 					SeatNumber:     carriageAndSeat[1],
+					PassengerName:  passengerInfo.PassengerName,
 					PassengerId:    passengerInfo.PassengerId,
-					IndentId:       0,
-					Amount:         888,
+					OrderId:        0,
+					Price:          88,
 				}
 				ticketIndex++
 				seatIndex++

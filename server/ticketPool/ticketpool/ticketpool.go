@@ -17,14 +17,16 @@ type TicketPool struct {
 }
 
 type Train struct {
+	TrainNum		string
 	stopStationMap 	map[uint32]*StopStation // key: stationId
 	carriageMap		map[string]*Carriages // key: date  根据日期获得某一天的所有车厢Carriages
 }
 
 type StopStation struct{
-	Seq        int // 序号：描述该车站是第几个经停站，从 0 开始
-	ArriveTime string
-	StartTime  string
+	Seq        	int // 序号：描述该车站是第几个经停站，从 0 开始
+	ArriveTime 	string
+	StartTime  	string
+	StationName string
 }
 
 type Carriages struct {
@@ -45,7 +47,7 @@ type FullTicket struct {
 }
 
 type SeatInfo struct {	// 描述车厢的座位信息，同一种车厢共用一份
-	seatType 		string
+	SeatType 		string
 	maxSeatCount 	int32
 	seats 			[]string // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
 }
@@ -110,6 +112,10 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId u
 
 func(tp *TicketPool) GetTrain(trainId uint32) *Train{
 	return tp.trainMap[trainId]
+}
+
+func(tp *TicketPool) GetSeatInfo(seatTypeId uint32) *SeatInfo{
+	return tp.carriageSeatInfoMap[seatTypeId]
 }
 
 func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*skiplist.Node, []string){

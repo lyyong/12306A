@@ -20,30 +20,36 @@ type BuyTicketRequest struct{
 }
 
 type Passenger struct {
-	PassengerId uint32 	`json:"passenger_id"`
-	SeatTypeId	uint32 	`json:"seat_type_id"`
-	ChooseSeat  string 	`json:"choose_seat"`
+	PassengerId 	uint32 	`json:"passenger_id"`
+	PassengerName 	string	`json:"passenger_name"`
+	SeatTypeId		uint32 	`json:"seat_type_id"`
+	ChooseSeat  	string 	`json:"choose_seat"`
 }
 
 type BuyTicketResponse struct {
-	IndentOuterId 	string `json:"indent_id"`
+	OrderOuterId 	string `json:"order_id"`
 	TrainId 		uint32 `json:"train_id"`
+	TrainNum		string `json:"train_num"`
 	StartStationId	uint32 `json:"start_station_id"`
+	StartStation	string `json:"start_station"`
 	StartTime 		string `json:"start_time"`
 	DestStationId	uint32 `json:"dest_station_id"`
+	DestStation		string `json:"dest_station"`
 	ArriveTime 		string `json:"arrive_time"`
 	Date			string `json:"date"`
 	ExpiredTime 	int32 `json:"expired_time"` // 单位秒
-	Amount 			int32 `json:"amount"`
+	Price 			int32 `json:"price"`
 	Tickets			[]TicketInfo `json:"tickets"`
 }
 
 type TicketInfo struct {
-	PassengerId uint32 `json:"passenger_id"`
-	SeatTypeId 	uint32 `json:"seat_type_id"`
-	CarriageNumber string `json:"carriage_number"`
-	SeatNumber string `json:"seat_number"`
-	Amount int32 `json:"amount"`
+	PassengerId 	uint32	`json:"passenger_id"`
+	PassengerName 	string	`json:"passenger_name"`
+	SeatTypeId 		uint32	`json:"seat_type_id"`
+	SeatType		string	`json:"seat_type"`
+	CarriageNumber 	string	`json:"carriage_number"`
+	SeatNumber 		string	`json:"seat_number"`
+	Price 			int32	`json:"price"`
 }
 
 func BuyTicket(c *gin.Context){
@@ -109,7 +115,7 @@ func BuyTicket(c *gin.Context){
 		UserID:         uint64(btReq.UserId),
 		Money:          8888,
 		AffairID:       "",
-		ExpireDuration: 0,
+		ExpireDuration: 1800,
 		CreatedBy:      "ticket",
 	}
 	order, err := service.CreateOrder(createOrderReq)
@@ -122,22 +128,27 @@ func BuyTicket(c *gin.Context){
 	for index, value := range tickets {
 		ticketsInfo[index] = TicketInfo{
 			PassengerId:    value.PassengerId,
+			PassengerName:  value.PassengerName,
 			SeatTypeId:     value.SeatTypeId,
+			SeatType:       value.SeatType,
 			CarriageNumber: value.CarriageNumber,
 			SeatNumber:     value.SeatNumber,
-			Amount:         value.Amount,
+			Price:          value.Price,
 		}
 	}
 	btResp := &BuyTicketResponse{
-		IndentOuterId:  order.OrderOutsideID,
+		OrderOuterId:   order.OrderOutsideID,
 		TrainId:        btReq.TrainId,
+		TrainNum:       tickets[0].TrainNum,
 		StartStationId: btReq.StartStationId,
+		StartStation:   tickets[0].StartStation,
 		StartTime:      tickets[0].StartTime,
 		DestStationId:  btReq.DestStationId,
+		DestStation:    tickets[0].DestStation,
 		ArriveTime:     tickets[0].ArriveTime,
 		Date:           btReq.Date,
 		ExpiredTime:    1800,
-		Amount:         8850,
+		Price:          8888,
 		Tickets:        ticketsInfo,
 	}
 	c.JSON(http.StatusOK, Response{Code: 0, Msg: "出票成功", Data: btResp})

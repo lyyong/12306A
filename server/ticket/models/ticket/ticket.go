@@ -8,17 +8,23 @@ import (
 type Ticket struct{
 	gorm.Model
 
-	TrainId uint32
-	StartStation string
-	DestStation string
-	StartTime time.Time
-	SeatType string
-	CarriageNumber string
-	SeatNumber string
-	Amount string
-	IndentId uint32
-	PassengerId uint32
-	State int8
+	TrainId 		uint32
+	TrainNum 		string
+	StartStationId 	uint32
+	StartStation 	string
+	StartTime 		time.Time
+	DestStationId 	uint32
+	DestStation 	string
+	DestTime 		time.Time
+	SeatTypeId 		uint32
+	SeatType 		string
+	CarriageNumber 	string
+	SeatNumber 		string
+	Price 			uint32
+	OrderId 		uint32
+	PassengerName 	string
+	PassengerId 	uint32
+	State 			uint8
 }
 
 func AddMultipleTicket(db *gorm.DB, tickets *[]Ticket) error {

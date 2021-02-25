@@ -81,11 +81,11 @@ func InitTicketPool() {
 			}
 		}
 
-		// 创建今天开始往后30天的carriageMap
+		// 创建今天开始往后7天的carriageMap
 		cm := make(map[string]*Carriages)
 		t := time.Now()
 
-		for i := 0; i < 30; i++ {
+		for i := 0; i < 7; i++ {
 			date := t.Format("2006-01-02")
 			cm[date] = genCarriages(train.ID, date, stopInfos, carriageList)
 			t = t.Add(time.Hour * 24)
@@ -106,21 +106,21 @@ func genStaticInfo() {
 	for _, carriage := range allCarriages {
 		if carriage.BusinessSeatNumber > 0 {
 			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)] = &SeatInfo{
-				seatType:     "商务座",
+				SeatType:     "商务座",
 				maxSeatCount: int32(carriage.BusinessSeatNumber),
 				seats:        strings.Split(carriage.BusinessSeat, ","),
 			}
 		}
 		if carriage.FirstSeatNumber > 0 {
 			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)] = &SeatInfo{
-				seatType:     "一等座",
+				SeatType:     "一等座",
 				maxSeatCount: int32(carriage.FirstSeatNumber),
 				seats:        strings.Split(carriage.FirstSeat, ","),
 			}
 		}
 		if carriage.SecondSeatNumber > 0 {
 			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)] = &SeatInfo{
-				seatType:     "二等座",
+				SeatType:     "二等座",
 				maxSeatCount: int32(carriage.SecondSeatNumber),
 				seats:        strings.Split(carriage.SecondSeat, ","),
 			}
@@ -216,12 +216,12 @@ func InitMockData() {
 	}
 
 	carriageSeatInfoMap[0] = &SeatInfo{
-		seatType:     "商务",
+		SeatType:     "商务",
 		maxSeatCount: 100,
 		seats:        seats,
 	}
 	carriageSeatInfoMap[1] = &SeatInfo{
-		seatType:     "一等座",
+		SeatType:     "一等座",
 		maxSeatCount: 100,
 		seats:        seats,
 	}
@@ -240,7 +240,7 @@ func InitMockData() {
 		}
 	}
 	carriageSeatInfoMap[2] = &SeatInfo{
-		seatType:     "二等座",
+		SeatType:     "二等座",
 		maxSeatCount: 140,
 		seats:        seatsLevelSecond,
 	}
