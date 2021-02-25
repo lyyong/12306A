@@ -16,7 +16,6 @@ import (
 
 var (
 	Tp *TicketPool
-
 )
 
 //func init(){
@@ -47,7 +46,6 @@ func InitTicketPool() {
 	ticketPool := &TicketPool{
 		trainMap:            make(map[uint32]*Train),
 		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
-
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
@@ -75,9 +73,10 @@ func InitTicketPool() {
 		ssm := make(map[uint32]*StopStation)
 		for _, stopInfo := range stopInfos {
 			ssm[uint32(stopInfo.ID)] = &StopStation{
-				Seq:        stopInfo.StopSeq,
-				ArriveTime: stopInfo.ArrivedTime,
-				StartTime:  stopInfo.LeaveTime,
+				Seq:         stopInfo.StopSeq,
+				ArriveTime:  stopInfo.ArrivedTime,
+				StartTime:   stopInfo.LeaveTime,
+				StationName: stopInfo.StationName,
 			}
 		}
 
@@ -91,6 +90,7 @@ func InitTicketPool() {
 			t = t.Add(time.Hour * 24)
 		}
 		ticketPool.trainMap[uint32(train.ID)] = &Train{
+			TrainNum:       train.Number,
 			stopStationMap: ssm,
 			carriageMap:    cm,
 		}

@@ -232,3 +232,18 @@ func (c *OrderRPCClient) GetNoFinishOrder(info *orderRPCpb.SearchCondition) (*or
 	}
 	return resp, err
 }
+
+func (c *OrderRPCClient) Refund(request *orderRPCpb.RefundRequest) (*orderRPCpb.Respond, error) {
+	tclient := *c.pbClient
+	resp, err := tclient.Refund(context.Background(), request)
+	if err != nil {
+		tryDirectConnent()
+		tclient := *c.pbClient
+		resp, err := tclient.Refund(context.Background(), request)
+		if err != nil {
+			return nil, err
+		}
+		return resp, err
+	}
+	return resp, err
+}

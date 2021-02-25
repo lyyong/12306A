@@ -13,6 +13,11 @@ import (
 type OrderRPCService struct {
 }
 
+func (o OrderRPCService) Refund(ctx context.Context, request *orderRPCpb.RefundRequest) (*orderRPCpb.Respond, error) {
+	orderService := service.NewOrderService()
+	return nil, orderService.Refund(uint(request.UserID), request.OutsideID, request.FullMoney, int(request.Money))
+}
+
 func (o OrderRPCService) GetNoFinishOrder(ctx context.Context, condition *orderRPCpb.SearchCondition) (*orderRPCpb.OrderInfo, error) {
 	orderService := service.NewOrderService()
 	order := orderService.GetOrdersByUserIDAndUnfinish(uint(condition.UserID))

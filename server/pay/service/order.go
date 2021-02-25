@@ -158,3 +158,28 @@ func saveOrderWithStateChange(order *model.Order, state int) {
 		model.UpdateOrder(order)
 	}()
 }
+
+// Refund 订单退款
+func (s orderService) Refund(userID uint, outsideID string, fullMoney bool, money int) error {
+	orderCache := cache.OrderCache{
+		UserID:    userID,
+		OutsideID: outsideID,
+	}
+	orders := make([]*model.Order, 0)
+	if cache2.Exists(orderCache.GetOrdersKey()) {
+		cache2.Get(orderCache.GetOrdersKey(), &orders)
+	} else {
+		orders, _ = model.GetOrdersByUserID(userID)
+	}
+	for _, order := range orders {
+		if order.OutsideID == outsideID {
+			order.State = model.ORDER_REFUND
+			// TODO 真实退款
+			cache2.Delete(orderCache.GetOrdersKey())
+			cache2.Set(orderCache.GetOrdersKey(), orders, expTime)
+			model.UpdateOrder(order)
+			return nil
+		}
+	}
+	return errors.New("无此订单")
+}

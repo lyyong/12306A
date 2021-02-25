@@ -52,10 +52,18 @@ message UpdateStateWithRRequest {
   string ROutsideID = 3;
 }
 
+message RefundRequest {
+  uint64 UserID = 1;
+  string OutsideID = 2;
+  bool FullMoney = 3;
+  int64 Money = 4;
+}
+
 service OrderRPCService {
   rpc GetNoFinishOrder(SearchCondition) returns (OrderInfo) {};
   rpc Create(CreateRequest) returns (CreateRespond) {};
   rpc Read(SearchCondition) returns (ReadRespond) {};
   rpc UpdateState(UpdateStateRequest) returns (Respond) {};
   rpc UpdateStateWithRelativeOrder(UpdateStateWithRRequest) returns (Respond) {};
+  rpc Refund(RefundRequest) returns (Respond) {};
 }
