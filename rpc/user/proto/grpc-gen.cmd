@@ -1,1 +1,1 @@
-protoc --go_out=plugins=grpc:../userrpc user.proto
+protoc --go_out=plugins=grpc:../userpb user.proto

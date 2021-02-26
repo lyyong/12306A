@@ -21,6 +21,7 @@ type Database struct {
 	Password string `ini:"password"`
 	Database string `ini:"database"`
 	Charset  string `ini:"charset"`
+	LogMode  string `ini:"log_mode"`
 }
 
 var (
