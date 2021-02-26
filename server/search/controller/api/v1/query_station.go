@@ -5,33 +5,30 @@
 package v1
 
 import (
-	"12306A/server/search/rdb"
+	"12306A-search/dao"
+	"12306A-search/rdb"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func QueryAllStation(c *gin.Context)  {
-	stations:=rdb.QueryStation()
 
-	//fmt.Println(stations)
-	if stations==nil{
-		c.JSON(http.StatusOK,gin.H{
-			"code":http.StatusNoContent,
-			"stations":"",
-		})
-	}else{
-		c.JSON(http.StatusOK,gin.H{
-			"code":http.StatusOK,
-			"stations":stations,
-		})
-	}
+	c.JSON(http.StatusOK,gin.H{
+		"code":http.StatusOK,
+		"msg":"...",
+		"data":gin.H{
+			"hot_cities":dao.HotCities,
+			"cities":dao.CityLists,
+		},
+	})
 	//c.String(http.StatusOK,"stations",stations)
 	//c.HTML(http.StatusOK,"stations",stations)
 }
 
 func QueryStationByTrainNo(c *gin.Context)  {
 	trainNo:=c.Query("train_no")
-	//fmt.Println(trainNo)
+	fmt.Println("aaa",trainNo)
 	stations:=rdb.QueryStationByTrainNo(trainNo)
 	if stations==nil{
 		c.JSON(http.StatusOK,gin.H{

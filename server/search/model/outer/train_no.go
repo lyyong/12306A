@@ -4,17 +4,21 @@
  */
 package outer
 
+
 type Train struct {
-	TrainNo          string `json:"train_number"`
+	TrainNumber          string `json:"train_number"`
+
 	StartTime        string `json:"leave_time"`
-	StartStationNo   int64  `json:"start_station_no"`
+	//StartStationNo   int64  `json:"leave_station_no"`
 	StartStation     string `json:"leave_station"`
 	StartStationType string `json:"leave_station_type"`
+
 	EndTime          string `json:"arrival_time"`
-	EndStationNo     int64  `json:"end_station_no"`
+	//EndStationNo     int64  `json:"end_station_no"`
 	EndStation       string `json:"arrival_station"`
 	EndStationType   string `json:"arrival_station_type"`
 	Duration         string `json:"travel_time"`
+
 	TrainType        string `json:"train_type"`
 	//高铁
 	SecondSeat   int `json:"second_seats_number"`

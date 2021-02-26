@@ -5,7 +5,7 @@
 package router
 
 import (
-	v12 "12306A/server/search/controller/api/v1"
+	v12 "12306A-search/controller/api/v1"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,13 +15,13 @@ func InitRouter() *gin.Engine {
 	v1:=r.Group("/search/api/v1/")
 	{
 		//查询所有站点
-		v1.GET("/queryAllStations",v12.QueryAllStation)
+		v1.POST("/queryAllStations",v12.QueryAllStation)
 		//查询车次的所有站点
-		v1.GET("/queryStation",v12.QueryStationByTrainNo)
+		v1.POST("/queryStation",v12.QueryStationByTrainNo)
 		//查询两城市之间合适的车次及余票数量
-		v1.GET("/remainder",v12.Query)
+		v1.POST("/remainder",v12.Query)
 		//购票
-		v1.GET("/buyTicket",v12.BuyTicket)
+		//v1.GET("/buyTicket",v12.BuyTicket)
 	}
 
 	r.Run(":18081")
