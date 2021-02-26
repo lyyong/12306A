@@ -57,11 +57,19 @@ type SeatInfo struct {	// 描述车厢的座位信息，同一种车厢共用一
 func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
 	// 根据请求在票池中获取车辆信息，经停站信息，计算 requestValue
 	train := tp.trainMap[trainId]
+	if train == nil {
+		return nil, errors.New("error train_id")
+	}
 	startStation := train.stopStationMap[startStationId]
 	destStation := train.stopStationMap[destStationId]
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
+		return nil, errors.New("error station_id")
+	}
 	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
-	// 根据日期获取当天的 Carriages
 	carriages := train.carriageMap[date]
+	if carriages == nil {
+		return nil, errors.New("error date")
+	}
 
 	csiNodeMap := make(map[*CarriageSeatInfo]*skiplist.Node)
 	seatsMap := make(map[uint32][]string,len(seatCountMap))
@@ -93,21 +101,29 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, da
 	return seatsMap, nil
 }
 
-func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId uint32, date string) map[uint32]int32 {
+func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId uint32, date string) (map[uint32]int32, error) {
 
 	train := tp.trainMap[trainId]
+	if train == nil {
+		return nil, errors.New("error train_id")
+	}
 	startStation := train.stopStationMap[startStationId]
 	destStation := train.stopStationMap[destStationId]
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
+		return nil, errors.New("error station_id")
+	}
 	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
 	carriages := train.carriageMap[date]
+	if carriages == nil {
+		return nil, errors.New("error date")
+	}
 
 	seatCountMap := make(map[uint32]int32)
-
 	for seatTypeId, csi := range carriages.carriageSeatInfo {
 		seatCountMap[seatTypeId] = csi.getTicketCount(requestValue)
 	}
 
-	return seatCountMap
+	return seatCountMap, nil
 }
 
 func(tp *TicketPool) GetTrain(trainId uint32) *Train{
