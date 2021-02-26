@@ -15,3 +15,11 @@ func TestClient_GetUser(t *testing.T) {
 	}
 	t.Logf("%#v\n", user)
 }
+
+func TestClient_ListPassenger(t *testing.T) {
+	passengers, err := client.ListPassenger(1)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Logf("%#v\n", passengers)
+}

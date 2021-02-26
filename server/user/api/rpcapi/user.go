@@ -32,3 +32,23 @@ func (s *UserService) GetUser(ctx context.Context, req *userpb.UserRequest) (*us
 	}
 	return response, nil
 }
+
+func (s *UserService) ListPassenger(ctx context.Context, req *userpb.ListPassengerRequest) (*userpb.ListPassengerResponse, error) {
+	id := uint(req.GetId())
+	passengers, err := service.ListPassenger(id)
+	if err != nil {
+		return nil, err
+	}
+	response := new(userpb.ListPassengerResponse)
+	for _, p := range passengers {
+		data := &userpb.ListPassengerResponseData{
+			Id:                uint32(p.Id),
+			Name:              p.Name,
+			CertificateType:   int32(p.CertificateType),
+			CertificateNumber: p.CertificateNumber,
+			PassengerType:     int32(p.PassengerType),
+		}
+		response.Passenger = append(response.Passenger, data)
+	}
+	return response, nil
+}
