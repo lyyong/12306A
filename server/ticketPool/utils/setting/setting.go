@@ -24,10 +24,10 @@ type database struct {
 var DataBase = &database{}
 
 type server struct {
-	Name	 string
-	Host	 string
-	RpcAddr  string
-	RPCPort	 int
+	Name    string
+	Host    string
+	RPCAddr string
+	RPCPort int
 }
 
 var Server = &server{}
@@ -47,12 +47,14 @@ type consul struct {
 	ServiceHost string
 	ServiceID   string
 }
+
 var Consul = &consul{}
 
 type zipkin struct {
 	ServiceID    string
 	HttpEndpoint string
 }
+
 var Zipkin = &zipkin{}
 
 var configFile = flag.String("configFile", "config/ticketPool-config.ini", "设置配置文件")

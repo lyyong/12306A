@@ -38,7 +38,6 @@ func main() {
 	err := router_tracer.SetupByHttp(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.RPCPort), setting.Zipkin.HttpEndpoint)
 
-
 	/* 初始化票池 */
 	logging.Info("Init TicketPool")
 	ticketpool.InitTicketPool()
@@ -47,8 +46,8 @@ func main() {
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
 
-	logging.Info("Listen", setting.Server.RpcAddr)
-	rpcListen, err := net.Listen("tcp", setting.Server.RpcAddr)
+	logging.Info("Listen", setting.Server.RPCAddr)
+	rpcListen, err := net.Listen("tcp", setting.Server.RPCAddr)
 	if err != nil {
 		logging.Error("listen fail:", err)
 		return
