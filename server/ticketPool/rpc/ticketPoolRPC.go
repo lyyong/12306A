@@ -83,11 +83,11 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 func (tps *TicketPoolServer) GetTicketNumber(ctx context.Context, req *pb.GetTicketNumberRequest) (*pb.GetTicketNumberResponse, error) {
 	// 查询车次余票
 	tp := ticketpool.Tp
-	trainsId := req.TrainId
-	tti := make([]*pb.TrainTicketInfo, len(trainsId))
+	condition := req.Condition
+	tti := make([]*pb.TrainTicketInfo, len(condition))
 
-	for i := 0; i < len(trainsId); i++ {
-		seatCountMap, err := tp.SearchTicketCount(trainsId[i], req.StartStationId, req.DestStationId, req.Date)
+	for i := 0; i < len(condition); i++ {
+		seatCountMap, err := tp.SearchTicketCount(condition[i].TrainId, condition[i].StartStationId, condition[i].DestStationId, req.Date)
 		if err != nil {
 			return nil, err
 		}
@@ -97,7 +97,7 @@ func (tps *TicketPoolServer) GetTicketNumber(ctx context.Context, req *pb.GetTic
 			seatInfo[index] = &pb.SeatInfo{SeatTypeId: seatTypeId, SeatNumber: count}
 			index++
 		}
-		tti[i] = &pb.TrainTicketInfo{TrainId: trainsId[i], SeatInfo: seatInfo}
+		tti[i] = &pb.TrainTicketInfo{TrainId: condition[i].TrainId, SeatInfo: seatInfo}
 	}
 
 	return &pb.GetTicketNumberResponse{TrainsTicketInfo: tti},nil
