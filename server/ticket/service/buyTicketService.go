@@ -83,8 +83,8 @@ func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 	}
 	tickets := make([]models.Ticket, len(tpTickets))
 	for i := 0; i < len(tpTickets); i++ {
-		startTime, _ := time.Parse("15:04", tpTickets[i].StartTime)
-		arriveTime, _ := time.Parse("15:04", tpTickets[i].ArriveTime)
+		startTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].StartTime)
+		arriveTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].ArriveTime)
 
 		tickets[i] = models.Ticket{
 			Model:          gorm.Model{},
