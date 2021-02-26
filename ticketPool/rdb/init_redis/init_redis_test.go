@@ -8,15 +8,20 @@ import "testing"
 
 
 //redis总初始化语句
-
 func TestInitDataRedis(t *testing.T) {
+	
+	//静态数据
 	WriteTrainPoolToRedis()
 	WriteTrainInfoToRedis()
 	WriteStationToRedis()
 	WriteStationAndCityToRedis()
-	WriteTicketPoolToRedis()
-	SplitTicket()
+
+	//票池
+	//WriteTicketPoolToRedis()
+	//SplitTicket()
 }
+
+
 
 //=======================================
 func TestWriteTrainPoolToRedis(t *testing.T) {
