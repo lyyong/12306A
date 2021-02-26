@@ -5,7 +5,7 @@ package v1
 
 import "github.com/gin-gonic/gin"
 
-type Order struct {
+type UserFinishOrdersSend struct {
 }
 
 // @Summary 用户获取自己的订单信息
@@ -17,6 +17,6 @@ type Order struct {
 // @Success 200 {object} controller.JSONResult{} "返回成功"
 // @Failure 400 {object} controller.JSONResult{}
 // @Router /ok/abb [get]
-func GetUserOrders(c *gin.Context) {
+func GetUserFinishOrders(c *gin.Context) {
 
 }

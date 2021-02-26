@@ -17,7 +17,7 @@ var consulClient *Client
 // port - 服务的端口号
 // serviceID - 服务的ID
 // target - consul的地址,例如"localhost:8500"
-// interval - //consul的地址,例如"localhost:8500"
+// interval - 心跳间隙
 // ttl - 注册信息的缓存时间, 如果ttl过时前没有得到updateTTL则注册服务信息将被抛弃, 单位秒
 func Register(name, host, port, serviceID, target string, interval, ttl int) error {
 	if consulClient != nil {
