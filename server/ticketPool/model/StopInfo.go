@@ -24,7 +24,7 @@ type StopInfo struct {
 // GetStopInfoByTrainID 通过trainID获取停靠站信息
 func GetStopInfoByTrainID(trainID uint) []*StopInfo {
 	sis := make([]*StopInfo, 0)
-	err := database.DB.Find(&sis).Where("train_id = ?", trainID).Error
+	err := database.DB.Where("train_id = ?", trainID).Find(&sis).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		logging.Error(err)
 		return nil

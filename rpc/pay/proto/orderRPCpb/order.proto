@@ -4,53 +4,66 @@ package proto;
 
 option go_package=".;orderRPCpb";
 
-message CreateInfo {
+message CreateRequest {
   uint64 UserID = 1;
-  string Money = 2;
+  int64 Money = 2;
   string AffairID = 3;
   int32 ExpireDuration = 4;
   string CreatedBy = 5;
 }
 
+message CreateRespond {
+  string OrderOutsideID = 1;
+}
+
 message OrderInfo {
   uint64 UserID = 1;
-  string Money = 2;
+  int64 Money = 2;
   string AffairID = 3;
   int32 ExpireDuration = 4;
   string OrderOutsideID = 5;
   int32 State = 6;
 }
 
-message ReadInfo {
-  repeated OrderInfo infos = 1;
-}
-
-message SearchInfo {
+message SearchCondition {
   uint64 UserID = 1;
 }
 
-message CreateRes {
-  string OrderOutsideID = 1;
+message ReadRespond {
+  repeated OrderInfo infos = 1;
 }
 
-message Error {
+message Respond {
   string Content = 1;
 }
 
-message UpdateStateInfo {
+message CanCreateRespond {
+  bool OK = 1;
+}
+
+message UpdateStateRequest {
   string OutsideID = 1;
   int32 State = 2;
 }
 
-message UpdateStateWithRInfo {
+message UpdateStateWithRRequest {
   string OutsideID = 1;
   int32 State = 2;
   string ROutsideID = 3;
 }
 
+message RefundRequest {
+  uint64 UserID = 1;
+  string OutsideID = 2;
+  bool FullMoney = 3;
+  int64 Money = 4;
+}
+
 service OrderRPCService {
-  rpc Create(CreateInfo) returns (CreateRes) {};
-  rpc Read(SearchInfo) returns (ReadInfo) {};
-  rpc UpdateState(UpdateStateInfo) returns (Error) {};
-  rpc UpdateStateWithRelativeOrder(UpdateStateWithRInfo) returns (Error) {};
+  rpc GetNoFinishOrder(SearchCondition) returns (OrderInfo) {};
+  rpc Create(CreateRequest) returns (CreateRespond) {};
+  rpc Read(SearchCondition) returns (ReadRespond) {};
+  rpc UpdateState(UpdateStateRequest) returns (Respond) {};
+  rpc UpdateStateWithRelativeOrder(UpdateStateWithRRequest) returns (Respond) {};
+  rpc Refund(RefundRequest) returns (Respond) {};
 }

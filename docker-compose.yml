@@ -60,3 +60,32 @@ services:
       - "8500:8500/tcp"
       - "8600:8600/tcp"
       - "8600:8600/udp"
+  kafka-manager:
+    image:
+      kafkamanager/kafka-manager
+    ports:
+      - "9111:9000"
+    environment:
+      ZK_HOSTS: zoo:2181
+  kafka:
+    image:
+      wurstmeister/kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 0
+      KAFKA_ZOOKEEPER_CONNECT: zoo:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://:9092,OUTSIDE://localhost:9094
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_CREATE_TOPICS: "PayOK:1:1"
+  zoo:
+    image:
+      zookeeper
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1

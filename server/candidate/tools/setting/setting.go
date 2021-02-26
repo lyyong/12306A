@@ -40,10 +40,15 @@ type database struct {
 	DbName   string
 }
 
+type kafka struct {
+	Host string
+}
+
 var Server = &server{}
 var Consul = &consul{}
 var Zipkin = &zipkin{}
 var Database = &database{}
+var Kafka = &kafka{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -61,6 +66,7 @@ func Setup() {
 	loadConfig(Cfg, "consul", Consul)
 	loadConfig(Cfg, "zipkin", Zipkin)
 	loadConfig(Cfg, "database", Database)
+	loadConfig(Cfg, "kafka", Kafka)
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
 }

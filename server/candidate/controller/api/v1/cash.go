@@ -22,8 +22,7 @@ type cashRecv struct {
 // @Description 发送需要候补的ID, 服务器将候补兑现然后生成票
 // @Accept json
 // @Produce json
-// @Param userID query string true "用户ID"
-// @Param username query string true "用户名"
+// @Param token header string true "认证信息"
 // @Param wantPayR body v1.cashRecv true "需要接受的信息"
 // @Success 200 {object} controller.JSONResult{} "返回成功"
 // @Failure 400 {object} controller.JSONResult{}

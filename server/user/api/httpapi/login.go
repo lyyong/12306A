@@ -31,6 +31,7 @@ func Login(c *gin.Context) {
 	req := new(LoginRequest)
 	if err := c.ShouldBindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, resp.R(struct{}{}).SetMsg("JSON格式错误"))
+		return
 	}
 
 	r := struct {

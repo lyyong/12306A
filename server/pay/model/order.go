@@ -12,7 +12,7 @@ type Order struct {
 	Model
 	UserID          uint   `json:"user_id"`
 	AlipayOrderInfo string `json:"alipay_order_info"`
-	Money           string `json:"money"`
+	Money           int    `json:"money"`
 	AffairID        string `json:"affair_id"`
 	ExpireDuration  int    `json:"expire_duration"`
 	OutsideID       string `json:"outside_id"`

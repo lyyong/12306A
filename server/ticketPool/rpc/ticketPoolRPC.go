@@ -2,9 +2,11 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	pb "rpc/ticketPool/proto/ticketPoolRPC"
 	"strings"
 	"ticketPool/ticketpool"
+	"time"
 )
 
 type TicketPoolServer struct {
@@ -30,31 +32,45 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 		return &pb.GetTicketResponse{Tickets: nil}, err
 	}
 
-	startTime := train.GetStopStation(req.StartStationId).StartTime
-	arriveTime := train.GetStopStation(req.DestStationId).ArriveTime
+	startStation := train.GetStopStation(req.StartStationId)
+	destStation := train.GetStopStation(req.DestStationId)
+	st, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, startStation.StartTime))
+	at, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, destStation.ArriveTime))
+	if at.Before(st) {
+		at.AddDate(0, 0, 1)
+	}
+	startTime := st.Format("2006-01-02 15:04")
+	arriveTime := at.Format("2006-01-02 15:04")
+
 	tickets := make([]*pb.Ticket, len(req.Passengers))
 	ticketIndex := 0
 	for seatTypeId, seats := range seatsMap {
 		seatIndex := 0
+		seatType := tp.GetSeatInfo(seatTypeId).SeatType
 		for i := 0; i < len(req.Passengers); i++ {
 			passengerInfo := req.Passengers[i]
 			if seatTypeId == passengerInfo.SeatTypeId {
 				carriageAndSeat := strings.Split(seats[seatIndex], " ")
 				// 生成车票信息
+
 				tickets[ticketIndex] = &pb.Ticket{
 					Id:             0,
 					TrainId:        req.TrainId,
+					TrainNum:       train.TrainNum,
 					StartStationId: req.StartStationId,
+					StartStation:   startStation.StationName,
 					StartTime:      startTime,
 					DestStationId:  req.DestStationId,
+					DestStation:    destStation.StationName,
 					ArriveTime:     arriveTime,
-					Date:           req.Date,
 					SeatTypeId:     seatTypeId,
+					SeatType:       seatType,
 					CarriageNumber: carriageAndSeat[0],
 					SeatNumber:     carriageAndSeat[1],
+					PassengerName:  passengerInfo.PassengerName,
 					PassengerId:    passengerInfo.PassengerId,
-					IndentId:       0,
-					Amount:         888,
+					OrderId:        0,
+					Price:          88,
 				}
 				ticketIndex++
 				seatIndex++

@@ -19,29 +19,36 @@ import (
 	"user/model"
 )
 
+type RegisterParam struct {
+	Username          string
+	Password          string
+	CertificateType   int
+	Name              string
+	CertificateNumber string
+	PhoneNumber       string
+	Email             string
+	PassengerType     int
+}
+
 // 用户注册
-func Register(username, password string) error {
+func Register(p *RegisterParam) error {
 	salt := generateSalt()
-	hashedPassword := hash2(password, salt)
+	hashedPassword := hash2(p.Password, salt)
 
 	u := &model.User{
-		Model:             gorm.Model{},
-		CreatedBy:         "",
-		UpdatedBy:         "",
-		DeletedBy:         "",
-		Username:          username,
+		Username:          p.Username,
 		Password:          hashedPassword,
 		State:             0,
 		Salt:              salt,
-		CertificateType:   0,
-		Name:              "",
-		CertificateNumber: "",
-		PhoneNumber:       "",
-		Email:             "",
-		PassengerType:     0,
+		CertificateType:   p.CertificateType,
+		Name:              p.Name,
+		CertificateNumber: p.CertificateNumber,
+		PhoneNumber:       p.PhoneNumber,
+		Email:             p.Email,
+		PassengerType:     p.PassengerType,
 	}
 
-	logging.Debug("[用户注册] 用户名:", username)
+	logging.Debug("[用户注册] 用户名:", p.Username)
 	// TODO: 具体错误类型判断
 	if err := model.InsertUser(DB, u); err != nil {
 		return errortype.ErrUserNameHasExist

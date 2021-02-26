@@ -7,13 +7,21 @@ import (
 	"common/tools/logging"
 	"errors"
 	"pay/model"
+	"pay/service/cache"
+	cache2 "pay/tools/cache"
 )
 
-type OrderService struct {
+type orderService struct {
+}
+
+const orderExpTime = 1800
+
+func NewOrderService() *orderService {
+	return &orderService{}
 }
 
 // CreateOrder 创建一个订单
-func (s OrderService) CreateOrder(userID uint, money, affairID, createdBy string) (string, error) {
+func (s orderService) CreateOrder(userID uint, money int, affairID, createdBy string) (string, error) {
 	order := model.Order{
 		Model:    model.Model{CreatedBy: createdBy},
 		UserID:   userID,
@@ -21,58 +29,64 @@ func (s OrderService) CreateOrder(userID uint, money, affairID, createdBy string
 		AffairID: affairID,
 	}
 	order.OutsideID = order.AffairID
-	if err := model.AddOrder(&order); err != nil {
-		return "", err
+	orderCache := cache.OrderCache{
+		UserID:    userID,
+		OutsideID: order.OutsideID,
 	}
+	// 添加到redis设置30分钟期限
+	cache2.Set(orderCache.GetNoFinishOrderKey(), order, orderExpTime)
+
+	// 存入数据库
+	// defer func() {
+	// 	if err := model.AddOrder(&order); err != nil {
+	// 		logging.Error(err)
+	// 	}
+	// }()
 	return order.OutsideID, nil
 }
 
-func (s OrderService) UpdateOrderState(outsideID string, state int) error {
-	order, err := model.GetOrderByOutsideID(outsideID)
-	if err != nil {
-		return err
-	}
+func (s orderService) UpdateOrderState(outsideID string, state int) error {
+	order := getOrderByOutsideID(outsideID)
+	var err error = nil
 	if order == nil {
 		err = errors.New("订单id错误")
 		logging.Error(err)
 		return err
 	}
-	order.State = state
+	saveOrderWithStateChange(order, state)
 	return nil
 }
 
-func (s OrderService) UpdateOrderStateWithRelative(outsideID string, state int, relativeID string) error {
-	order, err := model.GetOrderByOutsideID(outsideID)
-	if err != nil {
-		logging.Error(err)
-		return err
-	}
+func (s orderService) UpdateOrderStateWithRelative(outsideID string, state int, relativeID string) error {
+	order := getOrderByOutsideID(outsideID)
 	if order == nil {
-		err = errors.New("订单id错误")
+		err := errors.New("订单id错误")
 		logging.Error(err)
 		return err
 	}
-	rorder, err := model.GetOrderByOutsideID(relativeID)
-	if err != nil {
-		logging.Error(err)
-		return err
-	}
-	if order == nil {
-		err = errors.New("关联订单id错误")
+	rorder := getOrderByOutsideID(relativeID)
+	if rorder == nil {
+		err := errors.New("关联订单id错误")
 		logging.Error(err)
 		return err
 	}
 	order.RelativeOrder = rorder.ID
-	order.State = state
-	model.UpdateOrder(order)
-	if err != nil {
-		logging.Error(err)
-		return err
-	}
+	saveOrderWithStateChange(order, state)
 	return nil
 }
 
-func (s OrderService) GetOrdersByUserID(userID uint) []*model.Order {
+// GetOrdersByUserID 得到已完成的订单
+func (s orderService) GetOrdersByUserID(userID uint) []*model.Order {
+	orderCache := cache.OrderCache{
+		UserID: userID,
+	}
+	if cache2.Exists(orderCache.GetOrdersKey()) {
+		orders := make([]*model.Order, 0)
+		err := cache2.Get(orderCache.GetOrdersKey(), &orders)
+		if err == nil {
+			return orders
+		}
+	}
 	orders, err := model.GetOrdersByUserID(userID)
 	if err != nil {
 		logging.Error(err)
@@ -82,4 +96,90 @@ func (s OrderService) GetOrdersByUserID(userID uint) []*model.Order {
 		return nil
 	}
 	return orders
+}
+
+func (s orderService) GetOrdersByUserIDAndUnfinish(userID uint) *model.Order {
+	orderCache := cache.OrderCache{
+		UserID: userID,
+	}
+	if cache2.Exists(orderCache.GetNoFinishOrderKey()) {
+		var order model.Order
+		err := cache2.Get(orderCache.GetNoFinishOrderKey(), &order)
+		if err == nil {
+			return &order
+		}
+	}
+	return nil
+}
+
+// getOrderByOutsideID 通过redis或者mysql获得order
+func getOrderByOutsideID(outsideID string) *model.Order {
+	var order *model.Order
+	var err error = nil
+	orderCache := cache.OrderCache{
+		OutsideID: outsideID,
+	}
+	if cache2.Exists(orderCache.GetOrderKey()) {
+		order = new(model.Order)
+		err = cache2.Get(orderCache.GetOrderKey(), order)
+		if err != nil {
+			logging.Error(err)
+			order, err = model.GetOrderByOutsideID(outsideID)
+			if err != nil {
+				return nil
+			}
+		}
+	}
+	order, err = model.GetOrderByOutsideID(outsideID)
+	if err != nil {
+		return nil
+	}
+	return order
+}
+
+// saveOrderWithStateChange 保存状态变更的order
+func saveOrderWithStateChange(order *model.Order, state int) {
+	orderCache := cache.OrderCache{
+		UserID:    order.UserID,
+		OutsideID: order.OutsideID,
+	}
+	if order.State == 0 {
+		// 未完成的订单需要存入数据库
+		defer func() {
+			model.AddOrder(order)
+		}()
+		order.State = state
+		cache2.Set(orderCache.GetOrderKey(), order, orderExpTime)
+		return
+	}
+	order.State = state
+	cache2.Set(orderCache.GetOrderKey(), order, orderExpTime)
+	defer func() {
+		model.UpdateOrder(order)
+	}()
+}
+
+// Refund 订单退款
+func (s orderService) Refund(userID uint, outsideID string, fullMoney bool, money int) error {
+	orderCache := cache.OrderCache{
+		UserID:    userID,
+		OutsideID: outsideID,
+	}
+	orders := make([]*model.Order, 0)
+	if cache2.Exists(orderCache.GetOrdersKey()) {
+		cache2.Get(orderCache.GetOrdersKey(), &orders)
+	} else {
+		orders, _ = model.GetOrdersByUserID(userID)
+	}
+	for _, order := range orders {
+		if order.OutsideID == outsideID {
+			order.State = model.ORDER_REFUND
+			// TODO 真实退款
+			cache2.Delete(orderCache.GetOrdersKey())
+			cache2.Set(orderCache.GetOrdersKey(), orders, expTime)
+			model.UpdateOrder(order)
+			return nil
+		}
+	}
+	return errors.New("无此订单")
 }

@@ -8,7 +8,6 @@ import (
 	"common/tools/logging"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"time"
 )
 
 type Claim struct {
@@ -26,11 +25,11 @@ var (
 
 func Generate(userid uint, username string) (string, error) {
 	c := &Claim{
-		Userid:   userid,
-		Username: username,
+		Userid:         userid,
+		Username:       username,
 		StandardClaims: jwt.StandardClaims{
-			NotBefore: time.Now().Unix() - 60,
-			ExpiresAt: time.Now().Unix() + 30*60,
+			//NotBefore: time.Now().Unix() - 60,
+			//ExpiresAt: time.Now().Unix() + 30*60,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)

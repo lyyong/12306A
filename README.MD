@@ -16,7 +16,6 @@
 |&emsp;&emsp; &emsp;&emsp; |------setting&emsp;&emsp;配置服务</br>
 |&emsp;&emsp; &emsp;&emsp; |------config&emsp;&emsp;配置文件存放</br>
 |&emsp;&emsp; |------pay&emsp;&emsp;&emsp;&emsp; 支付服务器</br>
-|&emsp;&emsp; |------reticket&emsp;&emsp;&emsp;退票服务器</br>
 |&emsp;&emsp; |------search&emsp;&emsp;&emsp;搜索</br>
 |&emsp;&emsp;&emsp;&emsp; |------dynamic&emsp;&emsp;动态搜索</br>
 |&emsp;&emsp;&emsp;&emsp; |------static&emsp;&emsp;静态搜索</br>
@@ -25,6 +24,11 @@
 |------ticketPool&emsp;&emsp;&emsp;&emsp; 线程池服务,主要是对内提供服务</br>
 
 
-this is dev brench
+## 数据库
+https://github.com/lyyong/12306ASQL
 
-## 说明
+## rpc结构文档
+https://vwgf914vg3.feishu.cn/docs/doccnp3xk2n3SOo3FsOvyr5bRLb?from=from_copylink
+
+## API接口文档
+https://vwgf914vg3.feishu.cn/docs/doccn9jkNr6JL0PQxImWy0EvLMh?from=from_copylink

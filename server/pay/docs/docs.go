@@ -28,6 +28,47 @@ var doc = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/ok/abb": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "用户获取自己的订单信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "认证信息",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "需要接受的信息",
+                        "name": "wantPayR",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/v1.payOKAbbRecv"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "返回成功",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.JSONResult"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "服务器对支付进行验证",
                 "consumes": [
@@ -42,7 +83,7 @@ var doc = `{
                         "type": "string",
                         "description": "认证信息",
                         "name": "token",
-                        "in": "query",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -86,7 +127,7 @@ var doc = `{
                         "type": "string",
                         "description": "认证信息",
                         "name": "token",
-                        "in": "query",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -130,7 +171,7 @@ var doc = `{
                         "type": "string",
                         "description": "认证信息",
                         "name": "token",
-                        "in": "query",
+                        "in": "header",
                         "required": true
                     },
                     {

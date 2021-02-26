@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"ticketPool/rpc"
+	"ticketPool/ticketpool"
 	"ticketPool/utils/database"
 	"ticketPool/utils/setting"
 )
@@ -27,15 +28,17 @@ func Close() {
 
 func main() {
 
-	logging.Info("TicketPool Service....")
+	logging.Info("TicketPool Service start....")
 
 	/* 初始化票池 */
+	logging.Info("Init TicketPool")
+	ticketpool.InitTicketPool()
 
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
 
-	logging.Info("Listen")
+	logging.Info("Listen", setting.Server.RpcAddr)
 	rpcListen, err := net.Listen("tcp", setting.Server.RpcAddr)
 	if err != nil {
 		logging.Error("listen fail:", err)

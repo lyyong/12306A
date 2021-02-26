@@ -4,7 +4,7 @@
 package router
 
 import (
-	"common/middleware/token/user"
+	"common/middleware/token/usertoken"
 	"common/router_tracer"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -25,7 +25,7 @@ import (
 // @query.collection.format multi
 func InitRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(user.TokenParser())
+	r.Use(usertoken.TokenParser())
 	// 设置使用链路追踪
 	if router_tracer.IsTracing() {
 		r.Use(func(context *gin.Context) {
