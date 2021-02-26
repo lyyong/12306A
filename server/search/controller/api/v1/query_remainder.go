@@ -6,15 +6,17 @@ package v1
 
 import (
 	"12306A-search/rdb"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func Query(c *gin.Context)  {
 
-	date:=c.PostForm("date")
-	startCity:=c.PostForm("startCity")
-	endCity:=c.PostForm("endCity")
+	date:=c.Query("date")
+	startCity:=c.Query("startCity")
+	endCity:=c.Query("endCity")
+	fmt.Println(date,startCity,endCity,"aaa")
 	//fmt.Println(search)
 	//trains:=rdb.Query(search)
 	trains:=rdb.QueryTicketNumByDate(date,startCity,endCity)

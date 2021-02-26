@@ -51,8 +51,10 @@ func QueryTicketNumByDate(date,startStation,endStation string) []*outer.Train {
 	request.Date=date
 	request.StartStationId=startStationId
 	request.DestStationId=endStationId
+	fmt.Println(request)
 	for _,trainNo:=range trainNos{
 		trainId:=dao.GetTrainId(trainNo)
+		fmt.Println(trainNo)
 		request.TrainId=append(request.TrainId,trainId)
 	}
 	var rpcClient *Client.TPRPCClient
@@ -93,9 +95,11 @@ func QueryTicketNumByDate(date,startStation,endStation string) []*outer.Train {
 		if resMap[startStation]=="1"{
 			train.StartStationType="始"
 		}else{
-			train.StartStationType="终"
+			train.StartStationType="过"
 		}
 		if resMap[endStation]==resMap["stationNum"]{
+			train.EndStationType="终"
+		}else{
 			train.EndStationType="过"
 		}
 		leaveTime,_:=RedisDB.HGet(trainNos[i]+":"+resMap[startStation],"leaveTime").Result()
