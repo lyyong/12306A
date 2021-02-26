@@ -5,8 +5,8 @@
 package init_data
 
 import (
-	"12306A/ticketPool/model/inner"
 	"fmt"
+	"ticketPool/model/extra"
 	"time"
 )
 
@@ -63,7 +63,7 @@ func ReviseTotalTrainNo() {
 	}
 }
 
-func ReadTotalTrainNo() []*inner.Train {
+func ReadTotalTrainNo() []*extra.Train {
 	sqlStr := "select train_no,station_num,initial_time,terminal_time,station_no,station_name," +
 		"city_name,arrive_time,depart_time,duration,mileage,price " +
 		"from total_train_no; "
@@ -73,9 +73,9 @@ func ReadTotalTrainNo() []*inner.Train {
 		return nil
 	}
 
-	totalTrainNo := make(map[string][]*inner.TotalTrainNo)
+	totalTrainNo := make(map[string][]*extra.TotalTrainNo)
 	for rows.Next() {
-		station := &inner.TotalTrainNo{}
+		station := &extra.TotalTrainNo{}
 		err := rows.Scan(&station.TrainNo, &station.StationNum, &station.InitialTime, &station.TerminalTime,
 			&station.StationNo, &station.StationName, &station.CityName, &station.ArriveTime,
 			&station.DepartTime, &station.Duration, &station.Mileage, &station.Price)
@@ -84,18 +84,18 @@ func ReadTotalTrainNo() []*inner.Train {
 		}
 		totalTrainNo[station.TrainNo] = append(totalTrainNo[station.TrainNo], station)
 	}
-	var trains []*inner.Train
+	var trains []*extra.Train
 	for _, t := range totalTrainNo {
 
-		train := &inner.Train{}
+		train := &extra.Train{}
 		stas := t
 		train.TrainNo = stas[0].TrainNo
 		train.InitialTime, _ = time.ParseInLocation("2006-01-02 15:04:05", stas[0].InitialTime, time.Local)
 		train.TerminalTime, _ = time.ParseInLocation("2006-01-02 15:04:05", stas[0].TerminalTime, time.Local)
 		train.StationNum = stas[0].StationNum
-		var stations []*inner.Station
+		var stations []*extra.Station
 		for _, station := range stas {
-			s := &inner.Station{}
+			s := &extra.Station{}
 			s.StationNo = station.StationNo
 			s.StationName = station.StationName
 			s.CityName = station.CityName

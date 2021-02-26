@@ -5,13 +5,12 @@
 package outer
 
 type BuyTicket struct {
-	Date         string
-	TrainNo      string
+
+	TrainNumber      string
+	StartTime 	string
 	StartStation string
+	EndTime 	string
 	EndStation   string
 	SeatClass    string
-	TicketNum int //票数
-
-	//选座信息
-
+	SeatPlace string
 }

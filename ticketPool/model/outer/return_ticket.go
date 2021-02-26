@@ -4,14 +4,19 @@
  */
 package outer
 
-
 //已购票信息
 type Ticket struct {
-	Date         string
-	TrainNo      string
-	StartStation string
-	EndStation   string
-	SeatClass    string
-	CarriageNo   string
-	SeatNo       string
+	ID 				int
+	Date           string
+	TrainNumber        string
+	StartTime      string
+	StartStationNum string
+	StartStation   string
+	EndTime        string
+	EndStation     string
+	EndStationNum   string
+	SeatClass      string
+	CarriageNum     string
+	SeatNum         string
+	Price          float64
 }

@@ -6,9 +6,6 @@ package init_data
 
 import "testing"
 
-func TestWriteTrainPool(t *testing.T) {
-	WriteTrainPool()
-}
 
 func TestReadTrainPoolAll(t *testing.T) {
 	ReadTrainPoolAll()
