@@ -82,19 +82,14 @@ paths:
       - application/json
       description: 发送需要候补的信息给服务器, 服务器将执行候补功能
       parameters:
-      - description: 用户ID
-        in: query
-        name: userID
-        required: true
-        type: integer
-      - description: 用户名
-        in: query
-        name: username
+      - description: 认证信息
+        in: header
+        name: token
         required: true
         type: string
       - description: 需要接受的信息
         in: body
-        name: wantPayR
+        name: candidateRecv
         required: true
         schema:
           $ref: '#/definitions/v1.candidateRecv'
@@ -119,16 +114,11 @@ paths:
     post:
       consumes:
       - application/json
-      description: 发送需要候补的信息给服务器, 服务器将执行候补功能
+      description: 发送需要候补的ID, 服务器将候补兑现然后生成票
       parameters:
-      - description: 用户ID
-        in: query
-        name: userID
-        required: true
-        type: string
-      - description: 用户名
-        in: query
-        name: username
+      - description: 认证信息
+        in: header
+        name: token
         required: true
         type: string
       - description: 需要接受的信息
@@ -148,21 +138,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.JSONResult'
-      summary: 请求服务器执行候补功能
+      summary: 请求服务器兑现候补
   /state:
     post:
       consumes:
       - application/json
-      description: 发送需要候补的信息给服务器, 服务器将执行候补功能
+      description: 查看自己的候补订单
       parameters:
-      - description: 用户ID
-        in: query
-        name: userID
-        required: true
-        type: string
-      - description: 用户名
-        in: query
-        name: username
+      - description: 认证信息
+        in: header
+        name: token
         required: true
         type: string
       - description: 需要接受的信息
@@ -187,5 +172,5 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/controller.JSONResult'
-      summary: 请求服务器执行候补功能
+      summary: 请求服务器查看候补状态
 swagger: "2.0"

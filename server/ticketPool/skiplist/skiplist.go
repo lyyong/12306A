@@ -7,17 +7,16 @@ package skiplist
 import (
 	"fmt"
 	"math/rand"
+	"ticketPool/persistence"
 )
 
 type SkipList struct {
 	head 			*Index
 	maxLevel 		int
 	requestChan 	chan *Request
-}
-
-type Request struct {
-	option		string
-	args		[]interface{}
+	trainId			uint32
+	date			string
+	seatTypeId		uint32
 }
 
 type Node struct {
@@ -33,16 +32,26 @@ type Index struct {
 	right 	*Index
 }
 
-func NewSkipList() *SkipList{
+
+type Request struct {
+	option		string
+	args		[]interface{}
+}
+
+
+func NewSkipList(trainId uint32, date string, seatTypeId uint32) *SkipList{
 	head := &Index{
 		node:  &Node{},
 		down:  nil,
 		right: nil,
 	}
 	sl := &SkipList{
-		head:		 head,
-		maxLevel:	 1,
+		head:        head,
+		maxLevel:    1,
 		requestChan: make(chan *Request, 100),
+		trainId:    trainId,
+		date:       date,
+		seatTypeId: seatTypeId,
 	}
 	sl.DealWithRequest()
 	return sl
@@ -63,12 +72,34 @@ func(sl *SkipList) DealWithRequest(){
 			case "Put":
 				key := req.args[0].(uint64)
 				value := req.args[1].([]string)
+				if key == 0 {
+					continue
+				}
 				sl.Put(key, value)
+				persistence.Do(&persistence.PersistentRequest{
+					Option:     "INSERT",
+					TrainId:    sl.trainId,
+					Date:       sl.date,
+					SeatTypeId: sl.seatTypeId,
+					Key:        key,
+					Value:      value,
+				})
 			case "Allocate":
 				key := req.args[0].(uint64)
 				count := req.args[1].(int)
 				respChan := req.args[2].(chan *Node)
-				respChan <- sl.Allocate(key, count)
+				node := sl.Allocate(key, count)
+				respChan <- node
+				for ; node != nil; node = node.Next{
+					persistence.Do(&persistence.PersistentRequest{
+						Option:     "DELETE",
+						TrainId:    sl.trainId,
+						Date:       sl.date,
+						SeatTypeId: sl.seatTypeId,
+						Key:        node.Key,
+						Value:      node.Value,
+					})
+				}
 			case "Search":
 				key := req.args[0].(uint64)
 				respChan := req.args[1].(chan int32)

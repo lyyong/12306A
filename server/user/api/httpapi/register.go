@@ -14,8 +14,14 @@ import (
 )
 
 type RegisterRequest struct {
-	Username string
-	Password string
+	Username          string
+	Password          string
+	CertificateType   int
+	Name              string
+	CertificateNumber string
+	PhoneNumber       string
+	Email             string
+	PassengerType     int
 }
 
 // Register godoc
@@ -31,9 +37,19 @@ func Register(c *gin.Context) {
 	req := new(RegisterRequest)
 	if err := c.ShouldBindJSON(req); err != nil {
 		c.JSON(http.StatusBadRequest, resp.R(struct{}{}).SetMsg("JSON格式错误"))
+		return
 	}
 
-	if err := service.Register(req.Username, req.Password); err != nil {
+	p := &service.RegisterParam{
+		Username:        req.Username,
+		Password:        req.Password,
+		Name:            req.Name,
+		CertificateType: req.CertificateType,
+		PhoneNumber:     req.PhoneNumber,
+		Email:           req.Email,
+		PassengerType:   req.PassengerType,
+	}
+	if err := service.Register(p); err != nil {
 		if errors.Is(err, errortype.ErrUserNameHasExist) {
 			c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("用户已注册"))
 		} else {

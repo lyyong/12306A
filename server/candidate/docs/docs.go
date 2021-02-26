@@ -39,22 +39,15 @@ var doc = `{
                 "summary": "请求服务器执行候补功能",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "用户ID",
-                        "name": "userID",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "query",
+                        "description": "认证信息",
+                        "name": "token",
+                        "in": "header",
                         "required": true
                     },
                     {
                         "description": "需要接受的信息",
-                        "name": "wantPayR",
+                        "name": "candidateRecv",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -92,27 +85,20 @@ var doc = `{
         },
         "/cash": {
             "post": {
-                "description": "发送需要候补的信息给服务器, 服务器将执行候补功能",
+                "description": "发送需要候补的ID, 服务器将候补兑现然后生成票",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "请求服务器执行候补功能",
+                "summary": "请求服务器兑现候补",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
-                        "name": "userID",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "query",
+                        "description": "认证信息",
+                        "name": "token",
+                        "in": "header",
                         "required": true
                     },
                     {
@@ -143,27 +129,20 @@ var doc = `{
         },
         "/state": {
             "post": {
-                "description": "发送需要候补的信息给服务器, 服务器将执行候补功能",
+                "description": "查看自己的候补订单",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "请求服务器执行候补功能",
+                "summary": "请求服务器查看候补状态",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "用户ID",
-                        "name": "userID",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "query",
+                        "description": "认证信息",
+                        "name": "token",
+                        "in": "header",
                         "required": true
                     },
                     {

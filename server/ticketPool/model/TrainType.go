@@ -23,12 +23,12 @@ type TrainType struct {
 
 // GetTrainTypeByID 通过id获取火车类型
 func GetTrainTypeByID(id uint) *TrainType {
-	var tt *TrainType
-	if err := database.DB.Find(tt).Where("id = ?", id).Error; err != nil && err != gorm.ErrRecordNotFound {
+	var tt TrainType
+	if err := database.DB.Where("id = ?", id).Find(&tt).Error; err != nil && err != gorm.ErrRecordNotFound {
 		logging.Error(err)
 		return nil
 	}
-	return tt
+	return &tt
 }
 
 // GetTrainTypes 获取有所列车类型

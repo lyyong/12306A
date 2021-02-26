@@ -20,7 +20,7 @@ type refundAbbRecv struct {
 // @Description 给订单号然后进行退款操作
 // @Accept json
 // @Produce json
-// @Param token query string true "认证信息"
+// @Param token header string true "认证信息"
 // @Param refundR body v1.refundAbbRecv true "订单信息"
 // @Success 200 {object} controller.JSONResult{} "成功信息"
 // @Failure 400 {object} controller.JSONResult{}

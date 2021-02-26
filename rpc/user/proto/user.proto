@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package userrpc;
+package userpb;
 
 message UserRequest {
   uint32 id = 1;
@@ -18,6 +18,23 @@ message UserResponse {
   int32 passenger_type = 9;
 }
 
+message ListPassengerRequest {
+  uint32 id = 1;
+}
+
+message ListPassengerResponse {
+  repeated ListPassengerResponseData passenger = 1;
+}
+
+message ListPassengerResponseData {
+  uint32 id = 1;
+  string name = 2;
+  int32 certificate_type = 3;
+  string certificate_number = 4;
+  int32 passenger_type = 5;
+}
+
 service UserService {
   rpc GetUser(UserRequest) returns (UserResponse) {}
+  rpc ListPassenger(ListPassengerRequest) returns (ListPassengerResponse) {}
 }

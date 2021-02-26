@@ -5,7 +5,7 @@ package rpc_manage
 
 import (
 	"common/router_tracer"
-	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
+	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 	"google.golang.org/grpc"
 )
 
@@ -46,9 +46,12 @@ func NewGRPCClientConn(targetService string) (*grpc.ClientConn, error) {
 	if router_tracer.IsTracing() {
 		// 开启了链路追踪
 		zkClient, _ := router_tracer.GetClient()
+		// return grpc.Dial(targetService,
+		// 	grpc.WithUnaryInterceptor(
+		// 		otgrpc.OpenTracingClientInterceptor(*zkClient.Tracer(), otgrpc.LogPayloads())),
+		// 	grpc.WithInsecure())
 		return grpc.Dial(targetService,
-			grpc.WithUnaryInterceptor(
-				otgrpc.OpenTracingClientInterceptor(*zkClient.Tracer(), otgrpc.LogPayloads())),
+			grpc.WithStatsHandler(zipkingrpc.NewClientHandler(zkClient.Tracer())),
 			grpc.WithInsecure())
 	}
 

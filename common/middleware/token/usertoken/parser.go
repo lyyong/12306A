@@ -5,6 +5,7 @@
 package usertoken
 
 import (
+	"common/tools/logging"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,6 +26,7 @@ func TokenParser() gin.HandlerFunc {
 		// 解析token
 		claims, err := Parse(token)
 		if err != nil {
+			logging.Debug("token解析出错", err)
 			return
 		}
 		info := &UserInfo{

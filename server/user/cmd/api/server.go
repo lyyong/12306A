@@ -12,6 +12,7 @@ import (
 	"gopkg.in/ini.v1"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
 	"net"
 	"rpc/user/userpb"
@@ -49,7 +50,14 @@ var (
 			wg.Wait()
 		},
 	}
+
+	configFilePath string
 )
+
+func init() {
+	StartCmd.Flags().StringVarP(&configFilePath, "config", "c", "./config/config.ini",
+		"Default path is ./config/config.ini")
+}
 
 func setup() {
 	// 初始化日志模块
@@ -88,7 +96,7 @@ func runRpc() error {
 
 // 加载配置文件
 func initConfig() {
-	if err := ini.MapTo(config.Cfg, "./config/config.ini"); err != nil {
+	if err := ini.MapTo(config.Cfg, configFilePath); err != nil {
 		logging.Error(err)
 	} else {
 		logging.Info("配置文件加载成功")
@@ -108,9 +116,30 @@ func initDatabase() {
 		cfg.User, cfg.Password, cfg.Ip, cfg.Port, cfg.Database, cfg.Charset)
 	logging.Debug("DSN:", dsn)
 
+	// 日志级别
+	var logMode logger.LogLevel
+	switch cfg.LogMode {
+	case "Error":
+		logMode = logger.Error
+	case "Silent":
+		logMode = logger.Silent
+	case "Warn":
+		logMode = logger.Warn
+	case "Info":
+		logMode = logger.Info
+	default:
+		logMode = 0
+	}
+
+	// gorm 配置
+	gormConfig := new(gorm.Config)
+	if logMode > 0 {
+		gormConfig.Logger = logger.Default.LogMode(logMode)
+	}
+
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN: dsn,
-	}), &gorm.Config{})
+	}), gormConfig)
 
 	if err != nil {
 		log.Fatal("数据库连接失败")

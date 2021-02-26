@@ -5,12 +5,16 @@
 package main
 
 import (
+	"common/router_tracer"
+	"common/server_find"
 	"common/tools/logging"
 	"net"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"ticketPool/rpc"
+	"ticketPool/ticketpool"
 	"ticketPool/utils/database"
 	"ticketPool/utils/setting"
 )
@@ -27,15 +31,23 @@ func Close() {
 
 func main() {
 
-	logging.Info("TicketPool Service....")
+	logging.Info("TicketPool Service start....")
+	server_find.Register(setting.Server.Name,
+		setting.Server.Host, strconv.Itoa(setting.Server.RPCPort), setting.Consul.ServiceID, setting.Consul.Address, setting.Consul.Interval, setting.Consul.TTL)
+	// 链路追踪
+	err := router_tracer.SetupByHttp(setting.Server.Name,
+		setting.Server.Host, strconv.Itoa(setting.Server.RPCPort), setting.Zipkin.HttpEndpoint)
+
 
 	/* 初始化票池 */
+	logging.Info("Init TicketPool")
+	ticketpool.InitTicketPool()
 
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
 
-	logging.Info("Listen")
+	logging.Info("Listen", setting.Server.RpcAddr)
 	rpcListen, err := net.Listen("tcp", setting.Server.RpcAddr)
 	if err != nil {
 		logging.Error("listen fail:", err)
