@@ -13,5 +13,4 @@ type BuyTicket struct {
 	TicketNum int //票数
 
 	//选座信息
-
 }

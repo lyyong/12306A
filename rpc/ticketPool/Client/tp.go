@@ -16,7 +16,7 @@ type TPRPCClient struct {
 
 var client *TPRPCClient
 
-const targetServiceName = "ticketPool"
+const targetServiceName = ":9443"
 
 // NewClient 创建一个ticketPool的RPC客户端
 func NewClient() (*TPRPCClient, error) {

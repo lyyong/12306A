@@ -9,7 +9,3 @@ func TestCreateAllTables(t *testing.T) {
 func TestDropAllTables(t *testing.T) {
 	DropAllTables()
 }
-
-func TestCreateTableTicketPool(t *testing.T) {
-	CreateTableTicketPool()
-}

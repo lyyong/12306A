@@ -5,7 +5,6 @@
 package init_data
 
 import (
-	"12306A/ticketPool/model/inner"
 	"encoding/json"
 	"fmt"
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -14,6 +13,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"ticketPool/model/extra"
 	"time"
 )
 
@@ -125,7 +125,7 @@ func ReadStationCity() map[string]string {
 //==================================
 
 //读取车次信息，包括途径所有站点
-func ReadTrainNo() []*inner.Train {
+func ReadTrainNo() []*extra.Train {
 
 	//xlsx, err := excelize.OpenFile("/Users/yutianneng/go/src/12306A/ticketPool/train_no.xlsx")
 	xlsx, err := excelize.OpenFile("./ticketPool/train_no.xlsx")
@@ -135,12 +135,12 @@ func ReadTrainNo() []*inner.Train {
 	}
 	rows := xlsx.GetRows("Sheet1")
 
-	var trains []*inner.Train
+	var trains []*extra.Train
 	var num int64 = 0
 	for i := 1; ; {
-		var stations []*inner.Station
+		var stations []*extra.Station
 		initial, _ := time.ParseInLocation("2006-01-02 15:04:05", "2021-01-23 00:00:00", time.Local)
-		train := &inner.Train{}
+		train := &extra.Train{}
 		train.TrainNo = rows[i][6]
 		train.ID = num
 		num++
@@ -151,7 +151,7 @@ func ReadTrainNo() []*inner.Train {
 			if row[6] != train.TrainNo {
 				break
 			}
-			sta := &inner.Station{}
+			sta := &extra.Station{}
 			sta.ID = 1
 			//票价,一站10元
 			sta.Price = price
@@ -164,7 +164,7 @@ func ReadTrainNo() []*inner.Train {
 			sta.Mileage, _ = strconv.ParseInt(row[5], 10, 64)
 			//历时
 			//00:00:00没法写入mysql，最小时间
-			dura, _ := time.ParseInLocation("2006-01-02 15:04:05", "2001-01-01 01:00:00", time.Local)
+			dura, _ := time.ParseInLocation("2006-01-02 15:04:05", "2001-01-01 00:00:30", time.Local)
 			s := strings.Split(row[4], ":")
 			hours, _ := time.ParseDuration(s[0] + "h")
 			mins, _ := time.ParseDuration(s[1] + "m")

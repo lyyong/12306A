@@ -5,14 +5,16 @@
 package main
 
 import (
-	"12306A/ticketPool/init_data"
-	"12306A/ticketPool/rdb"
 	"fmt"
+	"ticketPool/dao"
+	"ticketPool/rpc"
 )
 
-func main()  {
-	init_data.InitDataMysql()
-	rdb.InitDataRedis()
-	fmt.Println("初始化结束")
 
+func main()  {
+	dao.InitId()
+	rpc.Setup()
+	fmt.Println()
 }
+
+

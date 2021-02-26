@@ -9,9 +9,6 @@ import (
 	"testing"
 )
 
-func TestQueryStation(t *testing.T) {
-	QueryStation()
-}
 
 func TestQueryStationByTrainNo(t *testing.T) {
 	stations := QueryStationByTrainNo("G21")

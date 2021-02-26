@@ -5,11 +5,13 @@
 package main
 
 import (
-	"12306A/server/search/router"
+	"12306A-search/router"
 	"fmt"
 )
 
 func main()  {
+	//fmt.Println("aa"=="aa")
 	r:=router.InitRouter()
 	fmt.Println(r)
+
 }
