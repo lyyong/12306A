@@ -42,16 +42,16 @@ message GetTicketResponse {
   repeated Ticket tickets = 1;
 }
 
-
 // 查余票
 message GetTicketNumberRequest {
-  repeated uint32 train_id = 1;
-  uint32 start_station_id = 2;
-  uint32 dest_station_id = 3;
-  string date = 4;
+  message Condition{
+    uint32 train_id = 1;
+    uint32 start_station_id = 2;
+    uint32 dest_station_id = 3;
+  }
+  repeated Condition condition = 1;
+  string date = 2;
 }
-
-
 
 message TrainTicketInfo {
   uint32 train_id = 1;
