@@ -24,8 +24,10 @@ type database struct {
 var DataBase = &database{}
 
 type server struct {
-	HttpAddr string
-	RpcAddr  string
+	Name    string
+	Host    string
+	RPCAddr string
+	RPCPort int
 }
 
 var Server = &server{}
@@ -38,6 +40,23 @@ type redis struct {
 
 var Redis = &redis{}
 
+type consul struct {
+	Address     string
+	Interval    int
+	TTL         int
+	ServiceHost string
+	ServiceID   string
+}
+
+var Consul = &consul{}
+
+type zipkin struct {
+	ServiceID    string
+	HttpEndpoint string
+}
+
+var Zipkin = &zipkin{}
+
 var configFile = flag.String("configFile", "config/ticketPool-config.ini", "设置配置文件")
 
 func InitSetting() {
@@ -49,7 +68,8 @@ func InitSetting() {
 	mapToStruct(cfg.Section("server"), Server)
 	mapToStruct(cfg.Section("database"), DataBase)
 	mapToStruct(cfg.Section("redis"), Redis)
-
+	mapToStruct(cfg.Section("consul"), Consul)
+	mapToStruct(cfg.Section("zipkin"), Zipkin)
 	Redis.IdleTimeout = Redis.IdleTimeout * time.Second
 }
 

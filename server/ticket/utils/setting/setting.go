@@ -6,41 +6,45 @@ package setting
 
 import (
 	"common/tools/logging"
+	"flag"
 	"github.com/go-ini/ini"
 	"time"
 )
 
 type database struct {
-	Host 		 string
-	UserName 	 string
-	PassWord 	 string
-	DBName 		 string
-	Charset 	 string
+	Host         string
+	UserName     string
+	PassWord     string
+	DBName       string
+	Charset      string
 	MaxIdleConns int
 	MaxOpenConns int
 }
+
 var DataBase = &database{}
 
-
 type server struct {
-	Name 		string
-	Host 		string
-	HttpAddr 	string
-	RPCAddr 	string
-	HttpPort	int
+	Name     string
+	Host     string
+	HttpAddr string
+	RPCAddr  string
+	HttpPort int
 }
+
 var Server = &server{}
 
 type redis struct {
-	Host 		string
-	MaxIdle 	int
+	Host        string
+	MaxIdle     int
 	IdleTimeout time.Duration
 }
+
 var Redis = &redis{}
 
 type kafka struct {
 	Host string
 }
+
 var Kafka = &kafka{}
 
 type consul struct {
@@ -50,16 +54,21 @@ type consul struct {
 	ServiceHost string
 	ServiceID   string
 }
+
 var Consul = &consul{}
 
 type zipkin struct {
 	ServiceID    string
 	HttpEndpoint string
 }
+
 var Zipkin = &zipkin{}
 
+var configFile = flag.String("configFile", "config/ticket-config.ini", "设置配置文件")
+
 func init() {
-	cfg, err := ini.Load("config/ticket-config.ini")
+	flag.Parse()
+	cfg, err := ini.Load(*configFile)
 	if err != nil {
 		logging.Fatal("Setting -- Load config fail:", err)
 	}

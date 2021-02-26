@@ -72,7 +72,7 @@ func InitTicketPool() {
 		stopInfos := model.GetStopInfoByTrainID(train.ID)
 		ssm := make(map[uint32]*StopStation)
 		for _, stopInfo := range stopInfos {
-			ssm[uint32(stopInfo.ID)] = &StopStation{
+			ssm[uint32(stopInfo.StationID)] = &StopStation{
 				Seq:         stopInfo.StopSeq,
 				ArriveTime:  stopInfo.ArrivedTime,
 				StartTime:   stopInfo.LeaveTime,

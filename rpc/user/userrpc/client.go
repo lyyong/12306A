@@ -56,3 +56,31 @@ func (c *Client) GetUser(id uint) (*User, error) {
 	}
 	return user, nil
 }
+
+type Passenger struct {
+	Id                uint
+	Name              string
+	CertificateType   int
+	CertificateNumber string
+	PassengerType     int
+}
+
+// 根据用户ID查询乘车人列表
+func (c *Client) ListPassenger(id uint) ([]*Passenger, error) {
+	res, err := c.client.ListPassenger(context.Background(), &userpb.ListPassengerRequest{Id: uint32(id)})
+	if err != nil {
+		return nil, err
+	}
+	var list []*Passenger
+	for _, p := range res.Passenger {
+		passenger := &Passenger{
+			Id:                uint(p.Id),
+			Name:              p.Name,
+			CertificateType:   int(p.CertificateType),
+			CertificateNumber: p.CertificateNumber,
+			PassengerType:     int(p.PassengerType),
+		}
+		list = append(list, passenger)
+	}
+	return list, nil
+}

@@ -2,8 +2,7 @@ version: '3.5'
 services:
   user-server:
     build:
-      context: .
-      dockerfile: ./server/user/Dockerfile
+      context: ./server/user
     ports:
       - "8222:8222/tcp"
   pay-server:
