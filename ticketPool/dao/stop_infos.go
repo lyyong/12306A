@@ -6,7 +6,6 @@ package dao
 
 import (
 	"fmt"
-	"ticketPool/init_data"
 	"ticketPool/model/inner"
 )
 
@@ -15,7 +14,7 @@ func SelectStopInfoAll() (stopInfos []*inner.StopInfo){
 	sqlStr:="select id,train_id,station_id,train_number,station_name,city,arrived_time,leave_time,stop_seq " +
 		"from stop_infos;"
 
-	rows,err:=init_data.Db.Query(sqlStr)
+	rows,err:=Db.Query(sqlStr)
 	if err!=nil{
 		fmt.Println(err)
 		return nil;

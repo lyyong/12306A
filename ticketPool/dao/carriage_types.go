@@ -6,7 +6,6 @@ package dao
 
 import (
 	"fmt"
-	"ticketPool/init_data"
 	"ticketPool/model/inner"
 )
 
@@ -15,7 +14,7 @@ func QueryCarriageTypesAll() []*inner.CarriageType {
 		"hard_seat_number,second_seat_number,first_seat_number,business_seat_number," +
 		"business_seat,first_seat,second_seat,hard_seat,hard_berth,soft_berth,senior_soft_berth " +
 		"from carriage_types;"
-	rows,err:= init_data.Db.Query(sqlStr)
+	rows,err:= Db.Query(sqlStr)
 	if err!=nil{
 		fmt.Println("query table carriage_types failed,err:",err)
 		return nil

@@ -4,14 +4,20 @@
  */
 package dao
 
+import "database/sql"
+
 var(
 	TrainIds map[uint32]string
 	StationIds map[uint32]string
 	SeatTypes map[uint32]string
 	SeatTypeIds map[string]uint32
+	Db *sql.DB
+	err error
 )
 
 func InitId()  {
+	Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306a_test")
+	Db.SetMaxOpenConns(0)
 	TrainIds =make(map[uint32]string)
 	StationIds =make(map[uint32]string)
 	SeatTypes=make(map[uint32]string)

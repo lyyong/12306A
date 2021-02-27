@@ -6,13 +6,12 @@ package dao
 
 import (
 	"fmt"
-	"ticketPool/init_data"
 	"ticketPool/model/inner"
 )
 
 func SelectTrainAll() (trains []*inner.Train) {
 	sqlStr:="select id,number,start_station,end_station,train_type,state from trains;"
-	rows,err:=init_data.Db.Query(sqlStr)
+	rows,err:=Db.Query(sqlStr)
 	if err!=nil{
 		fmt.Println("select table trains failed, err:",err)
 		return nil
