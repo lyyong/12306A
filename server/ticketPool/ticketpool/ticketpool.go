@@ -13,7 +13,7 @@ import (
 
 type TicketPool struct {
 	trainMap  			map[uint32]*Train 	// key: trainId
-	carriageSeatInfoMap map[uint32]*SeatInfo	// key: carriageTypeId
+	seatTypeMap 		map[uint32]string	// key: seatTypeId  value: seatTypeName
 }
 
 type Train struct {
@@ -130,8 +130,8 @@ func(tp *TicketPool) GetTrain(trainId uint32) *Train{
 	return tp.trainMap[trainId]
 }
 
-func(tp *TicketPool) GetSeatInfo(seatTypeId uint32) *SeatInfo{
-	return tp.carriageSeatInfoMap[seatTypeId]
+func(tp *TicketPool) GetSeatName(seatTypeId uint32) string{
+	return tp.seatTypeMap[seatTypeId]
 }
 
 func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*skiplist.Node, []string){
