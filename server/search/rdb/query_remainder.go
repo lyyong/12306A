@@ -72,10 +72,14 @@ func QueryTicketNumByDate(date,startCity,endCity string) []*outer.Train {
 		fmt.Println("rpc getTicketNumber failed, err:",err)
 		return nil
 	}
-
+	//fmt.Println("rpcClient",rpcClient)
+	//fmt.Println(request)
 	response,err:=rpcClient.GetTicketNumber(request)
 	ticketInfos:=response.TrainsTicketInfo
-
+	///fmt.Println(ticketInfos)
+	if ticketInfos==nil || len(ticketInfos)==0{
+		return nil
+	}
 	var trains []*outer.Train
 	for i:=0;i<len(ticketInfos);i++ {
 		train := &outer.Train{}
