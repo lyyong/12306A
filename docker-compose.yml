@@ -1,5 +1,25 @@
 version: '3.5'
 services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    ports:
+      - "80:80"
+  ticket-server:
+    build:
+      context: ./server/ticket
+    ports:
+    - "9441:9441"
+  search-server:
+    build:
+      context: ./server/search
+    ports:
+    - "18081:18081"
+  ticket-pool-k:
+    build:
+      context: ./server/ticketPool
+    ports:
+    - "9443:9443"
   user-server:
     build:
       context: ./server/user
@@ -40,11 +60,6 @@ services:
       - "9411:9411/tcp"
     image:
       openzipkin/zipkin
-  nginx:
-    build:
-      context: ./docker/nginx
-    ports:
-      - "80:80"
   consul:
     build:
       context: ./docker/consul

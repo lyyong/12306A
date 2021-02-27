@@ -218,13 +218,13 @@ func (c *OrderRPCClient) UpdateStateWithRelativeOrder(info *orderRPCpb.UpdateSta
 	return resp, err
 }
 
-func (c *OrderRPCClient) GetNoFinishOrder(info *orderRPCpb.SearchCondition) (*orderRPCpb.OrderInfo, error) {
+func (c *OrderRPCClient) ExistNoFinishOrder(info *orderRPCpb.SearchCondition) (*orderRPCpb.ExistNoFinishOrderRespond, error) {
 	tclient := *c.pbClient
-	resp, err := tclient.GetNoFinishOrder(context.Background(), info)
+	resp, err := tclient.ExistNoFinishOrder(context.Background(), info)
 	if err != nil {
 		tryDirectConnent()
 		tclient := *c.pbClient
-		resp, err := tclient.GetNoFinishOrder(context.Background(), info)
+		resp, err := tclient.ExistNoFinishOrder(context.Background(), info)
 		if err != nil {
 			return nil, err
 		}
