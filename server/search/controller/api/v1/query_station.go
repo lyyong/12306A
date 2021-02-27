@@ -7,7 +7,6 @@ package v1
 import (
 	"12306A-search/dao"
 	"12306A-search/rdb"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -28,7 +27,7 @@ func QueryAllStation(c *gin.Context)  {
 
 func QueryStationByTrainNo(c *gin.Context)  {
 	trainNo:=c.Query("train_no")
-	fmt.Println("aaa",trainNo)
+	//fmt.Println("aaa",trainNo)
 	stations:=rdb.QueryStationByTrainNo(trainNo)
 	if stations==nil{
 		c.JSON(http.StatusOK,gin.H{

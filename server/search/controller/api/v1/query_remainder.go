@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-func Query(c *gin.Context)  {
+func QueryRemainder(c *gin.Context)  {
 
 	date:=c.Query("date")
 	startCity:=c.Query("startCity")

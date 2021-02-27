@@ -17,10 +17,8 @@ import (
 )
 
 //按城市查询满足条件的车次，返回车次名
-func QueryTrainByDateAndCity(date,startStation, endStation string) []string {
+func QueryTrainByDateAndCity(date,startCity, endCity string) []string {
 
-	startCity,_:=RedisDB.HGet("stationCity",startStation).Result()
-	endCity,_:=RedisDB.HGet("stationCity",endStation).Result()
 	key:=startCity+"-"+endCity
 	now:=time.Now()
 	nn:=now.Format("2006-01-02")
@@ -41,57 +39,78 @@ func QueryTrainByDateAndCity(date,startStation, endStation string) []string {
 
 
 //查询某一天某个车次的某种座位等级的车票数，合适的
-func QueryTicketNumByDate(date,startStation,endStation string) []*outer.Train {
+func QueryTicketNumByDate(date,startCity,endCity string) []*outer.Train {
 	//2021-1-23:K4729:1:secondSeat
-	trainNos := QueryTrainByDateAndCity(date, startStation, endStation)
-	startStationId:=dao.GetStationId(startStation)
-	endStationId:=dao.GetStationId(endStation)
+	//将车站改为城市
+	startCity,_=RedisDB.HGet("stationCity",startCity).Result()
+	endCity,_=RedisDB.HGet("stationCity",endCity).Result()
+	trainNos := QueryTrainByDateAndCity(date, startCity,endCity)
 
 	request:=&ticketPoolRPC.GetTicketNumberRequest{}
-	request.Date=date
-	request.StartStationId=startStationId
-	request.DestStationId=endStationId
-	fmt.Println(request)
+
+	var conditions []*ticketPoolRPC.GetTicketNumberRequest_Condition
+
 	for _,trainNo:=range trainNos{
 		trainId:=dao.GetTrainId(trainNo)
-		fmt.Println(trainNo)
-		request.TrainId=append(request.TrainId,trainId)
+		//fmt.Println(trainNo)
+		condition:=&ticketPoolRPC.GetTicketNumberRequest_Condition{}
+		condition.TrainId=dao.GetTrainId(trainNo)
+		startStation,_:=RedisDB.HGet(trainNo,startCity).Result()
+		endStation,_:=RedisDB.HGet(trainNo,endCity).Result()
+		startStationId:=dao.GetStationId(startStation)
+		endStationId:=dao.GetStationId(endStation)
+		condition.TrainId=trainId
+		condition.StartStationId=startStationId
+		condition.DestStationId=endStationId
+		conditions=append(conditions,condition)
 	}
-	var rpcClient *Client.TPRPCClient
-	rpcClient,err=Client.NewClient()
-	response,err:=rpcClient.GetTicketNumber(request)
+	request.Date=date
+	request.Condition=conditions
+
+	rpcClient, err := Client.NewClient()
 	if err!=nil{
 		fmt.Println("rpc getTicketNumber failed, err:",err)
 		return nil
 	}
 
-	var trains []*outer.Train
+	response,err:=rpcClient.GetTicketNumber(request)
 	ticketInfos:=response.TrainsTicketInfo
-	for i:=0;i<len(ticketInfos);i++{
-		ticketInfo:=ticketInfos[i]
-		train:=&outer.Train{}
-		train.TrainNumber=dao.GetTrainNumber(ticketInfo.TrainId)
-		seatInfos:=ticketInfo.SeatInfo
-		for _,seatInfo:=range seatInfos{
 
+	var trains []*outer.Train
+	for i:=0;i<len(ticketInfos);i++ {
+		train := &outer.Train{}
+		ticketInfo := ticketInfos[i]
+		trainNo := dao.GetTrainNumber(ticketInfo.TrainId)
+		train.TrainNumber = trainNo
+
+		seatInfos := ticketInfo.SeatInfo
+		for _, seatInfo := range seatInfos {
 			switch seatInfo.SeatTypeId {
-			case 1:train.BusinessSeat=int(seatInfo.SeatNumber)
-			case 2:train.FirstSeat=int(seatInfo.SeatNumber)
-			case 3:train.SecondSeat=int(seatInfo.SeatNumber)
-			case 4:train.SeniorSoftSleeper=int(seatInfo.SeatNumber)
-			case 5:train.SoftSleeper=int(seatInfo.SeatNumber)
-			case 6:train.HardSleeper=int(seatInfo.SeatNumber)
-			case 7:train.HardSeat=int(seatInfo.SeatNumber)
+			case 1:
+				train.BusinessSeat = int(seatInfo.SeatNumber)
+			case 2:
+				train.FirstSeat = int(seatInfo.SeatNumber)
+			case 3:
+				train.SecondSeat = int(seatInfo.SeatNumber)
+			case 4:
+				train.SeniorSoftSleeper = int(seatInfo.SeatNumber)
+			case 5:
+				train.SoftSleeper = int(seatInfo.SeatNumber)
+			case 6:
+				train.HardSleeper = int(seatInfo.SeatNumber)
+			case 7:
+				train.HardSeat = int(seatInfo.SeatNumber)
 			default:
 			}
 		}
-		train.TrainType=""
-		startStation:=dao.GetStationName(startStationId)
-		endStation:=dao.GetStationName(endStationId)
+		resMap,_:=RedisDB.HGetAll(trainNo).Result()
+		startStation:=dao.GetStationName(conditions[i].StartStationId)
 		train.StartStation=startStation
+		train.StartTime,_=RedisDB.HGet(trainNo+"-"+resMap[train.StartStation],"leaveTime").Result()
+		endStation:=dao.GetStationName(conditions[i].DestStationId)
 		train.EndStation=endStation
+		train.EndTime,_=RedisDB.HGet(trainNo+"-"+resMap[train.EndStation],"arriveTime").Result()
 
-		resMap,_:=RedisDB.HGetAll(trainNos[i]).Result()
 		if resMap[startStation]=="1"{
 			train.StartStationType="始"
 		}else{
@@ -102,10 +121,6 @@ func QueryTicketNumByDate(date,startStation,endStation string) []*outer.Train {
 		}else{
 			train.EndStationType="过"
 		}
-		leaveTime,_:=RedisDB.HGet(trainNos[i]+":"+resMap[startStation],"leaveTime").Result()
-		arriveTime,_:=RedisDB.HGet(trainNos[i]+":"+resMap[endStation],"arriveTime").Result()
-		train.StartTime=leaveTime
-		train.EndTime=arriveTime
 
 		trains=append(trains,train)
 	}

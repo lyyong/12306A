@@ -15,9 +15,9 @@ import (
 //查询某个车次的站序、站点、到达时间、离开时间、时长
 func QueryStationByTrainNo(trainNo string) []*outer.Station {
 	key:=trainNo
-	fmt.Println(key)
+	//fmt.Println(key)
 	num,_:=RedisDB.HGet(key,"stationNum").Result()
-	fmt.Println(num)
+	//fmt.Println(num)
 	stationNum,_:=strconv.ParseInt(num,10,64)
 	var stations []*outer.Station
 	for i:=1;i<=int(stationNum);i++{
