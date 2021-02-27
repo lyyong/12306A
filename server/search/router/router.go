@@ -24,7 +24,7 @@ func InitRouter() *gin.Engine {
 	}
 
 	r.Run(":18081")
-	
+
 	return r
 }
 
