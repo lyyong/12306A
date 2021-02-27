@@ -7,7 +7,6 @@ package dao
 import (
 	"12306A-search/model/outer"
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -118,7 +117,7 @@ func InitHotCities()  {
 	HotCities=append(HotCities,city2)
 	HotCities=append(HotCities,city3)
 	HotCities=append(HotCities,city4)
-	fmt.Println(len(HotCities))
+	//fmt.Println(len(HotCities))
 }
 
 func InitCityLists()  {
@@ -133,7 +132,7 @@ func InitCityLists()  {
 			Name: s.Name,
 		}
 		i:=s.Spell[0]-'a'
-		fmt.Println(i,string(i+'A'))
+		//fmt.Println(i,string(i+'A'))
 		CityLists[i].Initials=string('A'+i)
 		CityLists[i].Cities=append(CityLists[i].Cities,city)
 		//fmt.Println(len(CityLists[i].Cities))
