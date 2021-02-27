@@ -6,15 +6,15 @@ package main
 
 import (
 	"fmt"
-	"ticketPool/dao"
-	"ticketPool/rpc"
+	"ticketPool/rdb/init_redis"
 )
 
 
 func main()  {
-	dao.InitId()
-	rpc.Setup()
-	fmt.Println()
+	//dao.InitId()
+	//rpc.Setup()
+	init_redis.InitDataRedis()
+	fmt.Println("初始化完成")
 }
 
 

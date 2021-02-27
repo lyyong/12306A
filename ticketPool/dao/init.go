@@ -4,7 +4,10 @@
  */
 package dao
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 import _ "github.com/go-sql-driver/mysql"
 var(
 	TrainIds map[uint32]string
@@ -15,9 +18,17 @@ var(
 	err error
 )
 
-func InitId()  {
+func init()  {
 	Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306a_test")
+	if err!=nil{
+		fmt.Println("db init failed,err:",err)
+		return
+	}
 	Db.SetMaxOpenConns(0)
+	InitId()
+}
+func InitId()  {
+
 	TrainIds =make(map[uint32]string)
 	StationIds =make(map[uint32]string)
 	SeatTypes=make(map[uint32]string)
