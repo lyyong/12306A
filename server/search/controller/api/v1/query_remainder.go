@@ -21,9 +21,9 @@ func QueryRemainder(c *gin.Context)  {
 	trains:=rdb.QueryTicketNumByDate(date,startCity,endCity)
 	if trains==nil{
 		c.JSON(http.StatusOK,gin.H{
-			"code":http.StatusNoContent,
+			"code":http.StatusOK,
 			"msg":"车次票数",
-			"data":gin.H{"list":""},
+			"data":gin.H{"list":"没有车次"},
 		})
 	}else {
 		c.JSON(http.StatusOK,gin.H{
