@@ -5,7 +5,7 @@
 package dao
 
 import "database/sql"
-
+import _ "github.com/go-sql-driver/mysql"
 var(
 	TrainIds map[uint32]string
 	StationIds map[uint32]string

@@ -76,6 +76,10 @@ func (t TicketPoolRPCService) GetTicketNumber(ctx context.Context, request *tick
 	responses :=&ticketPoolRPC.GetTicketNumberResponse{}
 	var trains []*ticketPoolRPC.TrainTicketInfo
 
+	if responses==nil{
+		fmt.Println("空请求")
+		return nil, nil
+	}
 	date := request.Date
 	conditions:=request.Condition
 	for _,condition:=range conditions{
