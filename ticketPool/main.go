@@ -7,8 +7,6 @@ package main
 import (
 	"common/tools/logging"
 	"ticketPool/rdb/init_redis"
-	"ticketPool/rpc"
-	"ticketPool/tools/setting"
 )
 
 
@@ -17,9 +15,8 @@ func main()  {
 	init_redis.InitDataRedis()
 	//fmt.Println("初始化完成")
 	logging.Info("初始化完成")
-	setting.Setup()
-	rpc.Setup()
-
+	//setting.Setup()
+	//rpc.Setup()
 }
 
 

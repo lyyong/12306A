@@ -46,9 +46,7 @@ func WriteTrainPoolToRedis() {
 		//以上车时间作为score,小时+分钟，不用日期，因为车次每天都会有
 		hour, minute, _ := startTime.Clock()
 		start := hour*60 + minute
-		//fmt.Println(start)
 		key := trainPool.StartCity + "-" + trainPool.EndCity
-
 		rdb.RedisDB.ZAdd(key, redis.Z{Score: float64(start), Member: trainPool.TrainNo})
 		//fmt.Println(cmd.Result())
 
@@ -90,9 +88,13 @@ func WriteTrainInfoToRedis() {
 		rdb.RedisDB.HSet(stationKey, "cityName", stopInfo.City)
 		//到达时间
 		//fmt.Println(stopInfo.ArrivedTime,stopInfo.LeaveTime)
+
 		rdb.RedisDB.HSet(stationKey, "arriveTime", stopInfo.ArrivedTime)
 		//出发时间
 		rdb.RedisDB.HSet(stationKey, "leaveTime", stopInfo.LeaveTime)
+		if stopInfo.TrainNumber=="G101"{
+			fmt.Println(stationKey,stopInfo)
+		}
 		//保存持续时间
 		//rdb.RedisDB.HSet(stationKey, "duration", stopInfo.StayDuration)
 		//rdb.RedisDB.HSet(stationKey, "mileage", stopInfo.Mileage)
