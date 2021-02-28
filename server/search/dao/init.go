@@ -60,9 +60,9 @@ func InitId()  {
 	SeatTypes[1]="businessSeat"
 	SeatTypes[2]="firstSeat"
 	SeatTypes[3]="secondSeat"
-	SeatTypeIds["businessSeat"]=1
-	SeatTypeIds["firstSeat"]=2
-	SeatTypeIds["secondSeat"]=3
+	SeatTypeIds["businessSeat"]=0
+	SeatTypeIds["firstSeat"]=1
+	SeatTypeIds["secondSeat"]=2
 	//for _,v:=range TrainIds {
 	//	fmt.Println(v)
 	//}

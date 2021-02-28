@@ -93,19 +93,19 @@ func QueryTicketNumByDate(date,startCity,endCity string) []*outer.Train {
 		seatInfos := ticketInfo.SeatInfo
 		for _, seatInfo := range seatInfos {
 			switch seatInfo.SeatTypeId {
-			case 1:
+			case 0:
 				train.BusinessSeat = int(seatInfo.SeatNumber)
-			case 2:
+			case 1:
 				train.FirstSeat = int(seatInfo.SeatNumber)
-			case 3:
+			case 2:
 				train.SecondSeat = int(seatInfo.SeatNumber)
-			case 4:
+			case 3:
 				train.SeniorSoftSleeper = int(seatInfo.SeatNumber)
-			case 5:
+			case 4:
 				train.SoftSleeper = int(seatInfo.SeatNumber)
-			case 6:
+			case 5:
 				train.HardSleeper = int(seatInfo.SeatNumber)
-			case 7:
+			case 6:
 				train.HardSeat = int(seatInfo.SeatNumber)
 			default:
 			}
