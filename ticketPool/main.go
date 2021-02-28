@@ -5,16 +5,20 @@
 package main
 
 import (
+	"common/tools/logging"
 	"fmt"
 	"ticketPool/rdb/init_redis"
+	"ticketPool/rpc"
 )
 
 
 func main()  {
 	//dao.InitId()
-	//rpc.Setup()
 	init_redis.InitDataRedis()
 	fmt.Println("初始化完成")
+	logging.Info("初始化完成")
+	rpc.Setup()
+
 }
 
 

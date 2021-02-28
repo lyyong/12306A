@@ -11,6 +11,7 @@ import (
 	"strings"
 	"ticketPool/dao"
 	"ticketPool/rdb"
+	"time"
 )
 
 func InitTicketPool()  {
@@ -55,7 +56,7 @@ func WriteTicketPoolToRedis()  {
 			//depart,_:=time.Parse("2006-01-02 15:04:05",stationMap["departTime"])
 			//departTime:=depart.Add(time.Now().Sub(depart)).Format("2006-01-02")
 			//fmt.Println(depart,carriageType,stationNum)
-			date:="2021-02-25"
+			date:=time.Now().Format("2006-01-02")
 			if carriageType.BusinessSeatNumber != 0 {
 				seats := strings.Split(carriageType.BusinessSeat, ",")
 				for _, seat := range seats {

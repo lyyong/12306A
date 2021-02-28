@@ -84,11 +84,11 @@ func BuyTicketNoSelect(key string,trainInfo map[string]string,buyTickets[]*outer
 		remainderStartStationNo := endStationNo
 		//fmt.Println(remainderStartStationNo)
 		remainderEndStationNo := strconv.Itoa(int(res[i].Score))
-		fmt.Println(res[i])
-		fmt.Println(remainderStartStationNo,remainderEndStationNo)
+		//fmt.Println(res[i])
+		//fmt.Println(remainderStartStationNo,remainderEndStationNo)
 		//没有余票
 		if strings.Compare(remainderStartStationNo, remainderEndStationNo) == 0 {
-			fmt.Println("没有余票")
+			//fmt.Println("没有余票")
 			continue
 		}
 		////获得日期，不含时间，如：2021-02-01

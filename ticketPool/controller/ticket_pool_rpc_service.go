@@ -4,10 +4,12 @@
 package controller
 
 import (
+	"common/tools/logging"
 	"context"
 	"errors"
 	"fmt"
 	"rpc/ticketPool/proto/ticketPoolRPC"
+	"strings"
 	"ticketPool/dao"
 	"ticketPool/model/outer"
 	"ticketPool/rdb"
@@ -18,6 +20,7 @@ type TicketPoolRPCService struct {
 }
 
 func (t TicketPoolRPCService) GetTicket(ctx context.Context, request *ticketPoolRPC.GetTicketRequest) (*ticketPoolRPC.GetTicketResponse, error) {
+	logging.Info("购票")
 	trainNo:=dao.GetTrainNumber(request.GetTrainId())
 	date:=request.GetDate()
 	startStation:=dao.GetStationName(request.GetStartStationId())
@@ -73,6 +76,7 @@ func (t TicketPoolRPCService) GetTicket(ctx context.Context, request *ticketPool
 
 func (t TicketPoolRPCService) GetTicketNumber(ctx context.Context, request *ticketPoolRPC.GetTicketNumberRequest) (*ticketPoolRPC.GetTicketNumberResponse, error) {
 	//panic("implement me")
+	logging.Info("查询余票")
 	responses :=&ticketPoolRPC.GetTicketNumberResponse{}
 	var trains []*ticketPoolRPC.TrainTicketInfo
 
@@ -92,14 +96,16 @@ func (t TicketPoolRPCService) GetTicketNumber(ctx context.Context, request *tick
 		endStation:=dao.GetStationName(endStationId)
 
 		var seatInfos []*ticketPoolRPC.SeatInfo
-		for i:=1;i<=len(dao.SeatTypes);i++{
+		//fmt.Println(len(seatInfos),len(dao.SeatTypes))
+		for i:=0;i<len(dao.SeatTypes);i++{
 			num:=service.QueryTicketNumByTrainNoAndDate(date,trainNo,dao.SeatTypes[uint32(i)],startStation,endStation)
-			fmt.Println(num)
 
-			seatInfo:=&ticketPoolRPC.SeatInfo{
-				SeatTypeId: uint32(i),
-				SeatNumber: int32(num),
-			}
+			seatInfo:=&ticketPoolRPC.SeatInfo{}
+			seatInfo.SeatTypeId=uint32(i)
+			//fmt.Println(seatInfo.SeatTypeId)
+			seatInfo.SeatNumber=int32(num)
+			//fmt.Println("seatInfo",seatInfo)
+
 			seatInfos=append(seatInfos,seatInfo)
 		}
 		train:=&ticketPoolRPC.TrainTicketInfo{}
@@ -112,6 +118,7 @@ func (t TicketPoolRPCService) GetTicketNumber(ctx context.Context, request *tick
 }
 
 func (t TicketPoolRPCService) RefundTicket(ctx context.Context, request *ticketPoolRPC.RefundTicketRequest) (*ticketPoolRPC.RefundTicketResponse, error) {
+	logging.Info("退票")
 	response:=&ticketPoolRPC.RefundTicketResponse{}
 
 	tickets:=request.Tickets
@@ -121,12 +128,13 @@ func (t TicketPoolRPCService) RefundTicket(ctx context.Context, request *ticketP
 	for i:=0;i<len(request.Tickets);i++{
 		ticket:=&outer.Ticket{}
 		ticket.TrainNumber=tickets[i].TrainNum
-		ticket.Date=tickets[i].StartTime
+		ticket.Date=strings.Split(tickets[i].StartTime," ")[0]
 
 		ticket.StartTime=tickets[i].StartTime
 		ticket.StartStation=tickets[i].StartStation
 		ticket.EndStation=tickets[i].DestStation
 		ticket.EndTime=tickets[i].ArriveTime
+		ticket.Price=90
 
 		ticket.CarriageNum=tickets[i].CarriageNumber
 		ticket.SeatNum=tickets[i].SeatNumber
@@ -136,6 +144,8 @@ func (t TicketPoolRPCService) RefundTicket(ctx context.Context, request *ticketP
 		ticket.StartStationNum=trainMap[ticket.StartStation]
 		ticket.EndStationNum=trainMap[ticket.EndStation]
 
+		fmt.Println("退票")
+		fmt.Println(ticket)
 		success:=service.AddTicket(ticket)
 		if success==false{
 			response.IsOk=false

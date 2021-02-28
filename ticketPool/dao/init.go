@@ -6,63 +6,77 @@ package dao
 
 import (
 	"database/sql"
-	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 )
-import _ "github.com/go-sql-driver/mysql"
+
 var(
-	TrainIds map[uint32]string
-	StationIds map[uint32]string
-	SeatTypes map[uint32]string
-	SeatTypeIds map[string]uint32
 	Db *sql.DB
 	err error
+	TrainIds map[string]uint32
+	TrainNumbers map[uint32]string
+	StationIds map[string]uint32
+	StationNames map[uint32]string
+	SeatTypes map[uint32]string
+	SeatTypeIds map[string]uint32
+
 )
 
 func init()  {
 	Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306a_test")
-	if err!=nil{
-		fmt.Println("db init failed,err:",err)
-		return
-	}
+	//fmt.Println(Db)
 	Db.SetMaxOpenConns(0)
+	//fmt.Println(Db)
+	if err != nil {
+		panic(err.Error())
+	}
 	InitId()
 }
 func InitId()  {
-
-	TrainIds =make(map[uint32]string)
-	StationIds =make(map[uint32]string)
+	TrainIds =make(map[string]uint32)
+	TrainNumbers=make(map[uint32]string)
+	StationNames=make(map[uint32]string)
+	StationIds = make(map[string]uint32)
 	SeatTypes=make(map[uint32]string)
 	SeatTypeIds=make(map[string]uint32)
 	stations:= SelectStationAll()
 	for _,s:=range stations{
-		StationIds[uint32(s.ID)]=s.Name
+		StationIds[s.Name]=uint32(s.ID)
+		StationNames[uint32(s.ID)]=s.Name
 	}
 	//for _,v:=range StationIds {
 	//	fmt.Println(v)
 	//}
 	trains:= SelectTrainAll()
 	for _,t:=range trains{
-		TrainIds[uint32(t.ID)]=t.Number
+		TrainIds[t.Number]=uint32(t.ID)
+		TrainNumbers[uint32(t.ID)]=t.Number
 	}
 
-	SeatTypes[1]="businessSeat"
-	SeatTypes[2]="firstSeat"
-	SeatTypes[3]="secondSeat"
-	SeatTypeIds["businessSeat"]=1
-	SeatTypeIds["firstSeat"]=2
-	SeatTypeIds["secondSeat"]=3
+	SeatTypes[0]="businessSeat"
+	SeatTypes[1]="firstSeat"
+	SeatTypes[2]="secondSeat"
+	SeatTypeIds["businessSeat"]=0
+	SeatTypeIds["firstSeat"]=1
+	SeatTypeIds["secondSeat"]=2
 	//for _,v:=range TrainIds {
 	//	fmt.Println(v)
 	//}
 }
 
 func GetTrainNumber(trainId uint32) string  {
-	return TrainIds[trainId]
+	return TrainNumbers[trainId]
+}
+func GetTrainId(trainNumber string) uint32  {
+	return TrainIds[trainNumber]
 }
 
 func GetStationName(stationId uint32) string  {
-	return StationIds[stationId]
+	return StationNames[stationId]
 }
+func GetStationId(stationName string) uint32  {
+	return StationIds[stationName]
+}
+
 
 func GetSeatType(seatId uint32) string  {
 	return SeatTypes[seatId]

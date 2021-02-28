@@ -22,13 +22,16 @@ func AddTicket(ticket *outer.Ticket) bool {
 	endStationNo,_:=strconv.ParseInt(ticket.EndStationNum,10,64)
 	//fmt.Println(float64(endStationNo))
 	dateAndTime:=strings.Split(ticket.StartTime," ")
+	//fmt.Println(dateAndTime)
 	startTime:=dateAndTime[0]
+	//fmt.Println(ticket.TrainNumber,ticket.StartStationNum,ticket.EndStationNum)
 	key:=startTime+":"+ticket.TrainNumber+":"+startStationNo+":"+ticket.SeatClass
-	t,err:= rdb.RedisDB.ZAdd(key,redis.Z{Score: float64(endStationNo),Member: ticket.CarriageNum+":"+ticket.SeatNum}).Result()
+	//fmt.Println(key)
+	_,err:= rdb.RedisDB.ZAdd(key,redis.Z{Score: float64(endStationNo),Member: ticket.CarriageNum+":"+ticket.SeatNum}).Result()
 	if err!=nil{
 		fmt.Println("redis ZAdd failed, err:",err)
 		return false
 	}
-	fmt.Println(t)
+	//fmt.Println(t)
 	return true
 }
