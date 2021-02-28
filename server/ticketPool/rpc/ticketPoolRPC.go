@@ -47,7 +47,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	ticketIndex := 0
 	for seatTypeId, seats := range seatsMap {
 		seatIndex := 0
-		seatType := tp.GetSeatInfo(seatTypeId).SeatType
+		seatType := tp.GetSeatName(seatTypeId)
 		for i := 0; i < len(req.Passengers); i++ {
 			passengerInfo := req.Passengers[i]
 			if seatTypeId == passengerInfo.SeatTypeId {
