@@ -10,9 +10,9 @@ import (
 )
 
 func TestQueryTrainByCity(t *testing.T) {
-	date:="2021-02-26"
-	startCity := "北京"
-	endCity := "上海"
+	date:="2021-02-28"
+	startCity := "北京市"
+	endCity := "上海市"
 	trainNos := QueryTrainByDateAndCity(date, startCity, endCity)
 	for _,t:=range trainNos{
 		fmt.Println(t)

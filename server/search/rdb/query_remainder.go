@@ -26,14 +26,18 @@ func QueryTrainByDateAndCity(date,startCity, endCity string) []string {
 	if strings.Compare(date,nn)==0{
 		//当天
 		h,m,_:=now.Clock()
+		//fmt.Println(now.Clock())
 		min=h*60+m
 	}
-
+	//fmt.Println(min)
 	res,err := RedisDB.ZRangeByScore(key, redis.ZRangeBy{Min: strconv.Itoa(min), Max: "50000"}).Result()
 	if err!=nil{
 		fmt.Println("select trains failed, err:",err)
 		return nil
 	}
+	//for _,t:=range res{
+	//	fmt.Println(t)
+	//}
 	return res
 }
 
@@ -45,6 +49,7 @@ func QueryTicketNumByDate(date,startCity,endCity string) []*outer.Train {
 	startCity,_=RedisDB.HGet("stationCity",startCity).Result()
 	endCity,_=RedisDB.HGet("stationCity",endCity).Result()
 	trainNos := QueryTrainByDateAndCity(date, startCity,endCity)
+	fmt.Println(len(trainNos))
 
 	request:=&ticketPoolRPC.GetTicketNumberRequest{}
 

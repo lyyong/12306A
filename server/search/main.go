@@ -15,3 +15,4 @@ func main()  {
 	fmt.Println(r)
 
 }
+//北京市-上海市 800 10000000

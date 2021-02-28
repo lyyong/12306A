@@ -57,9 +57,9 @@ func InitId()  {
 		TrainNumbers[uint32(t.ID)]=t.Number
 	}
 
-	SeatTypes[1]="businessSeat"
-	SeatTypes[2]="firstSeat"
-	SeatTypes[3]="secondSeat"
+	SeatTypes[0]="businessSeat"
+	SeatTypes[1]="firstSeat"
+	SeatTypes[2]="secondSeat"
 	SeatTypeIds["businessSeat"]=0
 	SeatTypeIds["firstSeat"]=1
 	SeatTypeIds["secondSeat"]=2
