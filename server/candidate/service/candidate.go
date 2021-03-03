@@ -19,7 +19,7 @@ type candidateService struct {
 func NewCandidateService() (*candidateService, error) {
 	cs := &candidateService{}
 	var err error
-	cs.orderOp, err = orderRPCClient.NewClientWithMQHost(setting.Kafka.Host)
+	cs.orderOp, err = orderRPCClient.NewClientWithTargetAndMQHost(setting.RPCTarget.Order, setting.Kafka.Host)
 	cs.orderOp.SetDealPayOK(payOK)
 	if err != nil {
 		return nil, err

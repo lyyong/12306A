@@ -2,4 +2,4 @@ FROM scratch
 COPY . /
 
 EXPOSE 9443
-ENTRYPOINT ["./ticketPool-k","-configFile=ticketPool-config-docker.ini"]
+ENTRYPOINT ["./ticket-pool-k","-configFile=./config/ticketPool-config-docker.ini"]

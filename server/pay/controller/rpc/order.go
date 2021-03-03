@@ -13,25 +13,18 @@ import (
 type OrderRPCService struct {
 }
 
-func (o OrderRPCService) Refund(ctx context.Context, request *orderRPCpb.RefundRequest) (*orderRPCpb.Respond, error) {
-	orderService := service.NewOrderService()
-	return nil, orderService.Refund(uint(request.UserID), request.OutsideID, request.FullMoney, int(request.Money))
-}
-
-func (o OrderRPCService) GetNoFinishOrder(ctx context.Context, condition *orderRPCpb.SearchCondition) (*orderRPCpb.OrderInfo, error) {
+func (o OrderRPCService) ExistNoFinishOrder(ctx context.Context, condition *orderRPCpb.SearchCondition) (*orderRPCpb.ExistNoFinishOrderRespond, error) {
 	orderService := service.NewOrderService()
 	order := orderService.GetOrdersByUserIDAndUnfinish(uint(condition.UserID))
 	if order == nil {
-		return nil, nil
+		return &orderRPCpb.ExistNoFinishOrderRespond{Exist: false}, nil
 	}
-	return &orderRPCpb.OrderInfo{
-		UserID:         uint64(order.UserID),
-		Money:          int64(order.Money),
-		AffairID:       order.AffairID,
-		ExpireDuration: int32(order.ExpireDuration),
-		OrderOutsideID: order.OutsideID,
-		State:          int32(order.State),
-	}, nil
+	return &orderRPCpb.ExistNoFinishOrderRespond{Exist: true}, nil
+}
+
+func (o OrderRPCService) Refund(ctx context.Context, request *orderRPCpb.RefundRequest) (*orderRPCpb.Respond, error) {
+	orderService := service.NewOrderService()
+	return nil, orderService.Refund(uint(request.UserID), request.OutsideID, request.FullMoney, int(request.Money))
 }
 
 // UpdateState RPC更新订单状态

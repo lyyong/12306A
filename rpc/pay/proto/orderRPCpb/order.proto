@@ -59,8 +59,12 @@ message RefundRequest {
   int64 Money = 4;
 }
 
+message ExistNoFinishOrderRespond {
+  bool Exist = 1;
+}
+
 service OrderRPCService {
-  rpc GetNoFinishOrder(SearchCondition) returns (OrderInfo) {};
+  rpc ExistNoFinishOrder(SearchCondition) returns (ExistNoFinishOrderRespond) {};
   rpc Create(CreateRequest) returns (CreateRespond) {};
   rpc Read(SearchCondition) returns (ReadRespond) {};
   rpc UpdateState(UpdateStateRequest) returns (Respond) {};

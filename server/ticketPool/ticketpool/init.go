@@ -45,7 +45,7 @@ var (
 func InitTicketPool() {
 	ticketPool := &TicketPool{
 		trainMap:            make(map[uint32]*Train),
-		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
+		seatTypeMap: 		 initSeatTypeMap(),
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
@@ -96,6 +96,7 @@ func InitTicketPool() {
 		}
 
 	}
+
 	Tp = ticketPool
 }
 
@@ -127,6 +128,15 @@ func genStaticInfo() {
 		}
 		// TODO 添加其他座位类型
 	}
+}
+
+func initSeatTypeMap() map[uint32]string {
+	seatTypeMap := make(map[uint32]string)
+	seatTypeName := []string{"商务座","一等座","二等座","高级软卧","软卧","硬卧","硬座"}
+	for i := 0; i < len(seatTypeName); i++ {
+		seatTypeMap[uint32(i)] = seatTypeName[i]
+	}
+	return seatTypeMap
 }
 
 func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carriageList []*model.CarriageType) *Carriages {
@@ -178,14 +188,20 @@ func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carria
 	return carriages
 }
 
+
+
+
+
+
+
+// 初始化假数据 - 测试
 func InitMockData() {
 	// 初始化票池
 	Tp = &TicketPool{
 		trainMap:            make(map[uint32]*Train),
-		carriageSeatInfoMap: make(map[uint32]*SeatInfo),
+		seatTypeMap: 		 make(map[uint32]string),
 	}
 	// 初始化车厢类型
-	carriageSeatInfoMap := Tp.carriageSeatInfoMap
 	/*
 		   mock数据:
 			[ 	carriageTypeId : 0
@@ -215,12 +231,12 @@ func InitMockData() {
 		}
 	}
 
-	carriageSeatInfoMap[0] = &SeatInfo{
+	businessSeat := &SeatInfo{
 		SeatType:     "商务",
 		maxSeatCount: 100,
 		seats:        seats,
 	}
-	carriageSeatInfoMap[1] = &SeatInfo{
+	firstSeat := &SeatInfo{
 		SeatType:     "一等座",
 		maxSeatCount: 100,
 		seats:        seats,
@@ -239,7 +255,7 @@ func InitMockData() {
 			index++
 		}
 	}
-	carriageSeatInfoMap[2] = &SeatInfo{
+	secondSeat := &SeatInfo{
 		SeatType:     "二等座",
 		maxSeatCount: 140,
 		seats:        seatsLevelSecond,
@@ -284,7 +300,7 @@ func InitMockData() {
 	business := make([]*FullTicket, carriageCount)
 	for i := 0; i < carriageCount; i++ {
 		business[i] = &FullTicket{
-			seat:              Tp.carriageSeatInfoMap[0],
+			seat:              businessSeat,
 			carriageSeq:       strconv.Itoa(index),
 			currentSeatNumber: 0,
 		}
@@ -294,7 +310,7 @@ func InitMockData() {
 	first := make([]*FullTicket, carriageCount)
 	for i := 0; i < carriageCount; i++ {
 		first[i] = &FullTicket{
-			seat:              Tp.carriageSeatInfoMap[1],
+			seat:              firstSeat,
 			carriageSeq:       strconv.Itoa(index),
 			currentSeatNumber: 0,
 		}
@@ -304,7 +320,7 @@ func InitMockData() {
 	second := make([]*FullTicket, carriageCount)
 	for i := 0; i < carriageCount; i++ {
 		second[i] = &FullTicket{
-			seat:              Tp.carriageSeatInfoMap[2],
+			seat:              secondSeat,
 			carriageSeq:       strconv.Itoa(index),
 			currentSeatNumber: 0,
 		}
@@ -338,7 +354,7 @@ func generateFullTicketValue(stationNumber int) uint64 {
 }
 
 func showTicketPoolInfo() {
-	for key, value := range Tp.carriageSeatInfoMap {
+	for key, value := range Tp.seatTypeMap {
 		fmt.Println("carriageTypeId:[", key, "]; seatInfo:[", value, "]")
 	}
 	for key, value := range Tp.trainMap {

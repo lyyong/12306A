@@ -52,7 +52,7 @@ func InitRouter() *gin.Engine {
 		}
 		orderGroup := apiV1.Group("/order")
 		{
-			orderGroup.GET("/myOrders", v1.GetUserOrders)
+			orderGroup.GET("/myOrders", v1.GetUserFinishOrders)
 		}
 	}
 

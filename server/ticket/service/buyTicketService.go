@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func CheckConflict(passengerId *[]uint32 ,date string) (bool, error){
+func CheckConflict(passengerId *[]uint32, date string) (bool, error) {
 	isConflict, err := models.IsConflict(passengerId, date)
 	if err != nil {
 		return false, err
@@ -34,15 +34,11 @@ func GetTickets(getTicketReq *ticketPoolPb.GetTicketRequest) ([]*ticketPoolPb.Ti
 }
 
 func CheckUnHandleIndent(userId uint32) (bool, error) {
-	resp, err := ts.orderCli.GetNoFinishOrder(&orderPb.SearchCondition{UserID: uint64(userId)})
+	resp, err := ts.orderCli.ExistNoFinishOrder(&orderPb.SearchCondition{UserID: uint64(userId)})
 	if err != nil {
 		return false, err
 	}
-	if resp == nil {
-		return false, nil
-	}else {
-		return true, nil
-	}
+	return resp.Exist, err
 }
 
 func CreateOrder(createReq *orderPb.CreateRequest) (*orderPb.CreateRespond, error) {

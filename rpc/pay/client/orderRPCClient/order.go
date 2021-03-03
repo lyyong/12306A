@@ -32,6 +32,7 @@ type PayOKOrderInfo struct {
 var (
 	client           *OrderRPCClient
 	kafkaDefaultHost = "kafka:9092"
+	targetService    = "nginx:18082"
 	// 在重设kafka host是停止上一个线程
 	runFlag = true
 	wg      sync.WaitGroup
@@ -40,20 +41,21 @@ var (
 )
 
 const (
-	targetServiceName           = "nginx:18082"
 	targetServiceName_localhost = ":8082"
 	topic                       = "PayOK"
 	partition                   = 0
 )
 
 // NewClient 创建一个 OrderRPCClient
+//
+// Deprecated
 func NewClient() (*OrderRPCClient, error) {
 	once.Do(func() {
 		if client != nil {
 			return
 		}
 		client = &OrderRPCClient{pbClient: nil, dealPayOK: nil}
-		conn, err := rpc_manage.NewGRPCClientConn(targetServiceName) // 如果出错可能运行在本地, 尝试使用本地连接
+		conn, err := rpc_manage.NewGRPCClientConn(targetService) // 如果出错可能运行在本地, 尝试使用本地连接
 		if err != nil {
 			logging.Error(err)
 			client = nil
@@ -91,12 +93,18 @@ func tryDirectConnent() *OrderRPCClient {
 // NewClientWithMQHost 创建一个 OrderRPCClient 并设置消息队列的服务地址
 //
 // 在docker中默认设置未kafka:9092, 如果是本地运行可以使用localhost:9092
+// Deprecated
 func NewClientWithMQHost(MQHost string) (*OrderRPCClient, error) {
 	kafkaDefaultHost = MQHost
 	return NewClient()
 }
 
-// runRecvKafka 运行接受携程, 只能在携程中运行
+func NewClientWithTargetAndMQHost(target, MQHost string) (*OrderRPCClient, error) {
+	targetService = target
+	return NewClientWithMQHost(MQHost)
+}
+
+// runRecvKafka 运行接受协程, 只能在协程中运行
 func runRecvKafka(ctx context.Context, cli *OrderRPCClient) {
 	wg.Add(1)
 	defer wg.Done()
@@ -162,12 +170,13 @@ func (c *OrderRPCClient) Create(info *orderRPCpb.CreateRequest) (*orderRPCpb.Cre
 	tclient := *c.pbClient
 	resp, err := tclient.Create(context.Background(), info)
 	if err != nil {
-		tryDirectConnent()
-		tclient := *c.pbClient
-		resp, err := tclient.Create(context.Background(), info)
-		if err != nil {
-			return nil, err
-		}
+		// logging.Error(err)
+		// tryDirectConnent()
+		// tclient := *c.pbClient
+		// resp, err := tclient.Create(context.Background(), info)
+		// if err != nil {
+		// 	return nil, err
+		// }
 		return resp, err
 	}
 	return resp, nil
@@ -177,12 +186,6 @@ func (c *OrderRPCClient) Read(info *orderRPCpb.SearchCondition) (*orderRPCpb.Rea
 	tclient := *c.pbClient
 	resp, err := tclient.Read(context.Background(), info)
 	if err != nil {
-		tryDirectConnent()
-		tclient := *c.pbClient
-		resp, err := tclient.Read(context.Background(), info)
-		if err != nil {
-			return nil, err
-		}
 		return resp, err
 	}
 	return resp, err
@@ -192,12 +195,6 @@ func (c *OrderRPCClient) UpdateState(info *orderRPCpb.UpdateStateRequest) (*orde
 	tclient := *c.pbClient
 	resp, err := tclient.UpdateState(context.Background(), info)
 	if err != nil {
-		tryDirectConnent()
-		tclient := *c.pbClient
-		resp, err := tclient.UpdateState(context.Background(), info)
-		if err != nil {
-			return nil, err
-		}
 		return resp, err
 	}
 	return resp, err
@@ -207,27 +204,15 @@ func (c *OrderRPCClient) UpdateStateWithRelativeOrder(info *orderRPCpb.UpdateSta
 	tclient := *c.pbClient
 	resp, err := tclient.UpdateStateWithRelativeOrder(context.Background(), info)
 	if err != nil {
-		tryDirectConnent()
-		tclient := *c.pbClient
-		resp, err := tclient.UpdateStateWithRelativeOrder(context.Background(), info)
-		if err != nil {
-			return nil, err
-		}
 		return resp, err
 	}
 	return resp, err
 }
 
-func (c *OrderRPCClient) GetNoFinishOrder(info *orderRPCpb.SearchCondition) (*orderRPCpb.OrderInfo, error) {
+func (c *OrderRPCClient) ExistNoFinishOrder(info *orderRPCpb.SearchCondition) (*orderRPCpb.ExistNoFinishOrderRespond, error) {
 	tclient := *c.pbClient
-	resp, err := tclient.GetNoFinishOrder(context.Background(), info)
+	resp, err := tclient.ExistNoFinishOrder(context.Background(), info)
 	if err != nil {
-		tryDirectConnent()
-		tclient := *c.pbClient
-		resp, err := tclient.GetNoFinishOrder(context.Background(), info)
-		if err != nil {
-			return nil, err
-		}
 		return resp, err
 	}
 	return resp, err
@@ -237,12 +222,6 @@ func (c *OrderRPCClient) Refund(request *orderRPCpb.RefundRequest) (*orderRPCpb.
 	tclient := *c.pbClient
 	resp, err := tclient.Refund(context.Background(), request)
 	if err != nil {
-		tryDirectConnent()
-		tclient := *c.pbClient
-		resp, err := tclient.Refund(context.Background(), request)
-		if err != nil {
-			return nil, err
-		}
 		return resp, err
 	}
 	return resp, err

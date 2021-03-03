@@ -60,24 +60,23 @@ var Database = &database{}
 var Redis = &redis{}
 var Kafka = &kafka{}
 
-// 配置路径和配置文件名称
-var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
-var configName = flag.String("configName", "pay-config.ini", "设置配置文件的名称")
+// 配置路径
+var configFile = flag.String("ConfigFile", "./config/candidate-config.ini", "设置配置文件")
 
 // Setup 载入配置文件信息
 func Setup() {
 	// 读取命令行信息
 	flag.Parse()
-	Cfg, err := ini.Load(*configPath + "/" + *configName)
+	cfg, err := ini.Load(*configFile)
 	if err != nil {
-		logging.Error("加载配置文件%s\\%s失败", configPath, configName)
+		logging.Fatal("Setting -- Load config fail:", err)
 	}
-	loadConfig(Cfg, "server", Server)
-	loadConfig(Cfg, "consul", Consul)
-	loadConfig(Cfg, "zipkin", Zipkin)
-	loadConfig(Cfg, "database", Database)
-	loadConfig(Cfg, "redis", Redis)
-	loadConfig(Cfg, "kafka", Kafka)
+	loadConfig(cfg, "server", Server)
+	loadConfig(cfg, "consul", Consul)
+	loadConfig(cfg, "zipkin", Zipkin)
+	loadConfig(cfg, "database", Database)
+	loadConfig(cfg, "redis", Redis)
+	loadConfig(cfg, "kafka", Kafka)
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
 	Redis.WriteTimeout *= time.Second
