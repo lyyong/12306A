@@ -57,6 +57,7 @@ type zipkin struct {
 
 var Zipkin = &zipkin{}
 
+
 var configFile = flag.String("configFile", "config/ticketPool-config.ini", "设置配置文件")
 
 func InitSetting() {
@@ -70,6 +71,7 @@ func InitSetting() {
 	mapToStruct(cfg.Section("redis"), Redis)
 	mapToStruct(cfg.Section("consul"), Consul)
 	mapToStruct(cfg.Section("zipkin"), Zipkin)
+
 	Redis.IdleTimeout = Redis.IdleTimeout * time.Second
 }
 

@@ -151,9 +151,12 @@ func TestGetTicketNumber_Validity(t *testing.T) {
 	getTicketReq := generateGetTicketData(reqCount)
 
 	getNumberReq := &pb.GetTicketNumberRequest{
-		TrainId:        []uint32{0},
-		StartStationId: 0,
-		DestStationId:  5,
+		Condition: []*pb.GetTicketNumberRequest_Condition{&pb.GetTicketNumberRequest_Condition{
+			TrainId:        0,
+			StartStationId: 0,
+			DestStationId:  5,
+		}},
+
 		Date:           "2021-02-16",
 	}
 
@@ -255,12 +258,19 @@ func generateGetTicketNumberData(requestCount int) []*pb.GetTicketNumberRequest{
 	req := make([]*pb.GetTicketNumberRequest, requestCount)
 
 	for i := 0; i < requestCount; i++ {
-		destStation := rand.Int31n(maxStationNum)+1
+
+		condition := make([]*pb.GetTicketNumberRequest_Condition,10)
+		for j := 0; j < 10; j++ {
+			destStation := rand.Int31n(maxStationNum)+1
+			condition[j] = &pb.GetTicketNumberRequest_Condition{
+				TrainId:        0,
+				StartStationId: uint32(rand.Int31n(destStation)),
+				DestStationId:  uint32(destStation),
+			}
+		}
 		req[i] = &pb.GetTicketNumberRequest{
-			TrainId:        []uint32{0},
-			StartStationId: uint32(rand.Int31n(destStation)),
-			DestStationId:  uint32(destStation),
-			Date:           "2021-02-16",
+			Condition: condition,
+			Date:      "2021-02-16",
 		}
 	}
 
@@ -278,10 +288,12 @@ func getAllConditionTicketNumberData() []*pb.GetTicketNumberRequest{
 	for i := 0; i < maxStationNum-1; i++ {
 		for j := i + 1; j < maxStationNum; j++{
 			req[index] = &pb.GetTicketNumberRequest{
-				TrainId:        []uint32{0},
-				StartStationId: uint32(i),
-				DestStationId:  uint32(j),
-				Date:           "2021-02-16",
+				Condition: []*pb.GetTicketNumberRequest_Condition{&pb.GetTicketNumberRequest_Condition{
+					TrainId:        0,
+					StartStationId: uint32(i),
+					DestStationId:  uint32(j),
+				}},
+				Date:      "2021-02-16",
 			}
 			index++
 		}

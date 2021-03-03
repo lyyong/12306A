@@ -7,6 +7,7 @@ package dao
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"ticketPool/tools/setting"
 )
 
 var(
@@ -21,9 +22,12 @@ var(
 
 )
 
-func init()  {
-	Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306a_test")
-	//fmt.Println(Db)
+func InitDB()  {
+	//Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306a_test")
+	////fmt.Println(Db)
+	Db, err = sql.Open("mysql", setting.DB.Username+":"+setting.DB.Password+"@"+
+		"tcp("+setting.DB.Host+")/"+setting.DB.DbName)
+	//Db,err:=sql.Open("mysql",setting.D)
 	Db.SetMaxOpenConns(0)
 	//fmt.Println(Db)
 	if err != nil {

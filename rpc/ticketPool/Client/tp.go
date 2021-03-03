@@ -7,32 +7,45 @@ import (
 	"common/rpc_manage"
 	"context"
 	"errors"
+	"google.golang.org/grpc"
 	"rpc/ticketPool/proto/ticketPoolRPC"
+	"sync"
 )
 
 type TPRPCClient struct {
 	tpClient *ticketPoolRPC.TicketPoolServiceClient
 }
 
-var client *TPRPCClient
+var (
+	client *TPRPCClient
+	once   sync.Once
+)
 
 const targetServiceName = ":9443"
 
 // NewClient 创建一个ticketPool的RPC客户端
 func NewClient() (*TPRPCClient, error) {
-	if client != nil {
-		return client, nil
-	}
-	client = &TPRPCClient{tpClient: nil}
-	conn, err := rpc_manage.NewGRPCClientConn(targetServiceName)
-	if err != nil {
-		client = nil
-		return nil, err
-	}
-	tclient := ticketPoolRPC.NewTicketPoolServiceClient(conn)
-	client.tpClient = &tclient
-	return client, nil
+	return NewClientWithTarget(targetServiceName)
 }
+
+// NewClient 创建一个ticketPool的RPC客户端
+func NewClientWithTarget(target string) (*TPRPCClient, error) {
+	var err error
+	once.Do(func() {
+		client = &TPRPCClient{tpClient: nil}
+		var conn *grpc.ClientConn
+		conn, err = rpc_manage.NewGRPCClientConn(target)
+		if err != nil {
+			client = nil
+			return
+		}
+		tclient := ticketPoolRPC.NewTicketPoolServiceClient(conn)
+		client.tpClient = &tclient
+	})
+
+	return client, err
+}
+
 
 func (c TPRPCClient) GetTicket(request *ticketPoolRPC.GetTicketRequest) (*ticketPoolRPC.GetTicketResponse, error) {
 	if c.tpClient == nil {

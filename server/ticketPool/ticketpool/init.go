@@ -272,7 +272,7 @@ func InitMockData() {
 	}
 	Tp.trainMap[0] = train
 
-	t, err := time.Parse("2006-01-02 15:04", "2021-02-16 9:30")
+	t, err := time.Parse("2006-01-02 15:04", "2021-02-16 09:30")
 	if err != nil {
 		logging.Error("time format error!")
 	}
@@ -281,8 +281,8 @@ func InitMockData() {
 	for i := 0; i < stationNumber; i++ {
 		train.stopStationMap[uint32(i)] = &StopStation{
 			Seq:        i,
-			ArriveTime: t.Format("2006-01-02 15:04"),
-			StartTime:  t.Add(time.Minute * 10).Format("2006-01-02 15:04"),
+			ArriveTime: t.Format("15:04"),
+			StartTime:  t.Add(time.Minute * 10).Format("15:04"),
 		}
 		t = t.Add(time.Hour)
 	}
