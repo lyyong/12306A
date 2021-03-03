@@ -5,29 +5,10 @@
 package rdb
 
 import (
-	"fmt"
 	"github.com/go-redis/redis"
 )
 
 
-var RedisDB *redis.Client
-var shaBuyTicket string
-var err error
-
-func init() {
-	RedisDB = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-
-	buyTicketScript:=CreateScriptBuyTicket()
-	shaBuyTicket,err=buyTicketScript.Load(RedisDB).Result()
-	if err!=nil{
-		fmt.Println("buyTicket lua script load failed ,err:",err)
-		return
-	}
-}
 
 func CreateScriptBuyTicket() *redis.Script {
 	script := redis.NewScript(`

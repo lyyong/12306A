@@ -6,6 +6,7 @@ package dao
 
 import (
 	"12306A-search/model/outer"
+	"12306A-search/tools/settings"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -24,8 +25,12 @@ var(
 	CityLists []*outer.CityList
 )
 
-func init()  {
-	Db, err = sql.Open("mysql", "root:12345678@tcp(localhost:3306)/12306a_test")
+func InitDB()  {
+	//"root:12345678@tcp(localhost:3306)/12306a_test"
+	//sqlStr:=settings.DB.Username+":"+settings.DB.Password+"@"+ "tcp("+settings.DB.Host+")/"+settings.DB.DbName
+	//fmt.Println(sqlStr)
+	Db, err = sql.Open("mysql", settings.DB.Username+":"+settings.DB.Password+"@"+
+		"tcp("+settings.DB.Host+")/"+settings.DB.DbName)
 	//fmt.Println(Db)
 	Db.SetMaxOpenConns(0)
 	//fmt.Println(Db)

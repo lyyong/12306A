@@ -4,8 +4,16 @@
  */
 package dao
 
-import "testing"
+import (
+	"12306A-search/tools/settings"
+	"fmt"
+	"testing"
+)
 
 func TestInitCityLists(t *testing.T) {
-	InitCityLists()
+	//InitCityLists()
+	settings.Setup()
+	InitDB()
+	fmt.Println(Db)
 }
+
