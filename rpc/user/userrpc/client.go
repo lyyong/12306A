@@ -18,7 +18,12 @@ type Client struct {
 }
 
 func NewClient() *Client {
-	conn, err := rpc_manage.NewGRPCClientConn(targetService)
+	return NewClientWithTarget(targetService)
+}
+
+// 创建RPC客户端
+func NewClientWithTarget(target string) *Client {
+	conn, err := rpc_manage.NewGRPCClientConn(target)
 	if err != nil {
 		logging.Fatal("用户RPC客户端创建失败")
 	}
