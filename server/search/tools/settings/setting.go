@@ -37,11 +37,14 @@ type redis struct {
 	MinIdleConns int
 	IdelTimeout  time.Duration
 }
-
+type target struct {
+	Addr string
+}
 
 var Server = &server{}
 var DB = &database{}
 var RedisDB = &redis{}
+var Target = &target{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -58,6 +61,8 @@ func Setup() {
 	loadConfig(Cfg, "server", Server)
 	loadConfig(Cfg, "database", DB)
 	loadConfig(Cfg, "redis", RedisDB)
+	loadConfig(Cfg, "target", Target)
+
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
 	RedisDB.WriteTimeout *= time.Second

@@ -7,6 +7,7 @@ package rdb
 import (
 	"12306A-search/dao"
 	"12306A-search/model/outer"
+	"12306A-search/tools/settings"
 	"fmt"
 	"github.com/go-redis/redis"
 	"rpc/ticketPool/Client"
@@ -72,7 +73,7 @@ func QueryTicketNumByDate(date,startCity,endCity string) []*outer.Train {
 	request.Date=date
 	request.Condition=conditions
 
-	rpcClient, err := Client.NewClient()
+	rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
 	if err!=nil{
 		fmt.Println("rpc getTicketNumber failed, err:",err)
 		return nil
