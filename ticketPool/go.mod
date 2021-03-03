@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/consul/api v1.8.1
 	github.com/jinzhu/gorm v1.9.16
 	github.com/mozillazg/go-pinyin v0.18.0
-	google.golang.org/grpc v1.36.0 // indirect
+	google.golang.org/grpc v1.36.0
 	rpc v0.0.0-00010101000000-000000000000
 )
 

@@ -23,11 +23,19 @@ func Setup() {
 	// 链路追踪
 	router_tracer.SetupByHttp(setting.Zipkin.ServiceID, setting.Server.Host, fmt.Sprintf("%d", setting.Server.HttpPort), setting.Zipkin.HttpEndpoint)
 	// 开启rpc
-	rpcService := rpc_manage.NewGRPCServer()
-	ticketPoolRPC.RegisterTicketPoolServiceServer(rpcService, &controller.TicketPoolRPCService{})
+	rpcServer := rpc_manage.NewGRPCServer()
+	ticketPoolRPC.RegisterTicketPoolServiceServer(rpcServer, &controller.TicketPoolRPCService{})
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", setting.Server.HttpPort))
 	if err != nil {
 		logging.Error(err)
 	}
-	rpcService.Serve(lis)
+
+	//go func() {
+	//	if err := rpcServer.Serve(lis); err != nil {
+	//		logging.Fatal("rpc server: ", err)
+	//		return
+	//	}
+	//}()
+	rpcServer.Serve(lis)
+	defer lis.Close()
 }

@@ -7,6 +7,7 @@ import (
 	"common/tools/logging"
 	"flag"
 	"github.com/go-ini/ini"
+	"time"
 )
 
 type server struct {
@@ -28,9 +29,28 @@ type zipkin struct {
 	HttpEndpoint string
 }
 
+
+type database struct {
+	Type     string
+	Username string
+	Password string
+	Host     string
+	DbName   string
+}
+
+type redis struct {
+	Host         string
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+	PoolSize     int
+	MinIdleConns int
+	IdelTimeout  time.Duration
+}
 var Server = &server{}
 var Consul = &consul{}
 var Zipkin = &zipkin{}
+var Redis = &redis{}
+var DB = &database{}
 
 // 配置路径和配置文件名称
 var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
@@ -47,6 +67,8 @@ func Setup() {
 	loadConfig(Cfg, "server", Server)
 	loadConfig(Cfg, "consul", Consul)
 	loadConfig(Cfg, "zipkin", Zipkin)
+	loadConfig(Cfg,"database",DB)
+	loadConfig(Cfg,"redis",Redis)
 }
 
 func loadConfig(Cfg *ini.File, section string, data interface{}) {

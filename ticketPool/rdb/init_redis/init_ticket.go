@@ -16,6 +16,9 @@ import (
 
 func InitTicketPool()  {
 
+	WriteTicketPoolToRedis()
+
+	SplitTicket()
 }
 
 //北京市-上海市 0 1000
@@ -34,7 +37,7 @@ func WriteTicketPoolToRedis()  {
 		return
 	}
 	//trainNos:=dao.SelectTrainAll()
-	fmt.Println(len(trainNos))
+	//fmt.Println(len(trainNos))
 	carriageTypes:=dao.QueryCarriageTypesAll()
 	carriageTypeNum:=len(carriageTypes)
 	carriageNum:=30
@@ -95,7 +98,7 @@ func SplitTicket()  {
 		return
 	}
 	//trainNos:=dao.SelectTrainAll()
-	fmt.Println(len(trainNos))
+	//fmt.Println(len(trainNos))
 	for i:=0;i<len(trainNos);i++ {
 		trainNo := trainNos[i]
 		//fmt.Println(trainNo)
@@ -152,7 +155,7 @@ func SplitTicket()  {
 		secondSeatKey := date + ":" + trainNo + ":" + "1" +":"+ "secondSeat"
 		secondSeats, _ := rdb.RedisDB.ZRangeByScoreWithScores(secondSeatKey, redis.ZRangeBy{Min: "0", Max: "1000"}).Result()
 		secondSeatMean := len(secondSeats) / int(stationNum)
-		fmt.Println(trainNo,secondSeatMean,len(secondSeats),stationNum)
+		//fmt.Println(trainNo,secondSeatMean,len(secondSeats),stationNum)
 		for j:=2;j<int(stationNum);j++{
 			for k:=0;k<secondSeatMean;k++{
 				tickets,_:=rdb.RedisDB.ZRangeByScoreWithScores(secondSeatKey,redis.ZRangeBy{Min: strconv.Itoa(j+1),Max: "10000"}).Result()
