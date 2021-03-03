@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/hashicorp/consul/api"
+	"ticketPool/tools/setting"
 )
 
 var (
@@ -20,10 +21,11 @@ var (
 )
 
 
-func init()  {
+func InitRedis()  {
 	RedisDB =redis.NewClient(&redis.Options{
-		Addr: "0.0.0.0:6379",
+		Addr: setting.Redis.Host,
 	})
+	fmt.Println()
 
 	//加载脚本
 	//buyTicketScript:= init_redis.CreateScriptBuyTicket()
@@ -36,10 +38,11 @@ func init()  {
 	//	Addrs:  []string{"192.168.10.11:7001","192.168.10.11:7002", "192.168.10.11:7003"},
 	//})
 	//连接redis集群
+}
 
-
+func InitConsul() {
 	client, err := api.NewClient(&api.Config{
-		Address: "127.0.0.1:8500",
+		Address: setting.Consul.Address,
 	})
 	if err == nil {
 		ConsulDb = client
@@ -47,5 +50,4 @@ func init()  {
 		fmt.Println("connect consul failed, err:",err)
 		return
 	}
-
 }
