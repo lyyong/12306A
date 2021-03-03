@@ -26,12 +26,12 @@ func init(){
 func NewTicketService() (*TicketService, error) {
 	ts := &TicketService{}
 	var err error
-	ts.orderCli, err = orderClient.NewClientWithMQHost(setting.Kafka.Host)
+	ts.orderCli, err = orderClient.NewClientWithTargetAndMQHost(setting.RpcTarget.Order, setting.Kafka.Host)
 	ts.orderCli.SetDealPayOK(payOK)
 	if err != nil {
 		return nil, err
 	}
-	ts.tpCli,err = ticketPoolClient.NewClient()
+	ts.tpCli,err = ticketPoolClient.NewClientWithTarget(setting.RpcTarget.TicketPool)
 	if err != nil {
 		return nil, err
 	}
