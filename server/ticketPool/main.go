@@ -38,9 +38,6 @@ func main() {
 	err := router_tracer.SetupByHttp(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.RPCPort), setting.Zipkin.HttpEndpoint)
 
-	/* 初始化票池 */
-	logging.Info("Init TicketPool")
-	ticketpool.InitTicketPool()
 
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
@@ -59,6 +56,11 @@ func main() {
 			return
 		}
 	}()
+
+	/* 初始化票池 */
+	logging.Info("Init TicketPool")
+	ticketpool.InitTicketPool()
+
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
