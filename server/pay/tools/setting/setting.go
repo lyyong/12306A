@@ -61,7 +61,7 @@ var Redis = &redis{}
 var Kafka = &kafka{}
 
 // 配置路径
-var configFile = flag.String("ConfigFile", "./config/candidate-config.ini", "设置配置文件")
+var configFile = flag.String("ConfigFile", "./config/search-config.ini", "设置配置文件")
 
 // Setup 载入配置文件信息
 func Setup() {

@@ -9,6 +9,8 @@ import (
 	"pay/model"
 	"pay/service/cache"
 	cache2 "pay/tools/cache"
+	"strconv"
+	"time"
 )
 
 type orderService struct {
@@ -28,7 +30,7 @@ func (s orderService) CreateOrder(userID uint, money int, affairID, createdBy st
 		Money:    money,
 		AffairID: affairID,
 	}
-	order.OutsideID = order.AffairID
+	order.OutsideID = createdBy + time.Now().Format("2006-01-02-15:04:05.000-") + strconv.Itoa(int(userID))
 	orderCache := cache.OrderCache{
 		UserID:    userID,
 		OutsideID: order.OutsideID,

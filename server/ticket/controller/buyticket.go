@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"common/middleware/token/usertoken"
 	"common/tools/logging"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -10,57 +11,62 @@ import (
 	"ticket/service"
 )
 
-type BuyTicketRequest struct{
-	UserId 			uint32	`json:"user_id"`  	// 暂时先由前端传参，后续通过用户身份认证获得
-	TrainId			uint32 	`json:"train_id"`
-	StartStationId	uint32 	`json:"start_station_id"`
-	DestStationId	uint32 	`json:"dest_station_id"`
-	Date			string 	`json:"date"`
-	Passengers  	[]Passenger `json:"passengers"`
+type BuyTicketRequest struct {
+	TrainId        uint32      `json:"train_id"`
+	StartStationId uint32      `json:"start_station_id"`
+	DestStationId  uint32      `json:"dest_station_id"`
+	Date           string      `json:"date"`
+	Passengers     []Passenger `json:"passengers"`
 }
 
 type Passenger struct {
-	PassengerId 	uint32 	`json:"passenger_id"`
-	PassengerName 	string	`json:"passenger_name"`
-	SeatTypeId		uint32 	`json:"seat_type_id"`
-	ChooseSeat  	string 	`json:"choose_seat"`
+	PassengerId   uint32 `json:"passenger_id"`
+	PassengerName string `json:"passenger_name"`
+	SeatTypeId    uint32 `json:"seat_type_id"`
+	ChooseSeat    string `json:"choose_seat"`
 }
 
 type BuyTicketResponse struct {
-	OrderOuterId 	string `json:"order_id"`
-	TrainId 		uint32 `json:"train_id"`
-	TrainNum		string `json:"train_num"`
-	StartStationId	uint32 `json:"start_station_id"`
-	StartStation	string `json:"start_station"`
-	StartTime 		string `json:"start_time"`
-	DestStationId	uint32 `json:"dest_station_id"`
-	DestStation		string `json:"dest_station"`
-	ArriveTime 		string `json:"arrive_time"`
-	Date			string `json:"date"`
-	ExpiredTime 	int32 `json:"expired_time"` // 单位秒
-	Price 			int32 `json:"price"`
-	Tickets			[]TicketInfo `json:"tickets"`
+	OrderOuterId   string       `json:"order_id"`
+	TrainId        uint32       `json:"train_id"`
+	TrainNum       string       `json:"train_num"`
+	StartStationId uint32       `json:"start_station_id"`
+	StartStation   string       `json:"start_station"`
+	StartTime      string       `json:"start_time"`
+	DestStationId  uint32       `json:"dest_station_id"`
+	DestStation    string       `json:"dest_station"`
+	ArriveTime     string       `json:"arrive_time"`
+	Date           string       `json:"date"`
+	ExpiredTime    int32        `json:"expired_time"` // 单位秒
+	Price          int32        `json:"price"`
+	Tickets        []TicketInfo `json:"tickets"`
 }
 
 type TicketInfo struct {
-	PassengerId 	uint32	`json:"passenger_id"`
-	PassengerName 	string	`json:"passenger_name"`
-	SeatTypeId 		uint32	`json:"seat_type_id"`
-	SeatType		string	`json:"seat_type"`
-	CarriageNumber 	string	`json:"carriage_number"`
-	SeatNumber 		string	`json:"seat_number"`
-	Price 			int32	`json:"price"`
+	PassengerId    uint32 `json:"passenger_id"`
+	PassengerName  string `json:"passenger_name"`
+	SeatTypeId     uint32 `json:"seat_type_id"`
+	SeatType       string `json:"seat_type"`
+	CarriageNumber string `json:"carriage_number"`
+	SeatNumber     string `json:"seat_number"`
+	Price          int32  `json:"price"`
 }
 
-func BuyTicket(c *gin.Context){
+func BuyTicket(c *gin.Context) {
 	var btReq BuyTicketRequest
 	if err := c.ShouldBindJSON(&btReq); err != nil {
 		logging.Error("bind param error:", err)
 		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: fmt.Sprintf("参数有误：%s", err.Error()), Data: nil})
 		return
 	}
-
-	hasUnHandleIndent, err := service.CheckUnHandleIndent(btReq.UserId)
+	// 获取用户信息
+	userInfo, ok := usertoken.GetUserInfo(c)
+	if !ok {
+		logging.Error("token 错误")
+		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "token 错误", Data: nil})
+		return
+	}
+	hasUnHandleIndent, err := service.CheckUnHandleIndent(uint32(userInfo.UserId))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Response{Code: 0, Msg: err.Error(), Data: nil})
 		return
@@ -71,7 +77,7 @@ func BuyTicket(c *gin.Context){
 	}
 
 	passengerId := make([]uint32, len(btReq.Passengers))
-	for index, value := range btReq.Passengers{
+	for index, value := range btReq.Passengers {
 		passengerId[index] = value.PassengerId
 	}
 	isConflict, err := service.CheckConflict(&passengerId, btReq.Date)
@@ -85,11 +91,12 @@ func BuyTicket(c *gin.Context){
 	}
 
 	passengers := make([]*ticketPoolPb.PassengerInfo, len(btReq.Passengers))
-	for index, value := range btReq.Passengers{
+	for index, value := range btReq.Passengers {
 		passengers[index] = &ticketPoolPb.PassengerInfo{
-			PassengerId: value.PassengerId,
-			SeatTypeId:  value.SeatTypeId,
-			ChooseSeat:  value.ChooseSeat,
+			PassengerName: value.PassengerName,
+			PassengerId:   value.PassengerId,
+			SeatTypeId:    value.SeatTypeId,
+			ChooseSeat:    value.ChooseSeat,
 		}
 	}
 	getTicketReq := &ticketPoolPb.GetTicketRequest{
@@ -105,7 +112,7 @@ func BuyTicket(c *gin.Context){
 		return
 	}
 
-	orderId := fmt.Sprintf("%d_ticket", btReq.UserId)
+	orderId := fmt.Sprintf("%d_ticket", uint32(userInfo.UserId))
 	err = service.SaveTickets(orderId, tickets, 1800)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "缓存车票失败", Data: nil})
@@ -113,7 +120,7 @@ func BuyTicket(c *gin.Context){
 	}
 
 	createOrderReq := &orderPb.CreateRequest{
-		UserID:         uint64(btReq.UserId),
+		UserID:         uint64(userInfo.UserId),
 		Money:          8888,
 		AffairID:       orderId,
 		ExpireDuration: 1800,

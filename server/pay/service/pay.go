@@ -50,9 +50,11 @@ func (s payService) WantPay(userID uint, orderOutsideID string) string {
 		var order model.Order
 		cache2.Get(orderCache.GetNoFinishOrderKey(), &order)
 		if order.OutsideID != orderOutsideID {
+			logging.Error("outsideID不符合", order.OutsideID, "!=", orderOutsideID)
 			return ""
 		}
 		order.AlipayOrderInfo = orderInfo
+		cache2.Delete(orderCache.GetNoFinishOrderKey())
 		cache2.Set(orderCache.GetNoFinishOrderKey(), &order, expTime)
 		return orderInfo
 	}
