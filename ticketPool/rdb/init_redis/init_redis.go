@@ -66,24 +66,15 @@ func WriteTrainPoolToRedis() {
 //列车基本信息用一个hash保存：key=车次, 元素：trainNo,stationNum, 1--stationNum -> cityName
 //每个车站都单独用一个hash保存,key=车次+站序，元素：stationNo,stationName,cityName,arriveTime,departTime,duration,price,mileage
 func WriteTrainInfoToRedis() {
-	exists:=make(map[string]bool)
+	//exists:=make(map[string]bool)
 	stopInfos:=dao.SelectStopInfoAll()
 	for _,stopInfo:=range stopInfos{
 		key:=stopInfo.TrainNumber
-		res,_:=rdb.RedisDB.Exists(key).Result()
-		if res>0{
-			exists[key]=true
-			continue
-		}
 		rdb.RedisDB.HSet(key,"stationNum",0)
 	}
 
 	for _,stopInfo:=range stopInfos{
 		key:=stopInfo.TrainNumber
-		//存在就不写了
-		if exists[key]==true{
-			continue
-		}
 
 		//车次元数据
 		//站名-站序
