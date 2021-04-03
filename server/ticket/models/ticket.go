@@ -33,6 +33,12 @@ func AddMultipleTicket(tickets *[]Ticket) error {
 	return res.Error
 }
 
+func GetTicketByOrderId(orderId string) ([]*Ticket, error){
+	var tickets []*Ticket
+	res := database.DB.Where("order_outside_id = ?", orderId).Find(tickets)
+	return tickets, res.Error
+}
+
 func UpdateState(ticketId uint32, state string) (bool, error) {
 	return false, nil
 }

@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	pb "rpc/ticket/proto/ticketRPC"
+	"ticket/models"
 )
 
 type TicketServer struct {
@@ -26,13 +27,41 @@ func (ts *TicketServer) AddTickets(ctx context.Context, in *pb.Tickets) (*pb.Emp
 	return &pb.Empty{}, nil
 }
 
-func (ts *TicketServer) GetTicketByIndentId(ctx context.Context, in *pb.GetByIndentRequest) (*pb.Tickets, error) {
+func (ts *TicketServer) GetTicketByOrdersId(ctx context.Context, in *pb.GetTicketByOrdersIdRequest) (*pb.TicketsList, error) {
 	// 根据订单号查询 Ticket 表
+	list := make([]*pb.Tickets, len(in.OrdersId))
+	for i := 0; i < len(in.OrdersId); i++ {
+		orderId := in.OrdersId[i]
 
-	return &pb.Tickets{}, nil
+		res, err := models.GetTicketByOrderId(orderId)
+		if err != nil {
+			return nil, err
+		}
+		tickets := make([]*pb.Ticket, len(res))
+		for j := 0; j < len(res); j++ {
+			tickets[j] = &pb.Ticket{
+				TrainNum:       res[j].TrainNum,
+				StartStation:   res[j].StartStation,
+				StartTime:      res[j].StartTime.String(),
+				DestStation:    res[j].DestStation,
+				DestTime:       res[j].DestTime.String(),
+				SeatType:       res[j].SeatType,
+				CarriageNumber: res[j].CarriageNumber,
+				SeatNumber:     res[j].SeatNumber,
+				Price:          res[j].Price,
+				PassengerName:  res[j].PassengerName,
+				OrderOutsideId: res[j].OrderOutsideId,
+			}
+		}
+		list[i] = &pb.Tickets{Tickets: tickets}
+	}
+
+	return &pb.TicketsList{
+		List: list,
+	}, nil
 }
 
-func (ts *TicketServer) GetTicketByPassengerId(ctx context.Context, in *pb.GetByPassengerRequest) (*pb.Tickets, error) {
+func (ts *TicketServer) GetTicketByPassengerId(ctx context.Context, in *pb.GetTicketByPassengerIdRequest) (*pb.Tickets, error) {
 	// 根据 passengerId 查询 Ticket 表
 
 	return &pb.Tickets{}, nil
