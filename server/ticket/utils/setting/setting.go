@@ -64,6 +64,15 @@ type zipkin struct {
 
 var Zipkin = &zipkin{}
 
+
+type rpcTarget struct {
+	Order string
+	TicketPool string
+}
+
+var RpcTarget = &rpcTarget{}
+
+
 var configFile = flag.String("configFile", "config/ticket-config.ini", "设置配置文件")
 
 func init() {
@@ -78,6 +87,7 @@ func init() {
 	mapToStruct(cfg.Section("kafka"), Kafka)
 	mapToStruct(cfg.Section("consul"), Consul)
 	mapToStruct(cfg.Section("zipkin"), Zipkin)
+	mapToStruct(cfg.Section("RPCTarget"), RpcTarget)
 	Redis.IdleTimeout = Redis.IdleTimeout * time.Second
 }
 

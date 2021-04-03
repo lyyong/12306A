@@ -20,7 +20,6 @@ type server struct {
 	RunMode      string
 }
 
-
 type database struct {
 	Type     string
 	Username string
@@ -46,22 +45,21 @@ var DB = &database{}
 var RedisDB = &redis{}
 var Target = &target{}
 
-// 配置路径和配置文件名称
-var configPath = flag.String("configPath", "./config/", "设置程序的配置文件路径")
-var configName = flag.String("configName", "search-config.ini", "设置配置文件的名称")
+// 配置路径
+var configFile = flag.String("ConfigFile", "./config/candidate-config.ini", "设置配置文件")
 
 // Setup 载入配置文件信息
 func Setup() {
 	// 读取命令行信息
 	flag.Parse()
-	Cfg, err := ini.Load(*configPath + "/" + *configName)
+	cfg, err := ini.Load(*configFile)
 	if err != nil {
-		logging.Error("加载配置文件%s\\%s失败", configPath, configName)
+		logging.Fatal("Setting -- Load config fail:", err)
 	}
-	loadConfig(Cfg, "server", Server)
-	loadConfig(Cfg, "database", DB)
-	loadConfig(Cfg, "redis", RedisDB)
-	loadConfig(Cfg, "target", Target)
+	loadConfig(cfg, "server", Server)
+	loadConfig(cfg, "database", DB)
+	loadConfig(cfg, "redis", RedisDB)
+	loadConfig(cfg, "target", Target)
 
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
@@ -76,4 +74,3 @@ func loadConfig(Cfg *ini.File, section string, data interface{}) {
 		logging.Error("加载%s数据出错: %v", section, err)
 	}
 }
-

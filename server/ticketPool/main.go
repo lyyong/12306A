@@ -60,7 +60,7 @@ func main() {
 	/* 初始化票池 */
 	logging.Info("Init TicketPool")
 	ticketpool.InitTicketPool()
-
+	logging.Info("TicketPool init success")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
