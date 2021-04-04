@@ -39,6 +39,12 @@ func GetTicketByOrderId(orderId string) ([]*Ticket, error){
 	return tickets, res.Error
 }
 
+func GetTicketsByPassengerId(passengerId uint32) ([]*Ticket, error){
+	var tickets []*Ticket
+	res := database.DB.Where("passenger_id = ?", passengerId).Find(tickets)
+	return tickets, res.Error
+}
+
 func UpdateState(ticketId uint32, state string) (bool, error) {
 	return false, nil
 }

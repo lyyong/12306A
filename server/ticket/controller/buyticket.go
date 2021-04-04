@@ -112,7 +112,7 @@ func BuyTicket(c *gin.Context) {
 		return
 	}
 
-	orderId := fmt.Sprintf("%d_ticket", uint32(userInfo.UserId))
+	orderId := fmt.Sprintf("ticket_%d", uint32(userInfo.UserId))
 	err = service.SaveTickets(orderId, tickets, 1800)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "缓存车票失败", Data: nil})

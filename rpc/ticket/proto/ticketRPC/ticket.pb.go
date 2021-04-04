@@ -388,6 +388,53 @@ func (x *GetTicketByPassengerIdRequest) GetPassengerId() uint32 {
 	return 0
 }
 
+type GetUnHandleTicketsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId uint32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+}
+
+func (x *GetUnHandleTicketsRequest) Reset() {
+	*x = GetUnHandleTicketsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_ticket_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUnHandleTicketsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUnHandleTicketsRequest) ProtoMessage() {}
+
+func (x *GetUnHandleTicketsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ticket_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUnHandleTicketsRequest.ProtoReflect.Descriptor instead.
+func (*GetUnHandleTicketsRequest) Descriptor() ([]byte, []int) {
+	return file_ticket_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetUnHandleTicketsRequest) GetUserId() uint32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
 type UpdateStateRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -400,7 +447,7 @@ type UpdateStateRequest struct {
 func (x *UpdateStateRequest) Reset() {
 	*x = UpdateStateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_ticket_proto_msgTypes[6]
+		mi := &file_ticket_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -413,7 +460,7 @@ func (x *UpdateStateRequest) String() string {
 func (*UpdateStateRequest) ProtoMessage() {}
 
 func (x *UpdateStateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ticket_proto_msgTypes[6]
+	mi := &file_ticket_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -426,7 +473,7 @@ func (x *UpdateStateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateStateRequest.ProtoReflect.Descriptor instead.
 func (*UpdateStateRequest) Descriptor() ([]byte, []int) {
-	return file_ticket_proto_rawDescGZIP(), []int{6}
+	return file_ticket_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *UpdateStateRequest) GetTicketId() uint32 {
@@ -486,16 +533,16 @@ var file_ticket_proto_rawDesc = []byte{
 	0x6b, 0x65, 0x74, 0x42, 0x79, 0x50, 0x61, 0x73, 0x73, 0x65, 0x6e, 0x67, 0x65, 0x72, 0x49, 0x64,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x21, 0x0a, 0x0c, 0x70, 0x61, 0x73, 0x73, 0x65,
 	0x6e, 0x67, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x70,
-	0x61, 0x73, 0x73, 0x65, 0x6e, 0x67, 0x65, 0x72, 0x49, 0x64, 0x22, 0x47, 0x0a, 0x12, 0x55, 0x70,
-	0x64, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x12, 0x1b, 0x0a, 0x09, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0d, 0x52, 0x08, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x49, 0x64, 0x12, 0x14, 0x0a,
-	0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x73, 0x74,
-	0x61, 0x74, 0x65, 0x32, 0xb9, 0x02, 0x0a, 0x0d, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x53, 0x65,
-	0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x34, 0x0a, 0x0a, 0x41, 0x64, 0x64, 0x54, 0x69, 0x63, 0x6b,
-	0x65, 0x74, 0x73, 0x12, 0x12, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e,
-	0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x73, 0x1a, 0x10, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74,
-	0x52, 0x50, 0x43, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x12, 0x56, 0x0a, 0x13, 0x47,
+	0x61, 0x73, 0x73, 0x65, 0x6e, 0x67, 0x65, 0x72, 0x49, 0x64, 0x22, 0x34, 0x0a, 0x19, 0x47, 0x65,
+	0x74, 0x55, 0x6e, 0x48, 0x61, 0x6e, 0x64, 0x6c, 0x65, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x73,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64,
+	0x22, 0x47, 0x0a, 0x12, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x74, 0x69, 0x63, 0x6b, 0x65,
+	0x74, 0x49, 0x64, 0x12, 0x14, 0x0a, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x65, 0x32, 0xd5, 0x02, 0x0a, 0x0d, 0x54, 0x69,
+	0x63, 0x6b, 0x65, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x56, 0x0a, 0x13, 0x47,
 	0x65, 0x74, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x42, 0x79, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x73,
 	0x49, 0x64, 0x12, 0x25, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x47,
 	0x65, 0x74, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x42, 0x79, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x73,
@@ -506,12 +553,17 @@ var file_ticket_proto_rawDesc = []byte{
 	0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x47, 0x65, 0x74, 0x54, 0x69, 0x63,
 	0x6b, 0x65, 0x74, 0x42, 0x79, 0x50, 0x61, 0x73, 0x73, 0x65, 0x6e, 0x67, 0x65, 0x72, 0x49, 0x64,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x12, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74,
-	0x52, 0x50, 0x43, 0x2e, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x73, 0x22, 0x00, 0x12, 0x40, 0x0a,
-	0x0b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x1d, 0x2e, 0x74,
-	0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53,
-	0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x10, 0x2e, 0x74, 0x69,
-	0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x52, 0x50, 0x43, 0x2e, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x73, 0x22, 0x00, 0x12, 0x50, 0x0a,
+	0x12, 0x47, 0x65, 0x74, 0x55, 0x6e, 0x48, 0x61, 0x6e, 0x64, 0x6c, 0x65, 0x54, 0x69, 0x63, 0x6b,
+	0x65, 0x74, 0x73, 0x12, 0x24, 0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e,
+	0x47, 0x65, 0x74, 0x55, 0x6e, 0x48, 0x61, 0x6e, 0x64, 0x6c, 0x65, 0x54, 0x69, 0x63, 0x6b, 0x65,
+	0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x12, 0x2e, 0x74, 0x69, 0x63, 0x6b,
+	0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x54, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x73, 0x22, 0x00, 0x12,
+	0x40, 0x0a, 0x0b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x1d,
+	0x2e, 0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x53, 0x74, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x10, 0x2e,
+	0x74, 0x69, 0x63, 0x6b, 0x65, 0x74, 0x52, 0x50, 0x43, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22,
+	0x00, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -526,7 +578,7 @@ func file_ticket_proto_rawDescGZIP() []byte {
 	return file_ticket_proto_rawDescData
 }
 
-var file_ticket_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_ticket_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_ticket_proto_goTypes = []interface{}{
 	(*Ticket)(nil),                        // 0: ticketRPC.Ticket
 	(*Empty)(nil),                         // 1: ticketRPC.Empty
@@ -534,18 +586,19 @@ var file_ticket_proto_goTypes = []interface{}{
 	(*TicketsList)(nil),                   // 3: ticketRPC.TicketsList
 	(*GetTicketByOrdersIdRequest)(nil),    // 4: ticketRPC.GetTicketByOrdersIdRequest
 	(*GetTicketByPassengerIdRequest)(nil), // 5: ticketRPC.GetTicketByPassengerIdRequest
-	(*UpdateStateRequest)(nil),            // 6: ticketRPC.UpdateStateRequest
+	(*GetUnHandleTicketsRequest)(nil),     // 6: ticketRPC.GetUnHandleTicketsRequest
+	(*UpdateStateRequest)(nil),            // 7: ticketRPC.UpdateStateRequest
 }
 var file_ticket_proto_depIdxs = []int32{
 	0, // 0: ticketRPC.Tickets.tickets:type_name -> ticketRPC.Ticket
 	2, // 1: ticketRPC.TicketsList.list:type_name -> ticketRPC.Tickets
-	2, // 2: ticketRPC.TicketService.AddTickets:input_type -> ticketRPC.Tickets
-	4, // 3: ticketRPC.TicketService.GetTicketByOrdersId:input_type -> ticketRPC.GetTicketByOrdersIdRequest
-	5, // 4: ticketRPC.TicketService.GetTicketByPassengerId:input_type -> ticketRPC.GetTicketByPassengerIdRequest
-	6, // 5: ticketRPC.TicketService.UpdateState:input_type -> ticketRPC.UpdateStateRequest
-	1, // 6: ticketRPC.TicketService.AddTickets:output_type -> ticketRPC.Empty
-	3, // 7: ticketRPC.TicketService.GetTicketByOrdersId:output_type -> ticketRPC.TicketsList
-	2, // 8: ticketRPC.TicketService.GetTicketByPassengerId:output_type -> ticketRPC.Tickets
+	4, // 2: ticketRPC.TicketService.GetTicketByOrdersId:input_type -> ticketRPC.GetTicketByOrdersIdRequest
+	5, // 3: ticketRPC.TicketService.GetTicketByPassengerId:input_type -> ticketRPC.GetTicketByPassengerIdRequest
+	6, // 4: ticketRPC.TicketService.GetUnHandleTickets:input_type -> ticketRPC.GetUnHandleTicketsRequest
+	7, // 5: ticketRPC.TicketService.UpdateState:input_type -> ticketRPC.UpdateStateRequest
+	3, // 6: ticketRPC.TicketService.GetTicketByOrdersId:output_type -> ticketRPC.TicketsList
+	2, // 7: ticketRPC.TicketService.GetTicketByPassengerId:output_type -> ticketRPC.Tickets
+	2, // 8: ticketRPC.TicketService.GetUnHandleTickets:output_type -> ticketRPC.Tickets
 	1, // 9: ticketRPC.TicketService.UpdateState:output_type -> ticketRPC.Empty
 	6, // [6:10] is the sub-list for method output_type
 	2, // [2:6] is the sub-list for method input_type
@@ -633,6 +686,18 @@ func file_ticket_proto_init() {
 			}
 		}
 		file_ticket_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetUnHandleTicketsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_ticket_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UpdateStateRequest); i {
 			case 0:
 				return &v.state
@@ -651,7 +716,7 @@ func file_ticket_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_ticket_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -677,9 +742,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type TicketServiceClient interface {
-	AddTickets(ctx context.Context, in *Tickets, opts ...grpc.CallOption) (*Empty, error)
 	GetTicketByOrdersId(ctx context.Context, in *GetTicketByOrdersIdRequest, opts ...grpc.CallOption) (*TicketsList, error)
 	GetTicketByPassengerId(ctx context.Context, in *GetTicketByPassengerIdRequest, opts ...grpc.CallOption) (*Tickets, error)
+	GetUnHandleTickets(ctx context.Context, in *GetUnHandleTicketsRequest, opts ...grpc.CallOption) (*Tickets, error)
 	UpdateState(ctx context.Context, in *UpdateStateRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
@@ -689,15 +754,6 @@ type ticketServiceClient struct {
 
 func NewTicketServiceClient(cc grpc.ClientConnInterface) TicketServiceClient {
 	return &ticketServiceClient{cc}
-}
-
-func (c *ticketServiceClient) AddTickets(ctx context.Context, in *Tickets, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/ticketRPC.TicketService/AddTickets", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *ticketServiceClient) GetTicketByOrdersId(ctx context.Context, in *GetTicketByOrdersIdRequest, opts ...grpc.CallOption) (*TicketsList, error) {
@@ -718,6 +774,15 @@ func (c *ticketServiceClient) GetTicketByPassengerId(ctx context.Context, in *Ge
 	return out, nil
 }
 
+func (c *ticketServiceClient) GetUnHandleTickets(ctx context.Context, in *GetUnHandleTicketsRequest, opts ...grpc.CallOption) (*Tickets, error) {
+	out := new(Tickets)
+	err := c.cc.Invoke(ctx, "/ticketRPC.TicketService/GetUnHandleTickets", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *ticketServiceClient) UpdateState(ctx context.Context, in *UpdateStateRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/ticketRPC.TicketService/UpdateState", in, out, opts...)
@@ -729,9 +794,9 @@ func (c *ticketServiceClient) UpdateState(ctx context.Context, in *UpdateStateRe
 
 // TicketServiceServer is the server API for TicketService service.
 type TicketServiceServer interface {
-	AddTickets(context.Context, *Tickets) (*Empty, error)
 	GetTicketByOrdersId(context.Context, *GetTicketByOrdersIdRequest) (*TicketsList, error)
 	GetTicketByPassengerId(context.Context, *GetTicketByPassengerIdRequest) (*Tickets, error)
+	GetUnHandleTickets(context.Context, *GetUnHandleTicketsRequest) (*Tickets, error)
 	UpdateState(context.Context, *UpdateStateRequest) (*Empty, error)
 }
 
@@ -739,14 +804,14 @@ type TicketServiceServer interface {
 type UnimplementedTicketServiceServer struct {
 }
 
-func (*UnimplementedTicketServiceServer) AddTickets(context.Context, *Tickets) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddTickets not implemented")
-}
 func (*UnimplementedTicketServiceServer) GetTicketByOrdersId(context.Context, *GetTicketByOrdersIdRequest) (*TicketsList, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTicketByOrdersId not implemented")
 }
 func (*UnimplementedTicketServiceServer) GetTicketByPassengerId(context.Context, *GetTicketByPassengerIdRequest) (*Tickets, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTicketByPassengerId not implemented")
+}
+func (*UnimplementedTicketServiceServer) GetUnHandleTickets(context.Context, *GetUnHandleTicketsRequest) (*Tickets, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUnHandleTickets not implemented")
 }
 func (*UnimplementedTicketServiceServer) UpdateState(context.Context, *UpdateStateRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateState not implemented")
@@ -754,24 +819,6 @@ func (*UnimplementedTicketServiceServer) UpdateState(context.Context, *UpdateSta
 
 func RegisterTicketServiceServer(s *grpc.Server, srv TicketServiceServer) {
 	s.RegisterService(&_TicketService_serviceDesc, srv)
-}
-
-func _TicketService_AddTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Tickets)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TicketServiceServer).AddTickets(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/ticketRPC.TicketService/AddTickets",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TicketServiceServer).AddTickets(ctx, req.(*Tickets))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _TicketService_GetTicketByOrdersId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -810,6 +857,24 @@ func _TicketService_GetTicketByPassengerId_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TicketService_GetUnHandleTickets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUnHandleTicketsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TicketServiceServer).GetUnHandleTickets(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ticketRPC.TicketService/GetUnHandleTickets",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TicketServiceServer).GetUnHandleTickets(ctx, req.(*GetUnHandleTicketsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TicketService_UpdateState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateStateRequest)
 	if err := dec(in); err != nil {
@@ -833,16 +898,16 @@ var _TicketService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*TicketServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddTickets",
-			Handler:    _TicketService_AddTickets_Handler,
-		},
-		{
 			MethodName: "GetTicketByOrdersId",
 			Handler:    _TicketService_GetTicketByOrdersId_Handler,
 		},
 		{
 			MethodName: "GetTicketByPassengerId",
 			Handler:    _TicketService_GetTicketByPassengerId_Handler,
+		},
+		{
+			MethodName: "GetUnHandleTickets",
+			Handler:    _TicketService_GetUnHandleTickets_Handler,
 		},
 		{
 			MethodName: "UpdateState",

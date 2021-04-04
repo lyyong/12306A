@@ -53,3 +53,19 @@ func(c TicketRPCClient) GetTicketByOrdersId(request *ticketRPC.GetTicketByOrders
 	tclient := *c.ticketClient
 	return tclient.GetTicketByOrdersId(context.Background(), request)
 }
+
+func(c TicketRPCClient) GetTicketByPassengerId(request *ticketRPC.GetTicketByPassengerIdRequest)(*ticketRPC.Tickets, error){
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.GetTicketByPassengerId(context.Background(), request)
+}
+
+func(c TicketRPCClient) GetUnHandleTickets(request *ticketRPC.GetUnHandleTicketsRequest)(*ticketRPC.Tickets, error){
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.GetUnHandleTickets(context.Background(), request)
+}

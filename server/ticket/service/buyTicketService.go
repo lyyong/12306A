@@ -64,7 +64,7 @@ func SaveTickets(key string, tickets []*ticketPoolPb.Ticket, expireTime int32) e
 func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 	conn := redispool.RedisPool.Get()
 	defer conn.Close()
-	key := fmt.Sprintf("%d_ticket", payOKInfo.UserID)
+	key := fmt.Sprintf("ticket_%d", payOKInfo.UserID)
 
 	data, err := redis.Bytes(conn.Do("GET", key))
 	if err != nil {
