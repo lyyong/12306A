@@ -21,11 +21,12 @@ type Order struct {
 }
 
 const (
-	ORDER_NOT_FINISH = iota // state = 0 订单未支付完成
-	ORDER_FINISH            // state = 1 订单已经完成
-	ORDER_CANCEL            // state = 2 订单已经取消
-	ORDER_CHANGE            // state = 3 订单已经改签
-	ORDER_REFUND            // state = 4 订单已经退款
+	ORDER_NOT_PAY    = iota // state = 0 订单未支付完成
+	ORDER_UNFINISHED        // state = 1 订单已经支付完成, 但是没有乘车
+	ORDER_FINISHED          // state = 2 订单已经完成, 使用完了
+	ORDER_CANCEL            // state = 3 订单已经取消
+	ORDER_CHANGE            // state = 4 订单已经改签
+	ORDER_REFUND            // state = 5 订单已经退款
 )
 
 // AddOrder 数据库写入一个订单信息

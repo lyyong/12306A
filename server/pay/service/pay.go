@@ -46,16 +46,16 @@ func (s payService) WantPay(userID uint, orderOutsideID string) string {
 		UserID:    userID,
 		OutsideID: orderOutsideID,
 	}
-	if cache2.Exists(orderCache.GetNoFinishOrderKey()) {
+	if cache2.Exists(orderCache.GetUnpayOrderKey()) {
 		var order model.Order
-		cache2.Get(orderCache.GetNoFinishOrderKey(), &order)
+		cache2.Get(orderCache.GetUnpayOrderKey(), &order)
 		if order.OutsideID != orderOutsideID {
 			logging.Error("outsideID不符合", order.OutsideID, "!=", orderOutsideID)
 			return ""
 		}
 		order.AlipayOrderInfo = orderInfo
-		cache2.Delete(orderCache.GetNoFinishOrderKey())
-		cache2.Set(orderCache.GetNoFinishOrderKey(), &order, expTime)
+		cache2.Delete(orderCache.GetUnpayOrderKey())
+		cache2.Set(orderCache.GetUnpayOrderKey(), &order, expTime)
 		return orderInfo
 	}
 	return ""
@@ -66,12 +66,12 @@ func (s payService) PayOK(userID uint, orderInfo, orderOutsideID string) error {
 		UserID:    userID,
 		OutsideID: orderOutsideID,
 	}
-	if !cache2.Exists(orderCache.GetNoFinishOrderKey()) {
+	if !cache2.Exists(orderCache.GetUnpayOrderKey()) {
 		return errors.New("订单信息出错")
 	}
 	var order model.Order
-	cache2.Get(orderCache.GetNoFinishOrderKey(), &order)
-	order.State = model.ORDER_FINISH
+	cache2.Get(orderCache.GetUnpayOrderKey(), &order)
+	order.State = model.ORDER_UNFINISHED
 	// TODO 下面的代码也许可以放到defer中运行
 	payOKInfo := orderRPCClient.PayOKOrderInfo{
 		UserID:    order.UserID,
@@ -96,7 +96,7 @@ func (s payService) PayOK(userID uint, orderInfo, orderOutsideID string) error {
 	// 更新到数据库
 	model.AddOrder(&order)
 	// 删除cache中的未完成订单
-	cache2.Delete(orderCache.GetNoFinishOrderKey())
+	cache2.Delete(orderCache.GetUnpayOrderKey())
 	// 更新cache
 	if !cache2.Exists(orderCache.GetOrdersKey()) {
 		return nil

@@ -7,7 +7,7 @@ import "gorm.io/gorm"
 
 type Model struct {
 	gorm.Model
-	CreatedBy  string
-	DeletedBy  string
-	ModifiedBy string
+	CreatedBy string
+	DeletedBy string
+	UpdatedBy string
 }

@@ -36,24 +36,26 @@ func InitRouter() *gin.Engine {
 		})
 	}
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	apiV1 := r.Group("/pay/api/v1")
+	payApiV1 := r.Group("/pay/api/v1")
 	{
-		okGroup := apiV1.Group("/ok")
+		okGroup := payApiV1.Group("/ok")
 		{
 			okGroup.POST("/abb", v1.PayOKAbb)
 		}
-		wantGroup := apiV1.Group("/want")
+		wantGroup := payApiV1.Group("/want")
 		{
 			wantGroup.POST("/abb", v1.WantPayAbb)
 		}
-		refundGroup := apiV1.Group("/refund")
+		refundGroup := payApiV1.Group("/refund")
 		{
 			refundGroup.POST("/abb", v1.RefundAbb)
 		}
-		orderGroup := apiV1.Group("/order")
-		{
-			orderGroup.GET("/myOrders", v1.GetUserFinishOrders)
-		}
+	}
+	orderApiV1 := r.Group("/order/api/v1")
+	{
+		orderApiV1.GET("/history", v1.GetUserHistoryOrders)
+		orderApiV1.GET("/unpay", v1.GetUserUnpayOrders)
+		orderApiV1.GET("/unfinished", v1.GetUserUnfinishedOrders)
 	}
 
 	return r
