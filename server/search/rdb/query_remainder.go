@@ -95,6 +95,7 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 		trainNo := dao.GetTrainNumber(ticketInfo.TrainId)
 		train.TrainNumber = trainNo
 		train.TrainID = uint64(ticketInfo.TrainId)
+		train.TrainType = "G"
 
 		seatInfos := ticketInfo.SeatInfo
 		for _, seatInfo := range seatInfos {
@@ -186,6 +187,7 @@ func QueryTicketNumByDateWithTrainNumber(TrainId, ssID, esID uint32, date string
 	train := &outer.Train{}
 	trainNo := dao.GetTrainNumber(ticketInfo.TrainId)
 	train.TrainNumber = trainNo
+	train.TrainType = "G"
 	train.TrainID = uint64(ticketInfo.TrainId)
 
 	seatInfos := ticketInfo.SeatInfo

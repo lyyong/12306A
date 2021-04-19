@@ -10,7 +10,11 @@ func InitRouter() *gin.Engine {
 	r := gin.Default()
 	// 使用鉴权中间件
 	r.Use(usertoken.TokenParser())
-	r.POST("/buyTicket", controller.BuyTicket)
-	r.POST("/RefundTicket", controller.RefundTicket)
+	v1 := r.Group("/ticket/api/v1")
+	{
+		v1.POST("/buyTicket", controller.BuyTicket)
+		v1.POST("/RefundTicket", controller.RefundTicket)
+	}
+
 	return r
 }

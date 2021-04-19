@@ -107,7 +107,7 @@ func BuyTicket(c *gin.Context) {
 		Passengers:     passengers,
 	}
 	tickets, err := service.GetTickets(getTicketReq)
-	if err != nil {
+	if err != nil || len(tickets) == 0 {
 		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "出票失败", Data: nil})
 		return
 	}
