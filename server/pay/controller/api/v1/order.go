@@ -15,6 +15,7 @@ import (
 	"pay/tools/setting"
 	"rpc/ticket/client"
 	"rpc/ticket/proto/ticketRPC"
+	"time"
 )
 
 type OrderInfo struct {
@@ -24,6 +25,34 @@ type OrderInfo struct {
 	LeaveTime      string `json:"leave_time"`
 	TicketSum      int    `json:"ticket_sum"`
 	FirstPassenger string `json:"first_passenger"`
+}
+
+type UnpayOrderInfo struct {
+	OrderId        string            `json:"order_id"`
+	TrainId        int               `json:"train_id"`
+	TrainNum       string            `json:"train_num"`
+	StartStationId int               `json:"start_station_id"`
+	StartStation   string            `json:"start_station"`
+	StartTime      string            `json:"start_time"`
+	DestStationId  int               `json:"dest_station_id"`
+	DestStation    string            `json:"dest_station"`
+	ArriveTime     string            `json:"arrive_time"`
+	Date           string            `json:"date"`
+	ExpiredTime    int               `json:"expired_time"`
+	Price          int               `json:"price"`
+	Tickets        []UnpayTicketInfo `json:"tickets"`
+}
+
+type UnpayTicketInfo struct {
+	PassengerId     int    `json:"passenger_id"`
+	PassengerName   string `json:"passenger_name"`
+	PassengerType   string `json:"passenger_type"`
+	CertificateType string `json:"certificate_type"`
+	SeatTypeId      int    `json:"seat_type_id"`
+	SeatType        string `json:"seat_type"`
+	CarriageNumber  string `json:"carriage_number"`
+	SeatNumber      string `json:"seat_number"`
+	Price           int    `json:"price"`
 }
 
 // @Summary 用户获取自己的历史订单信息
@@ -153,19 +182,48 @@ func GetUserUnpayOrders(c *gin.Context) {
 		return
 	}
 
-	if len(resp.Tickets) == 0 || len(resp.Tickets) == 0 {
+	if resp == nil || len(resp.Tickets) == 0 {
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, nil))
 		return
 	}
+	// TODO 数据补全
+	orderInfo2Client := &UnpayOrderInfo{
+		OrderId:        order.OutsideID,
+		TrainId:        0,
+		TrainNum:       resp.Tickets[0].TrainNum,
+		StartStationId: 0,
+		StartStation:   resp.Tickets[0].StartStation,
+		StartTime:      resp.Tickets[0].StartTime,
+		DestStationId:  0,
+		DestStation:    resp.Tickets[0].DestStation,
+		ArriveTime:     resp.Tickets[0].DestTime,
+		Date:           resp.Tickets[0].StartTime,
+		ExpiredTime:    1800 - order.CreatedAt.Add(time.Minute*30).Second() + order.CreatedAt.Second(),
+		Price:          order.Money,
+	}
 
-	orderInfo2Client := &OrderInfo{}
-	ticketSum := len(resp.Tickets)
-	orderInfo2Client.TrainNumber = resp.Tickets[0].TrainNum
-	orderInfo2Client.LeaveStation = resp.Tickets[0].StartStation
-	orderInfo2Client.ArrivalStation = resp.Tickets[0].DestStation
-	orderInfo2Client.LeaveTime = resp.Tickets[0].StartTime
-	orderInfo2Client.FirstPassenger = resp.Tickets[0].PassengerName
-	orderInfo2Client.TicketSum = ticketSum
+	for i := range resp.Tickets {
+		orderInfo2Client.Tickets = append(orderInfo2Client.Tickets, UnpayTicketInfo{
+			PassengerName:  resp.Tickets[i].PassengerName,
+			SeatType:       resp.Tickets[i].SeatType,
+			CarriageNumber: resp.Tickets[i].CarriageNumber,
+			SeatNumber:     resp.Tickets[i].SeatNumber,
+			Price:          int(resp.Tickets[i].Price),
+		})
+	}
 
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, orderInfo2Client))
+}
+
+func CancelUnpayOrder(c *gin.Context) {
+	userInfo, ok := usertoken.GetUserInfo(c)
+	sender := controller.NewSend(c)
+	if !ok {
+		sender.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, nil))
+		return
+	}
+
+	orderServer := service.NewOrderService()
+	orderServer.CancelUnpayOrder(userInfo.UserId)
+	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, "取消成功"))
 }

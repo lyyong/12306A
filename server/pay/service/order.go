@@ -204,3 +204,10 @@ func (s orderService) Refund(userID uint, outsideID string, fullMoney bool, mone
 	}
 	return errors.New("无此订单")
 }
+
+func (s *orderService) CancelUnpayOrder(userID uint) {
+	orderCache := cache.OrderCache{
+		UserID: userID,
+	}
+	cache2.Delete(orderCache.GetUnpayOrderKey())
+}

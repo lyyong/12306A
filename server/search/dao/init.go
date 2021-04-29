@@ -22,7 +22,7 @@ var (
 	SeatTypeIds  map[string]uint32
 
 	HotCities []*outer.City
-	CityLists map[string]*outer.CityList
+	CityLists []*outer.CityList
 )
 
 func InitDB() {
@@ -125,10 +125,10 @@ func InitHotCities() {
 }
 
 func InitCityLists() {
-	CityLists = make(map[string]*outer.CityList, 26)
-	// for i:=0;i<26;i++{
-	// 	CityLists[i]=&outer.CityList{}
-	// }
+	CityLists = make([]*outer.CityList, 26)
+	for i := 0; i < 26; i++ {
+		CityLists[i] = &outer.CityList{}
+	}
 	stations := SelectStationAll()
 	for _, s := range stations {
 		city := &outer.City{
@@ -137,17 +137,14 @@ func InitCityLists() {
 		}
 		i := s.Spell[0] - 'a'
 		//fmt.Println(i,string(i+'A'))
-		// CityLists[i].Initials=string('A'+i)
-		if _, ok := CityLists[string('A'+i)]; !ok {
-			CityLists[string('A'+i)] = &outer.CityList{}
-		}
-		*(CityLists[string('A'+i)]) = append(*(CityLists[string('A'+i)]), city)
+		CityLists[i].Initials = string('A' + i)
+		CityLists[i].Cities = append(CityLists[i].Cities, city)
 		//fmt.Println(len(CityLists[i].Cities))
 	}
 	index := 1
 
 	for _, cityList := range CityLists {
-		list := *cityList
+		list := cityList.Cities
 		for _, l := range list {
 			l.ID = index
 			index++

@@ -63,7 +63,7 @@ func InsertPassenger(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人添加成功"))
+	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人添加成功").SetCode(200))
 }
 
 type UpdatePassengerRequest struct {
@@ -117,7 +117,7 @@ func UpdatePassenger(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人修改成功"))
+	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人修改成功").SetCode(200))
 }
 
 type ListPassengerResponse struct {
@@ -165,5 +165,5 @@ func ListPassenger(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, resp.R(response))
+	c.JSON(http.StatusOK, resp.R(response).SetCode(200))
 }

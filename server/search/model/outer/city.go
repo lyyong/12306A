@@ -10,9 +10,9 @@ type City struct {
 	Spell string `json:"spell"`
 }
 
-// type CityList struct {
-// 	// Initials string
-// 	Cities []*City
-// }
+type CityList struct {
+	Initials string
+	Cities   []*City
+}
 
-type CityList []*City
+// type CityList []*City

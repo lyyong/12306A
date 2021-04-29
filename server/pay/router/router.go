@@ -56,6 +56,7 @@ func InitRouter() *gin.Engine {
 		orderApiV1.GET("/history", v1.GetUserHistoryOrders)
 		orderApiV1.GET("/unpay", v1.GetUserUnpayOrders)
 		orderApiV1.GET("/unfinished", v1.GetUserUnfinishedOrders)
+		orderApiV1.DELETE("/unpay", v1.CancelUnpayOrder)
 	}
 
 	return r

@@ -5,7 +5,7 @@
 package resp
 
 type Response struct {
-	Code string      `json:"code"`
+	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
@@ -17,7 +17,7 @@ func R(data interface{}) *Response {
 	return r
 }
 
-func (r *Response) SetCode(code string) *Response {
+func (r *Response) SetCode(code int) *Response {
 	r.Code = code
 	return r
 }
