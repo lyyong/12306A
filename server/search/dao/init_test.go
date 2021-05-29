@@ -13,7 +13,6 @@ import (
 func TestInitCityLists(t *testing.T) {
 	//InitCityLists()
 	settings.Setup()
-	InitDB()
+	//InitDB()
 	fmt.Println(Db)
 }
-

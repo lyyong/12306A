@@ -25,15 +25,22 @@ var (
 	CityLists []*outer.CityList
 )
 
+////单元测试用
+//func init()  {
+//
+//	Db,err = sql.Open("mysql","root:66666666@tcp(localhost:3306)/12306a_test")
+//	if err!=nil{
+//		fmt.Println("sql.Open error:",err)
+//		return
+//	}
+//}
+
 func InitDB() {
 	//"root:12345678@tcp(localhost:3306)/12306a_test"
-	//sqlStr:=settings.DB.Username+":"+settings.DB.Password+"@"+ "tcp("+settings.DB.Host+")/"+settings.DB.DbName
-	//fmt.Println(sqlStr)
 	Db, err = sql.Open("mysql", settings.DB.Username+":"+settings.DB.Password+"@"+
 		"tcp("+settings.DB.Host+")/"+settings.DB.DbName)
 	//fmt.Println(Db)
 	Db.SetMaxOpenConns(0)
-	//fmt.Println(Db)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -68,9 +75,6 @@ func InitId() {
 	SeatTypeIds["businessSeat"] = 0
 	SeatTypeIds["firstSeat"] = 1
 	SeatTypeIds["secondSeat"] = 2
-	//for _,v:=range TrainIds {
-	//	fmt.Println(v)
-	//}
 }
 
 func GetTrainNumber(trainId uint32) string {

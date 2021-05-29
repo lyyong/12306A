@@ -6,6 +6,7 @@ package v1
 
 import (
 	"12306A-search/rdb"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"pay/tools/message"
@@ -28,16 +29,18 @@ type QueryRemainderWithTrainNumReq struct {
 
 func QueryRemainder(c *gin.Context) {
 	var req QueryRemainderReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": message.PARAMS_ERROR,
-			"msg":  message.GetMsg(message.PARAMS_ERROR),
-		})
-		return
-	}
-	//fmt.Println(date,startCity,endCity,"aaa")
-	//fmt.Println(search)
-	//trains:=rdb.Query(search)
+	req.StartCity = c.Query("start_city")
+	req.EndCity = c.Query("end_city")
+	req.Date = c.Query("date")
+	//if err := c.ShouldBindJSON(&req); err != nil {
+	//	c.JSON(http.StatusOK, gin.H{
+	//		"code": message.PARAMS_ERROR,
+	//		"msg":  message.GetMsg(message.PARAMS_ERROR),
+	//	})
+	//	fmt.Println("abc,err")
+	//	return
+	//}
+	//fmt.Println("aaa",req)
 	trains := rdb.QueryTicketNumByDate(req.Date, req.StartCity, req.EndCity)
 	if trains == nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -57,11 +60,13 @@ func QueryRemainder(c *gin.Context) {
 
 func QueryRemainderWithTrainNumber(c *gin.Context) {
 	var req QueryRemainderWithTrainNumReq
+
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": message.PARAMS_ERROR,
 			"msg":  message.GetMsg(message.PARAMS_ERROR),
 		})
+		fmt.Println("参数解析错误")
 		return
 	}
 

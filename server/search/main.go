@@ -13,8 +13,8 @@ import (
 	"fmt"
 )
 
-func main()  {
-	//fmt.Println("aa"=="aa")
+func main() {
+
 	logging.Info("加载配置文件")
 	settings.Setup()
 	logging.Info("初始化DB")
@@ -22,8 +22,9 @@ func main()  {
 	logging.Info("初始化redis")
 	rdb.InitRedis()
 	logging.Info("启动服务器...")
-	r:=router.InitRouter()
+	r := router.InitRouter()
 	fmt.Println(r)
 
 }
+
 //北京市-上海市 800 10000000

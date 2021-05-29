@@ -119,7 +119,7 @@ func WriteStationAndCityToRedis() {
 
 //上海虹桥
 
-//用一个List保存所有站点
+//用一个ZAdd保存所有站点
 func WriteStationToRedis() {
 	stations := dao.SelectStationAll()
 
@@ -136,7 +136,7 @@ func WriteStationToRedis() {
 	}
 }
 
-// WriteTrainsToRedis 使用List保存所有的车次信息
+// WriteTrainsToRedis 使用Zset保存所有的车次信息
 func WriteTrainsToRedis() {
 	trains := dao.SelectTrainAll()
 

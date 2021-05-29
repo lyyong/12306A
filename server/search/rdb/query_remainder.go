@@ -49,7 +49,8 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 	startCity, _ = RedisDB.HGet("stationCity", startCity).Result()
 	endCity, _ = RedisDB.HGet("stationCity", endCity).Result()
 	trainNos := QueryTrainByDateAndCity(date, startCity, endCity)
-	fmt.Println(trainNos)
+	//fmt.Println(trainNos)
+	var trains []*outer.Train
 
 	request := &ticketPoolRPC.GetTicketNumberRequest{}
 
@@ -72,15 +73,85 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 	request.Date = date
 	request.Condition = conditions
 
-	rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
+	var response = &ticketPoolRPC.GetTicketNumberResponse{}
+	var trainTicketInfos []*ticketPoolRPC.TrainTicketInfo
+
+	//先查询缓存
+	cacheKey := startCity + "-" + endCity + "-cache"
+	exists, err := RedisDB.Exists(cacheKey).Result()
 	if err != nil {
-		fmt.Println("rpc getTicketNumber failed, err:", err)
 		return nil
 	}
+	if exists == 1 {
+		fmt.Println("有缓存...")
+		date := request.Date
+		for _, condition := range request.Condition {
+			key := date + "-" + strconv.Itoa(int(condition.TrainId)) +
+				"-" + strconv.Itoa(int(condition.StartStationId)) + "-" + strconv.Itoa(int(condition.DestStationId))
+			result, err := RedisDB.HGetAll(key).Result()
+			if err != nil {
+				fmt.Println("err:", err)
+				return trains
+			}
 
-	response, err := rpcClient.GetTicketNumber(request)
-	if response == nil {
-		return nil
+			var seatInfos []*ticketPoolRPC.SeatInfo
+			//座位等级=0，1，2...6
+			for k, v := range result {
+				seatType, err := strconv.ParseInt(k, 10, 32)
+				seatNum, err := strconv.ParseInt(v, 10, 32)
+				if err != nil {
+					fmt.Println("parseInt error:", err)
+					return nil
+				}
+				seatInfo := &ticketPoolRPC.SeatInfo{}
+				seatInfo.SeatTypeId = uint32(seatType)
+				seatInfo.SeatNumber = int32(seatNum)
+				seatInfos = append(seatInfos, seatInfo)
+
+			}
+			//存储一趟车次的余票情况
+			trainTicketInfo := &ticketPoolRPC.TrainTicketInfo{}
+			trainTicketInfo.TrainId = condition.TrainId
+			trainTicketInfo.SeatInfo = seatInfos
+
+			trainTicketInfos = append(trainTicketInfos, trainTicketInfo)
+		}
+		response.TrainsTicketInfo = trainTicketInfos
+	} else {
+		fmt.Println("没有缓存")
+		//没有缓存
+		rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
+		if err != nil {
+			fmt.Println("rpc getTicketNumber failed, err:", err)
+			return nil
+		}
+
+		response, err = rpcClient.GetTicketNumber(request)
+		if response == nil {
+			return nil
+		}
+
+		//更新或者保存缓存
+		RedisDB.Set(cacheKey, "abc", time.Minute*1)
+
+		for k, trainTicketInfo := range response.TrainsTicketInfo {
+
+			trainId := trainTicketInfo.TrainId
+			startStationId := request.Condition[k].StartStationId
+			endStationId := request.Condition[k].DestStationId
+
+			//2021-05-29-G21-1-5
+			cacheKey := date + "-" + strconv.Itoa(int(trainId)) +
+				"-" + strconv.Itoa(int(startStationId)) + "-" + strconv.Itoa(int(endStationId))
+			seatInfos := trainTicketInfo.SeatInfo
+
+			for _, seatInfo := range seatInfos {
+				//存储每一等级座位数量
+				RedisDB.HSet(cacheKey, strconv.Itoa(int(seatInfo.SeatTypeId)), seatInfo.SeatNumber)
+			}
+			//过期时间两分钟
+			RedisDB.Expire(cacheKey, time.Minute*1)
+		}
 	}
 
 	ticketInfos := response.TrainsTicketInfo
@@ -88,7 +159,7 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 	if ticketInfos == nil || len(ticketInfos) == 0 {
 		return nil
 	}
-	var trains []*outer.Train
+
 	for i := 0; i < len(ticketInfos); i++ {
 		train := &outer.Train{}
 		ticketInfo := ticketInfos[i]
@@ -165,16 +236,62 @@ func QueryTicketNumByDateWithTrainNumber(TrainId, ssID, esID uint32, date string
 	}
 	request.Date = date
 	request.Condition = conditions
-	rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
+
+	var response = &ticketPoolRPC.GetTicketNumberResponse{}
+	var trainTicketInfos []*ticketPoolRPC.TrainTicketInfo
+
+	//先查缓存
+	//cacheKey=2021-05-29-G21-1-5
+	cacheKey := date + "-" + strconv.Itoa(int(TrainId)) + "-" + strconv.Itoa(int(ssID)) + "-" + strconv.Itoa(int(esID))
+	resMap, err := RedisDB.HGetAll(cacheKey).Result()
 	if err != nil {
-		fmt.Println("rpc getTicketNumber failed, err:", err)
+		fmt.Println("Redis.Exists err:", err)
 		return nil
+	}
+	//有缓存
+	if resMap != nil && len(resMap) > 0 {
+		fmt.Println("有缓存")
+		var seatInfos []*ticketPoolRPC.SeatInfo
+
+		for k, v := range resMap {
+			seatType, err := strconv.ParseInt(k, 10, 32)
+			seatNum, err := strconv.ParseInt(v, 10, 32)
+			if err != nil {
+				fmt.Println("parseInt error:", err)
+				return nil
+			}
+			seatInfo := &ticketPoolRPC.SeatInfo{}
+			seatInfo.SeatTypeId = uint32(seatType)
+			seatInfo.SeatNumber = int32(seatNum)
+			seatInfos = append(seatInfos, seatInfo)
+		}
+		//存储一趟车次的余票情况
+		trainTicketInfo := &ticketPoolRPC.TrainTicketInfo{}
+		trainTicketInfo.TrainId = TrainId
+		trainTicketInfo.SeatInfo = seatInfos
+		trainTicketInfos = append(trainTicketInfos, trainTicketInfo)
+		response.TrainsTicketInfo = trainTicketInfos
+	} else {
+		fmt.Println("无缓存")
+		rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
+		if err != nil {
+			fmt.Println("rpc getTicketNumber failed, err:", err)
+			return nil
+		}
+
+		response, err = rpcClient.GetTicketNumber(request)
+		if response == nil {
+			return nil
+		}
+
+		//缓存
+		seatInfos := response.TrainsTicketInfo[0].SeatInfo
+		for _, seatInfo := range seatInfos {
+			RedisDB.HSet(cacheKey, strconv.Itoa(int(seatInfo.SeatTypeId)), seatInfo.SeatNumber)
+		}
+		RedisDB.Expire(cacheKey, time.Minute*1)
 	}
 
-	response, err := rpcClient.GetTicketNumber(request)
-	if response == nil {
-		return nil
-	}
 	ticketInfos := response.TrainsTicketInfo
 
 	if len(ticketInfos) == 0 {
@@ -217,7 +334,7 @@ func QueryTicketNumByDateWithTrainNumber(TrainId, ssID, esID uint32, date string
 		default:
 		}
 	}
-	resMap, _ := RedisDB.HGetAll(trainNo).Result()
+	resMap, _ = RedisDB.HGetAll(trainNo).Result()
 	leaveStation := dao.GetStationName(ssID)
 	train.LeaveStation = leaveStation
 	train.LeaveStationNo = uint64(ssID)

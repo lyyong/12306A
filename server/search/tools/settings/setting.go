@@ -48,6 +48,8 @@ var Target = &target{}
 // 配置路径
 var configFile = flag.String("ConfigFile", "./config/search-config.ini", "设置配置文件")
 
+//var configFile = flag.String("ConfigFile","/Users/yutianneng/go/src/12306A/server/search/config/search-config.ini","")
+
 // Setup 载入配置文件信息
 func Setup() {
 	// 读取命令行信息

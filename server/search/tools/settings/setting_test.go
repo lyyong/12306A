@@ -11,9 +11,8 @@ import (
 
 func TestSetting(t *testing.T) {
 	logging.Setup()
-	*configPath = "../../config/"
+	//*configPath = "../../config/"
 	Setup()
 	t.Log(RedisDB)
 	t.Log(DB)
 }
-
