@@ -67,6 +67,7 @@ func QueryRemainderWithTrainNumber(c *gin.Context) {
 			"msg":  message.GetMsg(message.PARAMS_ERROR),
 		})
 		fmt.Println("参数解析错误")
+		//logging.Info("参数解析错误")
 		return
 	}
 
