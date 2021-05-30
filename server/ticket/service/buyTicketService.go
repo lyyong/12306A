@@ -49,14 +49,14 @@ func CreateOrder(createReq *orderPb.CreateRequest) (*orderPb.CreateRespond, erro
 	return resp, nil
 }
 
-func SaveTickets(userId uint32, tickets []*ticketPoolPb.Ticket, expireTime int32) error {
+func SaveTickets(key string, tickets []*ticketPoolPb.Ticket, expireTime int32) error {
 	conn := redispool.RedisPool.Get()
 	defer conn.Close()
 	data, err := json.Marshal(tickets)
 	if err != nil {
 		return err
 	}
-	key := fmt.Sprintf("%d_ticket", userId)
+
 	conn.Do("SET", key, data, "EX", expireTime)
 	return nil
 }
@@ -64,7 +64,7 @@ func SaveTickets(userId uint32, tickets []*ticketPoolPb.Ticket, expireTime int32
 func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 	conn := redispool.RedisPool.Get()
 	defer conn.Close()
-	key := fmt.Sprintf("%d_ticket", payOKInfo.UserID)
+	key := fmt.Sprintf("ticket_%d", payOKInfo.UserID)
 
 	data, err := redis.Bytes(conn.Do("GET", key))
 	if err != nil {

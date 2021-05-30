@@ -20,7 +20,7 @@ func (c OrderCache) GetOrdersKey() string {
 	return fmt.Sprintf("orders-%d", c.UserID)
 }
 
-// GetNoFinishOrderKey 获得一个未完成订单的key 需要UserID
-func (c OrderCache) GetNoFinishOrderKey() string {
-	return fmt.Sprintf("order-no-finish-%d", c.UserID)
+// GetUnpayOrderKey 获得一个未完成订单的key 需要UserID
+func (c OrderCache) GetUnpayOrderKey() string {
+	return fmt.Sprintf("order-unpay-%d", c.UserID)
 }

@@ -8,10 +8,9 @@ import (
 	"ticketPool/model"
 )
 
-
 var persistenceChan chan *PersistentRequest
 
-func init(){
+func init() {
 	persistenceChan = make(chan *PersistentRequest, 10000)
 	doPersistence()
 }
@@ -25,8 +24,7 @@ type PersistentRequest struct {
 	Value      []string
 }
 
-
-func Do(req *PersistentRequest){
+func Do(req *PersistentRequest) {
 	persistenceChan <- req
 }
 
@@ -47,6 +45,9 @@ func doPersistence() {
 				seats := make([]model.Seat, len(req.Value))
 				for i := 0; i < len(req.Value); i++ {
 					seats[i] = model.Seat{
+						Model: model.Model{
+							CreatedBy: "ticket_pool",
+						},
 						Key:        req.Key,
 						TrainId:    req.TrainId,
 						Date:       req.Date,

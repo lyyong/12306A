@@ -9,12 +9,13 @@ import (
 )
 
 type Seat struct {
-	ID			uint
-	TrainId 	uint32
-	Date		string
-	SeatTypeId 	uint32
-	Key 		uint64
-	SeatInfo	string
+	Model
+	ID         uint
+	TrainId    uint32
+	Date       string
+	SeatTypeId uint32
+	Key        uint64
+	SeatInfo   string
 }
 
 func DeleteSeat(seat *Seat, value []string) error {

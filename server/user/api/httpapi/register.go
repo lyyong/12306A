@@ -58,5 +58,5 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("注册成功"))
+	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("注册成功").SetCode(200))
 }

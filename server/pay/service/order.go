@@ -9,6 +9,8 @@ import (
 	"pay/model"
 	"pay/service/cache"
 	cache2 "pay/tools/cache"
+	"strconv"
+	"time"
 )
 
 type orderService struct {
@@ -28,13 +30,13 @@ func (s orderService) CreateOrder(userID uint, money int, affairID, createdBy st
 		Money:    money,
 		AffairID: affairID,
 	}
-	order.OutsideID = order.AffairID
+	order.OutsideID = createdBy + time.Now().Format("2006-01-02-15:04:05.000-") + strconv.Itoa(int(userID))
 	orderCache := cache.OrderCache{
 		UserID:    userID,
 		OutsideID: order.OutsideID,
 	}
 	// 添加到redis设置30分钟期限
-	cache2.Set(orderCache.GetNoFinishOrderKey(), order, orderExpTime)
+	cache2.Set(orderCache.GetUnpayOrderKey(), order, orderExpTime)
 
 	// 存入数据库
 	// defer func() {
@@ -75,8 +77,33 @@ func (s orderService) UpdateOrderStateWithRelative(outsideID string, state int, 
 	return nil
 }
 
-// GetOrdersByUserID 得到已完成的订单
-func (s orderService) GetOrdersByUserID(userID uint) []*model.Order {
+// GetOrdersByUserIDAndFinished 得到用户的历史订单
+func (s orderService) GetOrdersByUserIDAndFinished(userID uint) []*model.Order {
+	return s.GetOrdersByUserIDAndState(userID, model.ORDER_FINISHED)
+}
+
+// GetOrdersByUserIDAndUnpay 获取用户未支付的订单
+func (s orderService) GetOrdersByUserIDAndUnpay(userID uint) *model.Order {
+	orderCache := cache.OrderCache{
+		UserID: userID,
+	}
+	if cache2.Exists(orderCache.GetUnpayOrderKey()) {
+		var order model.Order
+		err := cache2.Get(orderCache.GetUnpayOrderKey(), &order)
+		if err == nil {
+			return &order
+		}
+	}
+	return nil
+}
+
+// GetOrdersByUserIDAndUnfinished 获取没有出行的订单
+func (s orderService) GetOrdersByUserIDAndUnfinished(userID uint) []*model.Order {
+	return s.GetOrdersByUserIDAndState(userID, model.ORDER_UNFINISHED)
+}
+
+// GetOrdersByUserIDAndState 通过用户名和状态获取订单
+func (s orderService) GetOrdersByUserIDAndState(userID uint, state int) []*model.Order {
 	orderCache := cache.OrderCache{
 		UserID: userID,
 	}
@@ -84,10 +111,18 @@ func (s orderService) GetOrdersByUserID(userID uint) []*model.Order {
 		orders := make([]*model.Order, 0)
 		err := cache2.Get(orderCache.GetOrdersKey(), &orders)
 		if err == nil {
+			// 保留已完成的订单
+			for i := 0; i < len(orders); i++ {
+				if orders[i].State == state {
+					continue
+				}
+				orders = append(orders[:i], orders[i+1:]...)
+				i--
+			}
 			return orders
 		}
 	}
-	orders, err := model.GetOrdersByUserID(userID)
+	orders, err := model.GetOrders(map[string]interface{}{"user_id": userID, "state": state})
 	if err != nil {
 		logging.Error(err)
 		return nil
@@ -96,20 +131,6 @@ func (s orderService) GetOrdersByUserID(userID uint) []*model.Order {
 		return nil
 	}
 	return orders
-}
-
-func (s orderService) GetOrdersByUserIDAndUnfinish(userID uint) *model.Order {
-	orderCache := cache.OrderCache{
-		UserID: userID,
-	}
-	if cache2.Exists(orderCache.GetNoFinishOrderKey()) {
-		var order model.Order
-		err := cache2.Get(orderCache.GetNoFinishOrderKey(), &order)
-		if err == nil {
-			return &order
-		}
-	}
-	return nil
 }
 
 // getOrderByOutsideID 通过redis或者mysql获得order
@@ -182,4 +203,11 @@ func (s orderService) Refund(userID uint, outsideID string, fullMoney bool, mone
 		}
 	}
 	return errors.New("无此订单")
+}
+
+func (s *orderService) CancelUnpayOrder(userID uint) {
+	orderCache := cache.OrderCache{
+		UserID: userID,
+	}
+	cache2.Delete(orderCache.GetUnpayOrderKey())
 }

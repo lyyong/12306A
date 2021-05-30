@@ -48,5 +48,5 @@ func Login(c *gin.Context) {
 	} else {
 		r.Token = token
 	}
-	c.JSON(http.StatusOK, resp.R(r).SetMsg("登录成功"))
+	c.JSON(http.StatusOK, resp.R(r).SetMsg("登录成功").SetCode(200))
 }

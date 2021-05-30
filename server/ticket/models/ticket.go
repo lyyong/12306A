@@ -6,31 +6,43 @@ import (
 	"time"
 )
 
-type Ticket struct{
+type Ticket struct {
 	gorm.Model
 
-	UserId			uint32
-	TrainId 		uint32
-	TrainNum 		string
-	StartStationId 	uint32
-	StartStation 	string
-	StartTime 		time.Time
-	DestStationId 	uint32
-	DestStation 	string
-	DestTime 		time.Time
-	SeatType 		string
-	CarriageNumber 	string
-	SeatNumber 		string
-	Price 			int32
-	OrderOutsideId 	string
-	PassengerName 	string
-	PassengerId 	uint32
-	State 			uint8
+	UserId         uint32
+	TrainId        uint32
+	TrainNum       string
+	StartStationId uint32
+	StartStation   string
+	StartTime      time.Time
+	DestStationId  uint32
+	DestStation    string
+	DestTime       time.Time
+	SeatType       string
+	CarriageNumber string
+	SeatNumber     string
+	Price          int32
+	OrderOutsideId string
+	PassengerName  string
+	PassengerId    uint32
+	State          uint8
 }
 
 func AddMultipleTicket(tickets *[]Ticket) error {
 	res := database.DB.Create(tickets)
 	return res.Error
+}
+
+func GetTicketByOrderId(orderId string) ([]*Ticket, error) {
+	var tickets []*Ticket
+	res := database.DB.Where("order_outside_id = ?", orderId).Find(&tickets)
+	return tickets, res.Error
+}
+
+func GetTicketsByPassengerId(passengerId uint32) ([]*Ticket, error) {
+	var tickets []*Ticket
+	res := database.DB.Where("passenger_id = ?", passengerId).Find(tickets)
+	return tickets, res.Error
 }
 
 func UpdateState(ticketId uint32, state string) (bool, error) {

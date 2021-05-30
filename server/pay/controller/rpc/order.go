@@ -15,7 +15,7 @@ type OrderRPCService struct {
 
 func (o OrderRPCService) ExistNoFinishOrder(ctx context.Context, condition *orderRPCpb.SearchCondition) (*orderRPCpb.ExistNoFinishOrderRespond, error) {
 	orderService := service.NewOrderService()
-	order := orderService.GetOrdersByUserIDAndUnfinish(uint(condition.UserID))
+	order := orderService.GetOrdersByUserIDAndUnpay(uint(condition.UserID))
 	if order == nil {
 		return &orderRPCpb.ExistNoFinishOrderRespond{Exist: false}, nil
 	}
@@ -51,7 +51,7 @@ func (o OrderRPCService) UpdateStateWithRelativeOrder(ctx context.Context, info 
 func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateRequest) (*orderRPCpb.CreateRespond, error) {
 	orderService := service.NewOrderService()
 	// 判断该用户时是否有未完成的订单
-	order := orderService.GetOrdersByUserIDAndUnfinish(uint(info.UserID))
+	order := orderService.GetOrdersByUserIDAndUnpay(uint(info.UserID))
 	if order != nil {
 		return nil, errors.New("客户存在未完成的订单")
 	}
@@ -65,7 +65,7 @@ func (o OrderRPCService) Create(ctx context.Context, info *orderRPCpb.CreateRequ
 // Read 获取用户的相关订单
 func (o OrderRPCService) Read(ctx context.Context, info *orderRPCpb.SearchCondition) (*orderRPCpb.ReadRespond, error) {
 	orderService := service.NewOrderService()
-	orders := orderService.GetOrdersByUserID(uint(info.UserID))
+	orders := orderService.GetOrdersByUserIDAndFinished(uint(info.UserID))
 	var readRespond orderRPCpb.ReadRespond
 	for _, order := range orders {
 		readRespond.Infos = append(readRespond.Infos, &orderRPCpb.OrderInfo{

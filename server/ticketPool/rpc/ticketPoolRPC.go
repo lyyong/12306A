@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"common/tools/logging"
 	"context"
 	"fmt"
 	pb "rpc/ticketPool/proto/ticketPoolRPC"
@@ -11,13 +12,15 @@ import (
 
 type TicketPoolServer struct {
 	/*
-		rpc GetTicket (GetTicketRequest) returns (GetTicketResponse){}
-	  	rpc GetTicketNumber (GetTicketNumberRequest) returns (GetTicketNumberResponse){}
-	  	rpc RefundTicket (RefundTicketRequest) returns (RefundTicketResponse){}
+			rpc GetTicket (GetTicketRequest) returns (GetTicketResponse){}
+		  	rpc GetTicketNumber (GetTicketNumberRequest) returns (GetTicketNumberResponse){}
+		  	rpc RefundTicket (RefundTicketRequest) returns (RefundTicketResponse){}
 	*/
 }
 
 func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketRequest) (*pb.GetTicketResponse, error) {
+	logging.Info("购票请求: ", req)
+
 	tp := ticketpool.Tp
 	train := tp.GetTrain(req.TrainId)
 
@@ -81,6 +84,8 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 }
 
 func (tps *TicketPoolServer) GetTicketNumber(ctx context.Context, req *pb.GetTicketNumberRequest) (*pb.GetTicketNumberResponse, error) {
+	logging.Info("查询余票请求: ", req)
+
 	// 查询车次余票
 	tp := ticketpool.Tp
 	condition := req.Condition
@@ -100,7 +105,7 @@ func (tps *TicketPoolServer) GetTicketNumber(ctx context.Context, req *pb.GetTic
 		tti[i] = &pb.TrainTicketInfo{TrainId: condition[i].TrainId, SeatInfo: seatInfo}
 	}
 
-	return &pb.GetTicketNumberResponse{TrainsTicketInfo: tti},nil
+	return &pb.GetTicketNumberResponse{TrainsTicketInfo: tti}, nil
 }
 
 func (tps *TicketPoolServer) RefundTicket(ctx context.Context, req *pb.RefundTicketRequest) (*pb.RefundTicketResponse, error) {

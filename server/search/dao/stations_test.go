@@ -10,9 +10,10 @@ import (
 )
 
 func TestSelectStationAll(t *testing.T) {
-	stations:=SelectStationAll()
 
-	for _,s:=range stations{
+	stations := SelectStationAll()
+
+	for _, s := range stations {
 		fmt.Println(s)
 	}
 }

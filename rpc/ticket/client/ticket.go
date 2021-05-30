@@ -4,11 +4,68 @@
 
 package client
 
-import "rpc/ticket/proto/ticketRPC"
+import (
+	"common/rpc_manage"
+	"context"
+	"errors"
+	"google.golang.org/grpc"
+	"rpc/ticket/proto/ticketRPC"
+	"sync"
+)
 
 type TicketRPCClient struct {
-	pbClient ticketRPC.TicketServiceClient
+	ticketClient *ticketRPC.TicketServiceClient
 }
 
-var client *TicketRPCClient
+var (
+	client *TicketRPCClient
+	once sync.Once
+)
 
+const targetServiceName = ":9442"
+
+// NewClient 创建一个ticketPool的RPC客户端
+func NewClient() (*TicketRPCClient, error) {
+	return NewClientWithTarget(targetServiceName)
+}
+
+func NewClientWithTarget(target string) (*TicketRPCClient, error) {
+	var err error
+	once.Do(func() {
+		client = &TicketRPCClient{ticketClient: nil}
+		var conn *grpc.ClientConn
+		conn, err = rpc_manage.NewGRPCClientConn(target)
+		if err != nil {
+			client = nil
+			return
+		}
+		tclient := ticketRPC.NewTicketServiceClient(conn)
+		client.ticketClient = &tclient
+	})
+
+	return client, err
+}
+
+func(c TicketRPCClient) GetTicketByOrdersId(request *ticketRPC.GetTicketByOrdersIdRequest)(*ticketRPC.TicketsList, error){
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.GetTicketByOrdersId(context.Background(), request)
+}
+
+func(c TicketRPCClient) GetTicketByPassengerId(request *ticketRPC.GetTicketByPassengerIdRequest)(*ticketRPC.Tickets, error){
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.GetTicketByPassengerId(context.Background(), request)
+}
+
+func(c TicketRPCClient) GetUnHandleTickets(request *ticketRPC.GetUnHandleTicketsRequest)(*ticketRPC.Tickets, error){
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.GetUnHandleTickets(context.Background(), request)
+}
