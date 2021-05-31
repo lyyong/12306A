@@ -57,8 +57,7 @@ type zipkin struct {
 
 var Zipkin = &zipkin{}
 
-
-var configFile = flag.String("configFile", "config/ticketPool-config.ini", "设置配置文件")
+var configFile = flag.String("ConfigFile", "config/ticketPool-config.ini", "设置配置文件")
 
 func InitSetting() {
 	flag.Parse()

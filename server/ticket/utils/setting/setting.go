@@ -64,16 +64,14 @@ type zipkin struct {
 
 var Zipkin = &zipkin{}
 
-
 type rpcTarget struct {
-	Order string
+	Order      string
 	TicketPool string
 }
 
 var RpcTarget = &rpcTarget{}
 
-
-var configFile = flag.String("configFile", "config/ticket-config.ini", "设置配置文件")
+var configFile = flag.String("ConfigFile", "config/ticket-config.ini", "设置配置文件")
 
 func init() {
 	flag.Parse()
