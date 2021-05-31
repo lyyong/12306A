@@ -15,8 +15,13 @@ import (
 
 func main() {
 
-	logging.Info("加载配置文件")
 	settings.Setup()
+	if settings.Server.RunMode == "debug" {
+		logging.SetupWithMode(logging.LogDebug)
+	} else {
+		logging.SetupWithMode(logging.LogRelease)
+	}
+	logging.Info("加载配置文件")
 	logging.Info("初始化DB")
 	dao.InitDB()
 	logging.Info("初始化redis")

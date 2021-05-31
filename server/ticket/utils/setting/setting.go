@@ -29,6 +29,7 @@ type server struct {
 	HttpAddr string
 	RPCAddr  string
 	HttpPort int
+	RunMode  string
 }
 
 var Server = &server{}

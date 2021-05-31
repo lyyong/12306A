@@ -1,3 +1,5 @@
 /.idea/
 /vendor/
 /server/pay/.idea/
+server/search/config/liuyong-search-config.ini
+server/ticketPool/config/liuyong-ticketPool-config.ini

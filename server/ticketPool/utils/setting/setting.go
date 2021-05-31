@@ -28,6 +28,7 @@ type server struct {
 	Host    string
 	RPCAddr string
 	RPCPort int
+	RunMode string
 }
 
 var Server = &server{}
