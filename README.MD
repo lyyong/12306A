@@ -32,3 +32,7 @@ https://vwgf914vg3.feishu.cn/docs/doccnp3xk2n3SOo3FsOvyr5bRLb?from=from_copylink
 
 ## API接口文档
 https://vwgf914vg3.feishu.cn/docs/doccn9jkNr6JL0PQxImWy0EvLMh?from=from_copylink
+
+## 构建方式
+Linux下使用命令`source ./build.sh`，然后使用docker compose运行
+windows下使用脚本build.cmd

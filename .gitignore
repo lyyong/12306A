@@ -3,3 +3,10 @@
 /server/pay/.idea/
 server/search/config/liuyong-search-config.ini
 server/ticketPool/config/liuyong-ticketPool-config.ini
+server/candidate/candidate
+server/pay/pay
+.gitignore
+server/search/search
+server/ticket/ticket
+server/ticketPool/ticket-pool-k
+server/user/user
