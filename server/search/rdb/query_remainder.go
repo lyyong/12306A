@@ -8,7 +8,7 @@ import (
 	"12306A-search/dao"
 	"12306A-search/model/outer"
 	"12306A-search/tools/settings"
-	"fmt"
+	"common/tools/logging"
 	"github.com/go-redis/redis"
 	"rpc/ticketPool/Client"
 	"rpc/ticketPool/proto/ticketPoolRPC"
@@ -33,7 +33,8 @@ func QueryTrainByDateAndCity(date, startCity, endCity string) []string {
 	//fmt.Println(min)
 	res, err := RedisDB.ZRangeByScore(key, redis.ZRangeBy{Min: strconv.Itoa(min), Max: "50000"}).Result()
 	if err != nil {
-		fmt.Println("select trains failed, err:", err)
+		//fmt.Println("select trains failed, err:", err)
+		logging.Info("select trains failed, err:", err)
 		return nil
 	}
 	//for _,t:=range res{
@@ -83,14 +84,15 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 		return nil
 	}
 	if exists == 1 {
-		fmt.Println("有缓存...")
+		logging.Info("有缓存...")
 		date := request.Date
 		for _, condition := range request.Condition {
 			key := date + "-" + strconv.Itoa(int(condition.TrainId)) +
 				"-" + strconv.Itoa(int(condition.StartStationId)) + "-" + strconv.Itoa(int(condition.DestStationId))
 			result, err := RedisDB.HGetAll(key).Result()
 			if err != nil {
-				fmt.Println("err:", err)
+				//fmt.Println("err:", err)
+				logging.Info("err:", err)
 				return trains
 			}
 
@@ -100,7 +102,8 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 				seatType, err := strconv.ParseInt(k, 10, 32)
 				seatNum, err := strconv.ParseInt(v, 10, 32)
 				if err != nil {
-					fmt.Println("parseInt error:", err)
+					//fmt.Println("parseInt error:", err)
+					logging.Info("parseInt error:", err)
 					return nil
 				}
 				seatInfo := &ticketPoolRPC.SeatInfo{}
@@ -118,11 +121,13 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 		}
 		response.TrainsTicketInfo = trainTicketInfos
 	} else {
-		fmt.Println("没有缓存")
+		//fmt.Println("没有缓存")
+		logging.Info("无缓存...")
 		//没有缓存
 		rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
 		if err != nil {
-			fmt.Println("rpc getTicketNumber failed, err:", err)
+			//fmt.Println("rpc getTicketNumber failed, err:", err)
+			logging.Info("rpc getTicketNumber failed, err:", err)
 			return nil
 		}
 
@@ -245,19 +250,22 @@ func QueryTicketNumByDateWithTrainNumber(TrainId, ssID, esID uint32, date string
 	cacheKey := date + "-" + strconv.Itoa(int(TrainId)) + "-" + strconv.Itoa(int(ssID)) + "-" + strconv.Itoa(int(esID))
 	resMap, err := RedisDB.HGetAll(cacheKey).Result()
 	if err != nil {
-		fmt.Println("Redis.Exists err:", err)
+		//fmt.Println("Redis.Exists err:", err)
+		logging.Info("Redis.Exists err:", err)
 		return nil
 	}
 	//有缓存
 	if resMap != nil && len(resMap) > 0 {
-		fmt.Println("有缓存")
+		//fmt.Println("有缓存")
+		logging.Info("有缓存...")
 		var seatInfos []*ticketPoolRPC.SeatInfo
 
 		for k, v := range resMap {
 			seatType, err := strconv.ParseInt(k, 10, 32)
 			seatNum, err := strconv.ParseInt(v, 10, 32)
 			if err != nil {
-				fmt.Println("parseInt error:", err)
+				//fmt.Println("parseInt error:", err)
+				logging.Info("parseInt error:", err)
 				return nil
 			}
 			seatInfo := &ticketPoolRPC.SeatInfo{}
@@ -272,10 +280,12 @@ func QueryTicketNumByDateWithTrainNumber(TrainId, ssID, esID uint32, date string
 		trainTicketInfos = append(trainTicketInfos, trainTicketInfo)
 		response.TrainsTicketInfo = trainTicketInfos
 	} else {
-		fmt.Println("无缓存")
+		//fmt.Println("无缓存")
+		logging.Info("无缓存...")
 		rpcClient, err := Client.NewClientWithTarget(settings.Target.Addr)
 		if err != nil {
-			fmt.Println("rpc getTicketNumber failed, err:", err)
+			//fmt.Println("rpc getTicketNumber failed, err:", err)
+			logging.Info("rpc getTicketNumber failed, err:", err)
 			return nil
 		}
 

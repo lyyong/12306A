@@ -38,8 +38,8 @@ services:
   mysql:
     ports:
       - "3310:3306"
-    volumes:
-      - "~/data/docker-mysql:/var/lib/mysql"
+#    volumes:
+#      - "~/data/docker-mysql:/var/lib/mysql"
     environment:
       - "MYSQL_ROOT_PASSWORD=12306A.12306A"
     image:
@@ -49,11 +49,11 @@ services:
       - "6379:6379"
     image:
       redis
-  slave-redis:
-    build:
-      context: ./docker/redis/slave_tp
-    ports:
-      - "6380:6380"
+#  slave-redis:
+#    build:
+#      context: ./docker/redis/slave_tp
+#    ports:
+#      - "6380:6380"
   zipkin:
     ports:
       - "9410:9410/tcp"
@@ -74,13 +74,13 @@ services:
       - "8500:8500/tcp"
       - "8600:8600/tcp"
       - "8600:8600/udp"
-  kafka-manager:
-    image:
-      kafkamanager/kafka-manager
-    ports:
-      - "9111:9000"
-    environment:
-      ZK_HOSTS: zoo:2181
+#  kafka-manager:
+#    image:
+#      kafkamanager/kafka-manager
+#    ports:
+#      - "9111:9000"
+#    environment:
+#      ZK_HOSTS: zoo:2181
   kafka:
     image:
       wurstmeister/kafka

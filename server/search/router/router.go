@@ -6,11 +6,16 @@ package router
 
 import (
 	v12 "12306A-search/controller/api/v1"
+	"12306A-search/tools/settings"
+
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {
-	r := gin.Default()
+	// r := gin.Default()
+	gin.SetMode(settings.Server.RunMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
 
 	v1 := r.Group("/search/api/v1/")
 	{
