@@ -44,8 +44,9 @@ var (
 
 func InitTicketPool() {
 	ticketPool := &TicketPool{
-		trainMap:            make(map[uint32]*Train),
-		seatTypeMap: 		 initSeatTypeMap(),
+		trainMap:        make(map[uint32]*Train),
+		idToSeatTypeMap: initIdToSeatTypeMap(),
+		seatTypeToIdMap: initSeatTypeToIdMap(),
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
@@ -130,13 +131,23 @@ func genStaticInfo() {
 	}
 }
 
-func initSeatTypeMap() map[uint32]string {
-	seatTypeMap := make(map[uint32]string)
-	seatTypeName := []string{"商务座","一等座","二等座","高级软卧","软卧","硬卧","硬座"}
-	for i := 0; i < len(seatTypeName); i++ {
-		seatTypeMap[uint32(i)] = seatTypeName[i]
+func initIdToSeatTypeMap() map[uint32]string {
+	idToSeatTypeMap := make(map[uint32]string)
+	seatTypeNames := []string{"商务座","一等座","二等座","高级软卧","软卧","硬卧","硬座"}
+	for i := 0; i < len(seatTypeNames); i++ {
+		idToSeatTypeMap[uint32(i)] = seatTypeNames[i]
 	}
-	return seatTypeMap
+	return idToSeatTypeMap
+}
+
+
+func initSeatTypeToIdMap() map[string]uint32{
+	seatTypeToIdMap := make(map[string]uint32)
+	seatTypeNames := []string{"商务座","一等座","二等座","高级软卧","软卧","硬卧","硬座"}
+	for i := 0; i < len(seatTypeNames); i++ {
+		seatTypeToIdMap[seatTypeNames[i]] = uint32(i)
+	}
+	return seatTypeToIdMap
 }
 
 func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carriageList []*model.CarriageType) *Carriages {
@@ -199,7 +210,7 @@ func InitMockData() {
 	// 初始化票池
 	Tp = &TicketPool{
 		trainMap:            make(map[uint32]*Train),
-		seatTypeMap: 		 make(map[uint32]string),
+		idToSeatTypeMap:	 make(map[uint32]string),
 	}
 	// 初始化车厢类型
 	/*
@@ -354,7 +365,7 @@ func generateFullTicketValue(stationNumber int) uint64 {
 }
 
 func showTicketPoolInfo() {
-	for key, value := range Tp.seatTypeMap {
+	for key, value := range Tp.idToSeatTypeMap {
 		fmt.Println("carriageTypeId:[", key, "]; seatInfo:[", value, "]")
 	}
 	for key, value := range Tp.trainMap {

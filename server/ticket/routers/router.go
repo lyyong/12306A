@@ -13,7 +13,7 @@ func InitRouter() *gin.Engine {
 	v1 := r.Group("/ticket/api/v1")
 	{
 		v1.POST("/buyTicket", controller.BuyTicket)
-		v1.POST("/RefundTicket", controller.RefundTicket)
+		v1.POST("/refundTicket", controller.RefundTicket)
 	}
 
 	return r

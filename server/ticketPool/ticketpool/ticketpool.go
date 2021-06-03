@@ -13,7 +13,8 @@ import (
 
 type TicketPool struct {
 	trainMap  			map[uint32]*Train 	// key: trainId
-	seatTypeMap 		map[uint32]string	// key: seatTypeId  value: seatTypeName
+	idToSeatTypeMap		map[uint32]string	// key: seatTypeId  value: seatTypeName
+	seatTypeToIdMap		map[string]uint32
 }
 
 type Train struct {
@@ -126,12 +127,36 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId u
 	return seatCountMap, nil
 }
 
+func(tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint32, date string, seatTypeId uint32, seatInfo string) error{
+	train := tp.trainMap[trainId]
+	if train == nil {
+		return errors.New("error train_id")
+	}
+	startStation := train.stopStationMap[startStationId]
+	destStation := train.stopStationMap[destStationId]
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
+		return errors.New("error station_id")
+	}
+	key := generateRequestValue(startStation.Seq, destStation.Seq)
+	carriages := train.carriageMap[date]
+	if carriages == nil {
+		return errors.New("error date")
+	}
+	csi := carriages.carriageSeatInfo[seatTypeId]
+	csi.refund(key, seatInfo)
+	return nil
+}
+
 func(tp *TicketPool) GetTrain(trainId uint32) *Train{
 	return tp.trainMap[trainId]
 }
 
-func(tp *TicketPool) GetSeatName(seatTypeId uint32) string{
-	return tp.seatTypeMap[seatTypeId]
+func(tp *TicketPool) GetSeatTypeNameById(seatTypeId uint32) string{
+	return tp.idToSeatTypeMap[seatTypeId]
+}
+
+func(tp *TicketPool) GetIdBySeatTypeName(seatTypeName string) uint32{
+	return tp.seatTypeToIdMap[seatTypeName]
 }
 
 func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*skiplist.Node, []string){
@@ -233,6 +258,10 @@ func (csi *CarriageSeatInfo) getValues(node *skiplist.Node) []string{
 		values = append(values, node.Value...)
 	}
 	return values
+}
+
+func(csi *CarriageSeatInfo) refund(key uint64, value string) {
+	csi.sl.Do("Refund", key, value)
 }
 
 func (csi *CarriageSeatInfo) allocate(requestValue uint64, count int) *skiplist.Node{

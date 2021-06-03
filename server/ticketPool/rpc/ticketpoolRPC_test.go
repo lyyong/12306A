@@ -16,6 +16,43 @@ import (
 	"ticketPool/utils/setting"
 	"time"
 )
+func TestTicketPoolServer_RefundTicket(t *testing.T) {
+	setting.InitSetting()
+	ticketpool.InitMockData()
+	tps := &TicketPoolServer{}
+	tickets := make([]*pb.Ticket, 3)
+	tickets[0] = &pb.Ticket{
+		TrainId:        0,
+		StartStationId: 2,
+		StartTime:      "2021-02-16",
+		DestStationId:  18,
+		SeatType:       "一等座",
+		CarriageNumber: "3",
+		SeatNumber:     "2C",
+	}
+	tickets[1] = &pb.Ticket{
+		TrainId:        0,
+		StartStationId: 2,
+		StartTime:      "2021-02-16",
+		DestStationId:  7,
+		SeatType:       "一等座",
+		CarriageNumber: "3",
+		SeatNumber:     "1A",
+	}
+	tickets[2] = &pb.Ticket{
+		TrainId:        0,
+		StartStationId: 13,
+		StartTime:      "2021-02-16",
+		DestStationId:  18,
+		SeatType:       "一等座",
+		CarriageNumber: "3",
+		SeatNumber:     "1A",
+	}
+	tps.RefundTicket(context.Background(), &pb.RefundTicketRequest{
+		Tickets: tickets,
+	})
+}
+
 
 func TestGetTicket_Validity(t *testing.T) {
 	setting.InitSetting()
