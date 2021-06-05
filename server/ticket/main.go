@@ -23,6 +23,12 @@ import (
 )
 
 func main() {
+	// 加载日子系统
+	if setting.Server.RunMode == "debug" {
+		logging.SetupWithMode(logging.LogDebug)
+	} else {
+		logging.SetupWithMode(logging.LogRelease)
+	}
 	logging.Info("Ticket Service Start....")
 
 	server_find.Register(setting.Server.Name,

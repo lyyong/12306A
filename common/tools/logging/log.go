@@ -9,18 +9,24 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sync"
 	"time"
 )
 
 type Level int
+type LogMode int
 
 var (
+	logOnce sync.Once
+
 	DefaultPrefix      = ""
 	DefaultCallerDepth = 2
 
 	logger     *log.Logger
 	logPrefix  = ""
 	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
+
+	logMode = LogDebug
 )
 
 const (
@@ -29,15 +35,42 @@ const (
 	WARNING              // 警告
 	ERROR                // 错误
 	FATAL                // 失败信息
+
+	// 日志输出等级
+
+	// LogRelease 模式输出所有的log
+	LogRelease LogMode = iota
+	// LogDebug 模式输出所有的log
+	LogDebug
 )
 
-// TODO logger的多线陈单例
+// Setup 初始化log,默认模式为debug
 func Setup() {
-	// 获得日志记录器，第一个参数是IO句柄，第二个是每行日志的开头，第三个定义了日志记录属性
-	logger = log.New(os.Stdout, DefaultPrefix, log.LstdFlags)
+	logOnce.Do(func() {
+		// 获得日志记录器，第一个参数是IO句柄，第二个是每行日志的开头，第三个定义了日志记录属性
+		logger = log.New(os.Stdout, DefaultPrefix, log.LstdFlags)
 
-	Info(map[string]interface{}{
-		"时间": time.Now(),
+		Info(map[string]interface{}{
+			"时间": time.Now(),
+		})
+	})
+}
+
+// SetMode 设置log模式
+func SetMode(mode LogMode) {
+	logMode = mode
+}
+
+// SetupWithMode 初始化log并且设置模式
+func SetupWithMode(mode LogMode) {
+	logOnce.Do(func() {
+		// 获得日志记录器，第一个参数是IO句柄，第二个是每行日志的开头，第三个定义了日志记录属性
+		logger = log.New(os.Stdout, DefaultPrefix, log.LstdFlags)
+
+		Info(map[string]interface{}{
+			"时间": time.Now(),
+		})
+		SetMode(mode)
 	})
 }
 
@@ -55,6 +88,9 @@ func setPrefix(level Level) {
 }
 
 func Debug(v ...interface{}) {
+	if logMode == LogRelease {
+		return
+	}
 	if logger == nil {
 		Setup()
 	}
@@ -63,6 +99,9 @@ func Debug(v ...interface{}) {
 }
 
 func Info(v ...interface{}) {
+	if logMode == LogRelease {
+		return
+	}
 	if logger == nil {
 		Setup()
 	}
@@ -71,6 +110,9 @@ func Info(v ...interface{}) {
 }
 
 func Warn(v ...interface{}) {
+	if logMode == LogRelease {
+		return
+	}
 	if logger == nil {
 		Setup()
 	}

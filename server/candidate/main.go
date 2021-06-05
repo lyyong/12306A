@@ -24,10 +24,15 @@ import (
 
 // 需要初始化的组件
 func init() {
-	// 加载日子系统
-	logging.Setup()
 	// 载入配置文件
 	setting.Setup()
+	// 加载日子系统
+	if setting.Server.RunMode == "debug" {
+		logging.SetupWithMode(logging.LogDebug)
+	} else {
+		logging.SetupWithMode(logging.LogRelease)
+	}
+	
 	// 服务发现
 	server_find.Register(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.HttpPort), setting.Consul.ServiceID, setting.Consul.Address, setting.Consul.Interval, setting.Consul.TTL)

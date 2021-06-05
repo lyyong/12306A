@@ -6,11 +6,13 @@ package router
 import (
 	"common/middleware/token/usertoken"
 	"common/router_tracer"
+	v1 "pay/controller/api/v1"
+	_ "pay/docs"
+	"pay/tools/setting"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	v1 "pay/controller/api/v1"
-	_ "pay/docs"
 )
 
 // @title 支付服务
@@ -24,7 +26,9 @@ import (
 // @BasePath /pay/api/v1
 // @query.collection.format multi
 func InitRouter() *gin.Engine {
-	r := gin.Default()
+	gin.SetMode(setting.Server.RunMode)
+	r := gin.New()
+	r.Use(gin.Recovery())
 	r.Use(usertoken.TokenParser())
 	// 设置使用链路追踪
 	if router_tracer.IsTracing() {

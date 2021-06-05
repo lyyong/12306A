@@ -20,8 +20,12 @@ import (
 )
 
 func init() {
-	logging.Setup()
 	setting.InitSetting()
+	if setting.Server.RunMode == "debug" {
+		logging.SetupWithMode(logging.LogDebug)
+	} else {
+		logging.SetupWithMode(logging.LogRelease)
+	}
 	database.Setup()
 }
 

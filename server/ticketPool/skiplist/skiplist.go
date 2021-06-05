@@ -104,6 +104,10 @@ func(sl *SkipList) DealWithRequest(){
 				key := req.args[0].(uint64)
 				respChan := req.args[1].(chan int32)
 				respChan <- sl.Search(key)
+			case "Refund":
+				key := req.args[0].(uint64)
+				value := req.args[1].(string)
+				sl.refund(key, value)
 			}
 		}
 	}()
@@ -267,6 +271,40 @@ func(sl *SkipList) Remove (key uint64) []string {
 			sl.tryReduceLevel()
 		}
 		return v
+	}
+}
+
+func(sl *SkipList) refund(key uint64, value string) {
+	h := sl.head
+
+	for {
+		if h.down == nil {
+			break
+		}
+		h = h.down
+	}
+	n := h.node
+	for {
+		n = n.Next
+
+		if n == nil {
+			sl.Put(key, []string{value})
+			return
+		}
+
+		values := n.Value
+		for i := 0; i < len(values); i++{
+			if values[i] == value {
+				newKey := n.Key | key
+				if len(values) == 1 {
+					sl.Remove(n.Key)
+				}else {
+					n.Value = append(values[:i], values[i+1:]...)
+				}
+				sl.Put(newKey, []string{value})
+				return
+			}
+		}
 	}
 }
 
