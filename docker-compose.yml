@@ -42,6 +42,8 @@ services:
 #      - "~/data/docker-mysql:/var/lib/mysql"
     environment:
       - "MYSQL_ROOT_PASSWORD=12306A.12306A"
+      # 修改时区
+      - "TZ=Asia/Shanghai"
     image:
       mysql
   main-redis:

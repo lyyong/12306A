@@ -42,10 +42,16 @@ func (c candidateService) CacheCandidate(userID, trainId uint, date string, pass
 		return "", err
 	}
 
-	// TODO 创建候补存入缓存, 支付完成后, 支付服务通过队列通知候补服务, 候补将该候补信息写入mysql
+	// candidate := model.Candidate{}
+
+	// // 先存储到redis
+	// cc := cache.CandidateCache{}
+	// cache2.Set(cc.GetKeyByOrderIDUnPay())
 	return resp.OrderOutsideID, err
 }
 
+// payOK 用户支付完成有进行相关的处理
 func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
+	// 主要就是把缓存中的订单写入mysql
 	logging.Info(payOKInfo.AffairID)
 }

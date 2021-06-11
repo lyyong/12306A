@@ -6,8 +6,9 @@ package setting
 import (
 	"common/tools/logging"
 	"flag"
-	"github.com/go-ini/ini"
 	"time"
+
+	"github.com/go-ini/ini"
 )
 
 type server struct {
@@ -40,6 +41,15 @@ type database struct {
 	DbName   string
 }
 
+type redis struct {
+	Host         string
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+	PoolSize     int
+	MinIdleConns int
+	IdelTimeout  time.Duration
+}
+
 type rpcTarget struct {
 	Order string
 }
@@ -54,6 +64,7 @@ var Zipkin = &zipkin{}
 var Database = &database{}
 var Kafka = &kafka{}
 var RPCTarget = &rpcTarget{}
+var Redis = &redis{}
 
 // 配置路径
 var configFile = flag.String("ConfigFile", "./config/candidate-config.ini", "设置配置文件")
@@ -70,6 +81,7 @@ func Setup() {
 	loadConfig(cfg, "consul", Consul)
 	loadConfig(cfg, "zipkin", Zipkin)
 	loadConfig(cfg, "database", Database)
+	loadConfig(cfg, "redis", Redis)
 	loadConfig(cfg, "kafka", Kafka)
 	loadConfig(cfg, "RPCTarget", RPCTarget)
 	Server.ReadTimeout *= time.Second
