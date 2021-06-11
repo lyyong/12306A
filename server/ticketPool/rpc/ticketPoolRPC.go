@@ -50,7 +50,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	ticketIndex := 0
 	for seatTypeId, seats := range seatsMap {
 		seatIndex := 0
-		seatType := tp.GetSeatName(seatTypeId)
+		seatType := tp.GetSeatTypeNameById(seatTypeId)
 		for i := 0; i < len(req.Passengers); i++ {
 			passengerInfo := req.Passengers[i]
 			if seatTypeId == passengerInfo.SeatTypeId {
@@ -110,7 +110,15 @@ func (tps *TicketPoolServer) GetTicketNumber(ctx context.Context, req *pb.GetTic
 
 func (tps *TicketPoolServer) RefundTicket(ctx context.Context, req *pb.RefundTicketRequest) (*pb.RefundTicketResponse, error) {
 	// 退票到票池
-
+	logging.Info("退票请求: ", req)
+	tp := ticketpool.Tp
+	for _, ticket := range req.Tickets {
+		err := tp.RefundTickets(ticket.TrainId, ticket.StartStationId, ticket.DestStationId, ticket.StartTime, tp.GetIdBySeatTypeName(ticket.SeatType), fmt.Sprintf("%s %s",ticket.CarriageNumber, ticket.SeatNumber))
+		if err != nil {
+			logging.Error(err)
+			return nil, err
+		}
+	}
 	return &pb.RefundTicketResponse{
 		IsOk: true,
 	}, nil

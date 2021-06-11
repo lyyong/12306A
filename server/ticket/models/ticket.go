@@ -39,9 +39,21 @@ func GetTicketByOrderId(orderId string) ([]*Ticket, error) {
 	return tickets, res.Error
 }
 
+
 func GetTicketsByPassengerId(passengerId uint32) ([]*Ticket, error) {
 	var tickets []*Ticket
 	res := database.DB.Where("passenger_id = ?", passengerId).Find(tickets)
+	return tickets, res.Error
+}
+
+
+func DeleteTicketByTicketId(db *gorm.DB, ticketsId []uint32) ([]*Ticket, error) {
+	var tickets []*Ticket
+	res := db.Find(tickets, ticketsId)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	res = db.Delete(tickets, ticketsId)
 	return tickets, res.Error
 }
 
