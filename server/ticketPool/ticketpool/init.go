@@ -44,9 +44,9 @@ var (
 
 func InitTicketPool() {
 	ticketPool := &TicketPool{
-		trainMap:        make(map[uint32]*Train),
-		idToSeatTypeMap: initIdToSeatTypeMap(),
-		seatTypeToIdMap: initSeatTypeToIdMap(),
+		TrainMap:        make(map[uint32]*Train),
+		IdToSeatTypeMap: initIdToSeatTypeMap(),
+		SeatTypeToIdMap: initSeatTypeToIdMap(),
 	}
 
 	// 初始化车厢座位信息 （所有类型车厢）
@@ -90,10 +90,10 @@ func InitTicketPool() {
 			cm[date] = genCarriages(train.ID, date, stopInfos, carriageList)
 			t = t.Add(time.Hour * 24)
 		}
-		ticketPool.trainMap[uint32(train.ID)] = &Train{
+		ticketPool.TrainMap[uint32(train.ID)] = &Train{
 			TrainNum:       train.Number,
-			stopStationMap: ssm,
-			carriageMap:    cm,
+			StopStationMap: ssm,
+			CarriageMap:    cm,
 		}
 
 	}
@@ -109,22 +109,22 @@ func genStaticInfo() {
 		if carriage.BusinessSeatNumber > 0 {
 			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)] = &SeatInfo{
 				SeatType:     "商务座",
-				maxSeatCount: int32(carriage.BusinessSeatNumber),
-				seats:        strings.Split(carriage.BusinessSeat, ","),
+				MaxSeatCount: int32(carriage.BusinessSeatNumber),
+				Seats:        strings.Split(carriage.BusinessSeat, ","),
 			}
 		}
 		if carriage.FirstSeatNumber > 0 {
 			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)] = &SeatInfo{
 				SeatType:     "一等座",
-				maxSeatCount: int32(carriage.FirstSeatNumber),
-				seats:        strings.Split(carriage.FirstSeat, ","),
+				MaxSeatCount: int32(carriage.FirstSeatNumber),
+				Seats:        strings.Split(carriage.FirstSeat, ","),
 			}
 		}
 		if carriage.SecondSeatNumber > 0 {
 			allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)] = &SeatInfo{
 				SeatType:     "二等座",
-				maxSeatCount: int32(carriage.SecondSeatNumber),
-				seats:        strings.Split(carriage.SecondSeat, ","),
+				MaxSeatCount: int32(carriage.SecondSeatNumber),
+				Seats:        strings.Split(carriage.SecondSeat, ","),
 			}
 		}
 		// TODO 添加其他座位类型
@@ -151,7 +151,7 @@ func initSeatTypeToIdMap() map[string]uint32{
 }
 
 func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carriageList []*model.CarriageType) *Carriages {
-	carriages := &Carriages{carriageSeatInfo: make(map[uint32]*CarriageSeatInfo)}
+	carriages := &Carriages{CarriageSeatInfo: make(map[uint32]*CarriageSeatInfo)}
 	fullV := generateFullTicketValue(len(stopInfos))
 	// 检查车厢,  将座位类型作为上一级, 暂时只有商务座,一等座和二等座
 	business := make([]*FullTicket, 0) // 商务座切片
@@ -160,41 +160,41 @@ func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carria
 	for i, carriage := range carriageList {
 		if carriage.BusinessSeatNumber > 0 {
 			business = append(business, &FullTicket{
-				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)],
-				carriageSeq:       strconv.Itoa(i),
-				currentSeatNumber: 0,
+				Seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)],
+				CarriageSeq:       strconv.Itoa(i),
+				CurrentSeatNumber: 0,
 			})
 		}
 		if carriage.FirstSeatNumber > 0 {
 			first = append(first, &FullTicket{
-				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)],
-				carriageSeq:       strconv.Itoa(i),
-				currentSeatNumber: 0,
+				Seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)],
+				CarriageSeq:       strconv.Itoa(i),
+				CurrentSeatNumber: 0,
 			})
 		}
 		if carriage.SecondSeatNumber > 0 {
 			second = append(second, &FullTicket{
-				seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)],
-				carriageSeq:       strconv.Itoa(i),
-				currentSeatNumber: 0,
+				Seat:              allSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)],
+				CarriageSeq:       strconv.Itoa(i),
+				CurrentSeatNumber: 0,
 			})
 		}
 		// TODO 添加更多座位类型
 	}
-	carriages.carriageSeatInfo[BUSINESS_SEAT_ID] = &CarriageSeatInfo{
-		fullValue:   fullV,
-		fullTickets: business,
-		sl:          skiplist.NewSkipList(uint32(trainId), date, BUSINESS_SEAT_ID),
+	carriages.CarriageSeatInfo[BUSINESS_SEAT_ID] = &CarriageSeatInfo{
+		FullValue:   fullV,
+		FullTickets: business,
+		Sl:          skiplist.NewSkipList(uint32(trainId), date, BUSINESS_SEAT_ID),
 	}
-	carriages.carriageSeatInfo[FIRST_SEAT_ID] = &CarriageSeatInfo{
-		fullValue:   fullV,
-		fullTickets: first,
-		sl:          skiplist.NewSkipList(uint32(trainId), date, FIRST_SEAT_ID),
+	carriages.CarriageSeatInfo[FIRST_SEAT_ID] = &CarriageSeatInfo{
+		FullValue:   fullV,
+		FullTickets: first,
+		Sl:          skiplist.NewSkipList(uint32(trainId), date, FIRST_SEAT_ID),
 	}
-	carriages.carriageSeatInfo[SECOND_SEAT_ID] = &CarriageSeatInfo{
-		fullValue:   fullV,
-		fullTickets: second,
-		sl:          skiplist.NewSkipList(uint32(trainId), date, SECOND_SEAT_ID),
+	carriages.CarriageSeatInfo[SECOND_SEAT_ID] = &CarriageSeatInfo{
+		FullValue:   fullV,
+		FullTickets: second,
+		Sl:          skiplist.NewSkipList(uint32(trainId), date, SECOND_SEAT_ID),
 	}
 	return carriages
 }
@@ -209,23 +209,23 @@ func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carria
 func InitMockData() {
 	// 初始化票池
 	Tp = &TicketPool{
-		trainMap:            make(map[uint32]*Train),
-		idToSeatTypeMap:	 make(map[uint32]string),
+		TrainMap:        make(map[uint32]*Train),
+		IdToSeatTypeMap: make(map[uint32]string),
 	}
 	// 初始化车厢类型
 	/*
 		   mock数据:
 			[ 	carriageTypeId : 0
 				carriageType:商务
-				maxSeatCount:100
+				MaxSeatCount:100
 			]
 			[ 	carriageTypeId : 1
 				carriageType:一等
-				maxSeatCount:100
+				MaxSeatCount:100
 			]
 			[ 	carriageTypeId : 2
 				carriageType:二等
-				maxSeatCount:140
+				MaxSeatCount:140
 			]
 	*/
 	seats := make([]string, 100)
@@ -244,13 +244,13 @@ func InitMockData() {
 
 	businessSeat := &SeatInfo{
 		SeatType:     "商务",
-		maxSeatCount: 100,
-		seats:        seats,
+		MaxSeatCount: 100,
+		Seats:        seats,
 	}
 	firstSeat := &SeatInfo{
 		SeatType:     "一等座",
-		maxSeatCount: 100,
-		seats:        seats,
+		MaxSeatCount: 100,
+		Seats:        seats,
 	}
 
 	seatsLevelSecond := make([]string, 140)
@@ -268,8 +268,8 @@ func InitMockData() {
 	}
 	secondSeat := &SeatInfo{
 		SeatType:     "二等座",
-		maxSeatCount: 140,
-		seats:        seatsLevelSecond,
+		MaxSeatCount: 140,
+		Seats:        seatsLevelSecond,
 	}
 
 	/* 获取所有列车信息，循环对每一个列车初始化，此处假数据只生成一辆列车
@@ -278,10 +278,10 @@ func InitMockData() {
 	*/
 
 	train := &Train{
-		stopStationMap: make(map[uint32]*StopStation),
-		carriageMap:    make(map[string]*Carriages),
+		StopStationMap: make(map[uint32]*StopStation),
+		CarriageMap:    make(map[string]*Carriages),
 	}
-	Tp.trainMap[0] = train
+	Tp.TrainMap[0] = train
 
 	t, err := time.Parse("2006-01-02 15:04", "2021-02-16 09:30")
 	if err != nil {
@@ -290,7 +290,7 @@ func InitMockData() {
 	// 20个站点
 	stationNumber := 20
 	for i := 0; i < stationNumber; i++ {
-		train.stopStationMap[uint32(i)] = &StopStation{
+		train.StopStationMap[uint32(i)] = &StopStation{
 			Seq:        i,
 			ArriveTime: t.Format("15:04"),
 			StartTime:  t.Add(time.Minute * 10).Format("15:04"),
@@ -301,9 +301,9 @@ func InitMockData() {
 	// 初始化 2021-02-16 这一天的票
 	date, _ := time.Parse("2006-01-02", "2021-02-16")
 	carriages := &Carriages{
-		carriageSeatInfo: make(map[uint32]*CarriageSeatInfo),
+		CarriageSeatInfo: make(map[uint32]*CarriageSeatInfo),
 	}
-	train.carriageMap[date.Format("2006-01-02")] = carriages
+	train.CarriageMap[date.Format("2006-01-02")] = carriages
 
 	// 6个商务座车厢
 	carriageCount := 6
@@ -311,9 +311,9 @@ func InitMockData() {
 	business := make([]*FullTicket, carriageCount)
 	for i := 0; i < carriageCount; i++ {
 		business[i] = &FullTicket{
-			seat:              businessSeat,
-			carriageSeq:       strconv.Itoa(index),
-			currentSeatNumber: 0,
+			Seat:              businessSeat,
+			CarriageSeq:       strconv.Itoa(index),
+			CurrentSeatNumber: 0,
 		}
 		index++
 	}
@@ -321,9 +321,9 @@ func InitMockData() {
 	first := make([]*FullTicket, carriageCount)
 	for i := 0; i < carriageCount; i++ {
 		first[i] = &FullTicket{
-			seat:              firstSeat,
-			carriageSeq:       strconv.Itoa(index),
-			currentSeatNumber: 0,
+			Seat:              firstSeat,
+			CarriageSeq:       strconv.Itoa(index),
+			CurrentSeatNumber: 0,
 		}
 		index++
 	}
@@ -331,28 +331,28 @@ func InitMockData() {
 	second := make([]*FullTicket, carriageCount)
 	for i := 0; i < carriageCount; i++ {
 		second[i] = &FullTicket{
-			seat:              secondSeat,
-			carriageSeq:       strconv.Itoa(index),
-			currentSeatNumber: 0,
+			Seat:              secondSeat,
+			CarriageSeq:       strconv.Itoa(index),
+			CurrentSeatNumber: 0,
 		}
 		index++
 	}
 
 	fullTicketValue := generateFullTicketValue(stationNumber)
-	carriages.carriageSeatInfo[0] = &CarriageSeatInfo{
-		fullValue:   fullTicketValue,
-		fullTickets: business,
-		sl:          skiplist.NewSkipList(0, "2021-02-16", 0),
+	carriages.CarriageSeatInfo[0] = &CarriageSeatInfo{
+		FullValue:   fullTicketValue,
+		FullTickets: business,
+		Sl:          skiplist.NewSkipList(0, "2021-02-16", 0),
 	}
-	carriages.carriageSeatInfo[1] = &CarriageSeatInfo{
-		fullValue:   fullTicketValue,
-		fullTickets: first,
-		sl:          skiplist.NewSkipList(0, "2021-02-16", 1),
+	carriages.CarriageSeatInfo[1] = &CarriageSeatInfo{
+		FullValue:   fullTicketValue,
+		FullTickets: first,
+		Sl:          skiplist.NewSkipList(0, "2021-02-16", 1),
 	}
-	carriages.carriageSeatInfo[2] = &CarriageSeatInfo{
-		fullValue:   fullTicketValue,
-		fullTickets: second,
-		sl:          skiplist.NewSkipList(0, "2021-02-16", 2),
+	carriages.CarriageSeatInfo[2] = &CarriageSeatInfo{
+		FullValue:   fullTicketValue,
+		FullTickets: second,
+		Sl:          skiplist.NewSkipList(0, "2021-02-16", 2),
 	}
 }
 
@@ -365,20 +365,20 @@ func generateFullTicketValue(stationNumber int) uint64 {
 }
 
 func showTicketPoolInfo() {
-	for key, value := range Tp.idToSeatTypeMap {
+	for key, value := range Tp.IdToSeatTypeMap {
 		fmt.Println("carriageTypeId:[", key, "]; seatInfo:[", value, "]")
 	}
-	for key, value := range Tp.trainMap {
+	for key, value := range Tp.TrainMap {
 		fmt.Println("trainId:[", key, "]; train:[", value, "]")
 		train := value
-		for stationId, station := range train.stopStationMap {
+		for stationId, station := range train.StopStationMap {
 			fmt.Println("stationId:[", stationId, "]; station:[", station, "]")
 		}
-		for date, carriages := range train.carriageMap {
+		for date, carriages := range train.CarriageMap {
 			fmt.Println("date:[", date, "]; carriages:[", carriages, "]")
-			for seatTypeId, csi := range carriages.carriageSeatInfo {
+			for seatTypeId, csi := range carriages.CarriageSeatInfo {
 				fmt.Println("seatTypeId:[", seatTypeId, "]; csi:[", csi, "]")
-				for _, v := range csi.fullTickets {
+				for _, v := range csi.FullTickets {
 					fmt.Println("carriage:", v)
 				}
 			}

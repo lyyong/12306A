@@ -53,12 +53,13 @@ func DeleteTicketByTicketId(db *gorm.DB, ticketsId []uint32) ([]*Ticket, error) 
 	if res.Error != nil {
 		return nil, res.Error
 	}
-	res = db.Delete(tickets, ticketsId)
+	res = db.Table("tickets").Where("id IN ?", ticketsId).Updates(Ticket{State: 2})
 	return tickets, res.Error
 }
 
-func UpdateState(ticketId uint32, state string) (bool, error) {
-	return false, nil
+func UpdateState(ticketsId []uint32, state uint8) error {
+	res := database.DB.Table("tickets").Where("id IN ?", ticketsId).Updates(Ticket{State: state})
+	return res.Error
 }
 
 func IsConflict(passengerId *[]uint32, date string) (bool, error) {

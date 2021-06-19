@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"syscall"
 	"ticketPool/rpc"
+	"ticketPool/serialize"
 	"ticketPool/ticketpool"
 	"ticketPool/utils/database"
 	"ticketPool/utils/setting"
@@ -66,6 +67,8 @@ func main() {
 	ticketpool.InitTicketPool()
 	logging.Info("TicketPool init success")
 
+	/* 开启票池序列化 */
+	serialize.Serialize()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	signal.Notify(quit, syscall.SIGTERM)
