@@ -1,30 +1,18 @@
+// Package router
 // @Author liuYong
 // @Created at 2020-01-05
-// @Modified at 2020-01-05
 package router
 
 import (
 	"common/middleware/token/usertoken"
 	"common/router_tracer"
 	v1 "pay/controller/api/v1"
-	_ "pay/docs"
 	"pay/tools/setting"
 
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// @title 支付服务
-// @version 1.0
-// @description 负责处理与支付和退款相关的业务
-
-// @contact.name LiuYong
-// @contact.email ly_yong@qq.com
-
-// @host localhost:8082
-// @BasePath /pay/api/v1
-// @query.collection.format multi
+// InitRouter 初始化一个路由
 func InitRouter() *gin.Engine {
 	gin.SetMode(setting.Server.RunMode)
 	r := gin.New()
@@ -39,7 +27,6 @@ func InitRouter() *gin.Engine {
 			context.Next()
 		})
 	}
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	payApiV1 := r.Group("/pay/api/v1")
 	{
 		okGroup := payApiV1.Group("/ok")
@@ -52,7 +39,7 @@ func InitRouter() *gin.Engine {
 		}
 		refundGroup := payApiV1.Group("/refund")
 		{
-			refundGroup.POST("/abb", v1.RefundAbb)
+			refundGroup.POST("/", v1.Refund)
 		}
 	}
 	orderApiV1 := r.Group("/order/api/v1")

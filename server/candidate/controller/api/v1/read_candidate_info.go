@@ -1,6 +1,6 @@
+// Package v1
 // @Author LiuYong
 // @Created at 2021-02-03
-// @Modified at 2021-02-03
 package v1
 
 import (
@@ -25,16 +25,7 @@ type readSend struct {
 	state int // 状态 0为正在候补,1为候补成功,2为候补失败
 }
 
-// ReadState 请求服务器查看候补状态 godoc
-// @Summary 请求服务器查看候补状态
-// @Description 查看自己的候补订单
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Param wantPayR body v1.readRecv true "需要接受的信息"
-// @Success 200 {object} controller.JSONResult{data=v1.readSend} "返回成功"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router /state [post]
+// ReadState 请求服务器查看候补状态
 func ReadState(c *gin.Context) {
 	send := controller.NewSend(c)
 	noData := make(map[string]interface{})

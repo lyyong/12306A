@@ -1,6 +1,6 @@
+// Package v1
 // @Author LiuYong
 // @Created at 2021-02-03
-// @Modified at 2021-02-03
 package v1
 
 import (
@@ -28,16 +28,7 @@ type candidateSend struct {
 	OrderOutsideID string `json:"order_outside_id" binding:"required"` // 返回的订单编号
 }
 
-// Candidate 请求服务器执行候补功能 godoc
-// @Summary 请求服务器执行候补功能
-// @Description 发送需要候补的信息给服务器, 服务器将执行候补功能
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Param candidateRecv body v1.candidateRecv true "需要接受的信息"
-// @Success 200 {object} controller.JSONResult{data=v1.candidateSend} "返回成功"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router / [post]
+// Candidate 请求服务器执行候补功能
 func Candidate(c *gin.Context) {
 	send := controller.NewSend(c)
 	noData := make(map[string]interface{})

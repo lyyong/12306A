@@ -1,6 +1,6 @@
+// Package v1
 // @Author LiuYong
 // @Created at 2021-1-23
-// @Modified at 2021-1-23
 package v1
 
 import (
@@ -15,17 +15,8 @@ type refundAbbRecv struct {
 	OrderOutsideID string `json:"order_outside_id" binding:"required"`
 }
 
-// 退款 godoc
-// @Summary 请求退款
-// @Description 给订单号然后进行退款操作
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Param refundR body v1.refundAbbRecv true "订单信息"
-// @Success 200 {object} controller.JSONResult{} "成功信息"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router /refund/abb [post]
-func RefundAbb(c *gin.Context) {
+// Refund 退款
+func Refund(c *gin.Context) {
 	sender := controller.NewSend(c)
 	noData := make(map[string]interface{})
 	var refundR refundAbbRecv

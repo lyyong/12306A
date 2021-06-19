@@ -1,6 +1,6 @@
+// Package model
 // @Author LiuYong
 // @Created at 2021-02-04
-// @Modified at 2021-02-04
 package model
 
 import (
@@ -60,7 +60,7 @@ func GetCandidates(conditions map[string]interface{}) ([]*Candidate, error) {
 	return res, nil
 }
 
-// GetCandidates 通过用户id查找候补订单
+// GetCandidatesByUserID 通过用户id查找候补订单
 func GetCandidatesByUserID(userID int) ([]*Candidate, error) {
 	return GetCandidates(map[string]interface{}{"user_id": userID})
 }

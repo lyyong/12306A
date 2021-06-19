@@ -1,6 +1,6 @@
+// Package message
 // @Author liuYong
 // @Created at 2020-01-05
-// @Modified at 2020-01-05
 package message
 
 var msg = map[int]string{

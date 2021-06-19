@@ -18,9 +18,6 @@ require (
 	github.com/pierrec/lz4 v2.2.6+incompatible // indirect
 	github.com/segmentio/kafka-go v0.4.10
 	github.com/smartystreets/goconvey v1.6.4 // indirect
-	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
-	github.com/swaggo/gin-swagger v1.3.0
-	github.com/swaggo/swag v1.7.0
 	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
 	google.golang.org/grpc v1.35.0
 	gopkg.in/ini.v1 v1.62.0 // indirect
