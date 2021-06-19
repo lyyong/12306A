@@ -40,6 +40,7 @@ func (ts *TicketServer) GetTicketByOrdersId(ctx context.Context, in *pb.GetTicke
 		tickets := make([]*pb.Ticket, len(res))
 		for j := 0; j < len(res); j++ {
 			tickets[j] = &pb.Ticket{
+				Id:             uint32(res[j].ID),
 				TrainNum:       res[j].TrainNum,
 				StartStation:   res[j].StartStation,
 				StartTime:      res[j].StartTime.String(),
@@ -105,6 +106,7 @@ func (ts *TicketServer) GetTicketByPassengerId(ctx context.Context, in *pb.GetTi
 	tickets := make([]*pb.Ticket, len(res))
 	for j := 0; j < len(res); j++ {
 		tickets[j] = &pb.Ticket{
+			Id:             uint32(res[j].ID),
 			TrainNum:       res[j].TrainNum,
 			StartStation:   res[j].StartStation,
 			StartTime:      res[j].StartTime.String(),
