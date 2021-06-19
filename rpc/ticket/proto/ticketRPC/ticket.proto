@@ -3,7 +3,7 @@ syntax = "proto3";
 package ticketRPC;
 
 message Ticket {
-//  uint32 id = 1;
+  uint32 id = 1;
 //  uint32 user_id = 2;
 //  uint32 train_id = 3;
   string train_num = 4;

@@ -69,3 +69,19 @@ func(c TicketRPCClient) GetUnHandleTickets(request *ticketRPC.GetUnHandleTickets
 	tclient := *c.ticketClient
 	return tclient.GetUnHandleTickets(context.Background(), request)
 }
+
+func(c TicketRPCClient) BuyTickets(request *ticketRPC.BuyTicketsRequest)(*ticketRPC.BuyTicketsResponseList, error){
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.BuyTickets(context.Background(), request)
+}
+
+func(c TicketRPCClient) UpdateTicketsState(request *ticketRPC.UpdateStateRequest)(*ticketRPC.Empty, error) {
+	if c.ticketClient == nil {
+		return nil, errors.New("没有NewClient")
+	}
+	tclient := *c.ticketClient
+	return tclient.UpdateTicketsState(context.Background(), request)
+}
