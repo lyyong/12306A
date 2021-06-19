@@ -47,15 +47,40 @@ message GetUnHandleTicketsRequest {
   uint32 user_id = 1;
 }
 message UpdateStateRequest { // 修改 车票状态 （如退票、改签）
-  uint32 ticket_id = 1;
-  string state = 2;  // 要修改的状态
+  repeated uint32 tickets_id = 1;
+  uint32 state = 2;  // 要修改的状态
 }
 
+message BuyTicketsRequest {
+  uint32 train_id = 1;
+  uint32 start_station_id = 2;
+  uint32 dest_station_id = 3;
+  string date = 4;
+  repeated Passenger passengers = 5;
+  string order_outer_id = 6;
+  uint32 user_id = 7;
+}
+
+message Passenger {
+  uint32 passenger_id = 1;
+  string passenger_name = 2;
+  uint32 seat_type_id = 3;
+}
+
+message BuyTicketsResponse{
+  uint32 passenger_id = 1;
+  uint32 ticket_id = 2;
+}
+
+message BuyTicketsResponseList {
+  repeated BuyTicketsResponse response = 1;
+}
 
 service TicketService {
   rpc GetTicketByOrdersId (GetTicketByOrdersIdRequest) returns (TicketsList){}
   rpc GetTicketByPassengerId (GetTicketByPassengerIdRequest) returns (Tickets){}
   rpc GetUnHandleTickets(GetUnHandleTicketsRequest) returns(Tickets){}
-  rpc UpdateState (UpdateStateRequest) returns (Empty){}
+  rpc UpdateTicketsState (UpdateStateRequest) returns (Empty){}
+  rpc BuyTickets (BuyTicketsRequest) returns (BuyTicketsResponseList){}
 }
 
