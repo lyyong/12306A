@@ -9,22 +9,22 @@ set ticketPool_dir=%root_dir%\server\ticketPool
 set user_dir=%root_dir%\server\user
 echo building candidate server
 cd %candidate_dir%
-go build -o candidate .
+CGO_ENABLED=0 go build -o candidate .
 echo building pay server
 cd %pay_dir%
-go build -o pay .
+CGO_ENABLED=0 go build -o pay .
 echo building search server
 cd %search_dir%
-go build -o search .
+CGO_ENABLED=0 go build -o search .
 echo building ticket server
 cd %ticket_dir%
-go build -o ticket .
+CGO_ENABLED=0 go build -o ticket .
 echo building ticketPool server
 cd %ticketPool_dir%
-go build -o ticket-pool-k .
+CGO_ENABLED=0 go build -o ticket-pool-k .
 echo building user server
 cd %user_dir%
-go build -o user .
+CGO_ENABLED=0 go build -o user .
 echo build finish
 go env -w GOOS=windows
 pause

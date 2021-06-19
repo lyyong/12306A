@@ -11,15 +11,18 @@ import (
 	"common/tools/logging"
 	"context"
 	"fmt"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"net/http"
 	"os"
 	"os/signal"
+	"pay/tools/cache"
 	"pay/tools/database"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-redis/redis/v8"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 // 需要初始化的组件
@@ -32,7 +35,7 @@ func init() {
 	} else {
 		logging.SetupWithMode(logging.LogRelease)
 	}
-	
+
 	// 服务发现
 	server_find.Register(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.HttpPort), setting.Consul.ServiceID, setting.Consul.Address, setting.Consul.Interval, setting.Consul.TTL)
@@ -44,6 +47,29 @@ func init() {
 	}
 	// 加载数据库
 	err = database.Setup(setting.Database.Type, setting.Database.Username, setting.Database.Password, setting.Database.Host, setting.Database.DbName)
+	if err != nil {
+		logging.Error(err)
+	}
+
+	// 加载redis
+	err = cache.Setup(&redis.Options{
+		Network: "tcp",
+		Addr:    setting.Redis.Host,
+		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
+			res, err := cn.Ping(ctx).Result()
+			if err != nil {
+				logging.Error(err)
+				return err
+			}
+			fmt.Println(res)
+			return nil
+		},
+		ReadTimeout:  setting.Redis.ReadTimeout,
+		WriteTimeout: setting.Redis.WriteTimeout,
+		PoolSize:     setting.Redis.PoolSize,
+		MinIdleConns: setting.Redis.MinIdleConns,
+		IdleTimeout:  setting.Redis.IdelTimeout,
+	})
 	if err != nil {
 		logging.Error(err)
 	}
