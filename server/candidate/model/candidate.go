@@ -8,20 +8,21 @@ import (
 	"pay/tools/database"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type Candidate struct {
 	model.Model
 	Date           time.Time `json:"date"`             // 候补时间
 	TrainID        uint      `json:"train_id"`         // 车次id
-	OrderID        uint      `json:"order_id"`         // 订单id
+	OrderID        string    `json:"order_id"`         // 订单id
 	UserID         uint      `json:"user_id"`          // 用户id
-	PassengerID    int       `json:"passenger_id"`     // 乘客id
+	PassengerID    uint      `json:"passenger_id"`     // 乘客id
 	PassengerName  string    `json:"passenger_name"`   // 乘客名称
-	StartStationID int       `json:"start_station_id"` // 上车车站id
-	DestStationID  int       `json:"dest_station_id"`  // 下车车站id
-	State          int       `json:"state"`            // 状态，0正在候补，1候补成功，2为候补失败
+	StartStationID uint      `json:"start_station_id"` // 上车车站id
+	DestStationID  uint      `json:"dest_station_id"`  // 下车车站id
+	ExpireDate     time.Time `json:"expire_date"`
+	State          int       `json:"state"` // 状态，0正在候补，1候补成功，2为候补失败
 }
 
 const createdBy = "candidate-server"
@@ -37,7 +38,7 @@ func AddCandidate(can *Candidate) error {
 }
 
 // AddCandidates 添加多个订单
-func AddCandidates(cans []*Candidate) error {
+func AddCandidates(cans []Candidate) error {
 	for i := range cans {
 		cans[i].CreatedBy = createdBy
 	}
@@ -48,9 +49,9 @@ func AddCandidates(cans []*Candidate) error {
 }
 
 // GetCandidates 通过条件获取订单, 条件的key是candidate struct成员
-func GetCandidates(canditions map[string]interface{}) ([]*Candidate, error) {
+func GetCandidates(conditions map[string]interface{}) ([]*Candidate, error) {
 	var res []*Candidate
-	if err := database.Client().Where(canditions).Find(&res).Error; err != nil {
+	if err := database.Client().Where(conditions).Find(&res).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			return nil, nil
 		}

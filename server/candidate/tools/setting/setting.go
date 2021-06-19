@@ -51,7 +51,8 @@ type redis struct {
 }
 
 type rpcTarget struct {
-	Order string
+	Order      string
+	TicketPool string
 }
 
 type kafka struct {
@@ -86,6 +87,9 @@ func Setup() {
 	loadConfig(cfg, "RPCTarget", RPCTarget)
 	Server.ReadTimeout *= time.Second
 	Server.WriteTimeout *= time.Second
+	Redis.WriteTimeout *= time.Second
+	Redis.ReadTimeout *= time.Second
+	Redis.IdelTimeout *= time.Minute
 }
 
 func loadConfig(Cfg *ini.File, section string, data interface{}) {

@@ -83,3 +83,26 @@ func LikeDeletes(key string) error {
 	}
 	return nil
 }
+
+func LPush(key string, data interface{}) error {
+	ctx := context.Background()
+	value, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	err = RedisConn.LPush(ctx, key, value).Err()
+	return err
+}
+
+func LIndex(key string, index int, value interface{}) error {
+	typ := reflect.TypeOf(value)
+	if typ.Kind() != reflect.Ptr {
+		return errors.New("value is not a pointer")
+	}
+	ctx := context.Background()
+	bytes, err := RedisConn.LIndex(ctx, key, int64(index)).Bytes()
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, value)
+}

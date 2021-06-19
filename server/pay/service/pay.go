@@ -27,13 +27,13 @@ const (
 )
 
 var (
-	kafkaWirter *kafka.Writer
-	once        sync.Once
-	topic       = "PayOK"
+	kwToPay    *kafka.Writer
+	onceForKP  sync.Once
+	topicPayOK = "PayOK"
 )
 
 func NewPayService() *payService {
-	kafkaWirter = getKafkaWirter()
+	kwToPay = getKWToPay()
 	return &payService{}
 }
 
@@ -86,7 +86,7 @@ func (s payService) PayOK(userID uint, orderInfo, orderOutsideID string) error {
 		logging.Error(err)
 		return err
 	}
-	err = kafkaWirter.WriteMessages(context.TODO(), kafka.Message{
+	err = kwToPay.WriteMessages(context.TODO(), kafka.Message{
 		Value: msgV,
 	})
 	if err != nil {
@@ -108,17 +108,17 @@ func (s payService) PayOK(userID uint, orderInfo, orderOutsideID string) error {
 	return nil
 }
 
-func getKafkaWirter() *kafka.Writer {
-	once.Do(func() {
-		if kafkaWirter == nil {
-			kafkaWirter = &kafka.Writer{
+func getKWToPay() *kafka.Writer {
+	onceForKP.Do(func() {
+		if kwToPay == nil {
+			kwToPay = &kafka.Writer{
 				Addr:         kafka.TCP(setting.Kafka.Host),
-				Topic:        topic,
+				Topic:        topicPayOK,
 				Async:        false,                 // 非异步执行
 				BatchTimeout: 50 * time.Millisecond, // 消息在发送缓存中的等待时间, 设置小点速度快但是占用cpu
 				WriteTimeout: 10 * time.Second,
 			}
 		}
 	})
-	return kafkaWirter
+	return kwToPay
 }

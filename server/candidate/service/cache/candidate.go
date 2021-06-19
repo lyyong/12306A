@@ -13,6 +13,10 @@ func (cc CandidateCache) GetKeyByUserID(UserID uint) string {
 	return fmt.Sprintf("candidate-%d", UserID)
 }
 
-func (cc CandidateCache) GetKeyByOrderIDUnPay(OrderID uint) string {
-	return fmt.Sprintf("candidate-unpay-%d", OrderID)
+func (cc CandidateCache) GetKeyByOrderIDUnPay(OrderID string) string {
+	return fmt.Sprintf("candidate-unpay-%s", OrderID)
+}
+
+func (cc CandidateCache) GetTrainIDSCacheKey() string {
+	return "CAN-trainIDS"
 }
