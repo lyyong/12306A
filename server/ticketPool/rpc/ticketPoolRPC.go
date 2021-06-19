@@ -32,6 +32,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	// 调用tp.GetTicket出票，得到的是座位切片
 	seatsMap, err := tp.GetTicket(req.TrainId, req.StartStationId, req.DestStationId, req.Date, seatCountMap)
 	if err != nil {
+		logging.Error(err)
 		return &pb.GetTicketResponse{Tickets: nil}, err
 	}
 
@@ -94,6 +95,7 @@ func (tps *TicketPoolServer) GetTicketNumber(ctx context.Context, req *pb.GetTic
 	for i := 0; i < len(condition); i++ {
 		seatCountMap, err := tp.SearchTicketCount(condition[i].TrainId, condition[i].StartStationId, condition[i].DestStationId, req.Date)
 		if err != nil {
+			logging.Error(err)
 			return nil, err
 		}
 		seatInfo := make([]*pb.SeatInfo, len(seatCountMap))

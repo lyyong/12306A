@@ -12,15 +12,15 @@ import (
 )
 
 type TicketPool struct {
-	trainMap  			map[uint32]*Train 	// key: trainId
-	idToSeatTypeMap		map[uint32]string	// key: seatTypeId  value: seatTypeName
-	seatTypeToIdMap		map[string]uint32
+	TrainMap        map[uint32]*Train // key: trainId
+	IdToSeatTypeMap map[uint32]string // key: seatTypeId  value: seatTypeName
+	SeatTypeToIdMap map[string]uint32
 }
 
 type Train struct {
-	TrainNum		string
-	stopStationMap 	map[uint32]*StopStation // key: stationId
-	carriageMap		map[string]*Carriages // key: date  根据日期获得某一天的所有车厢Carriages
+	TrainNum       string
+	StopStationMap map[uint32]*StopStation // key: stationId
+	CarriageMap    map[string]*Carriages   // key: date  根据日期获得某一天的所有车厢Carriages
 }
 
 type StopStation struct{
@@ -31,43 +31,43 @@ type StopStation struct{
 }
 
 type Carriages struct {
-	carriageSeatInfo 	map[uint32]*CarriageSeatInfo // key: seatTypeId  根据 seatTypeId 获取该类型座位的车厢切片
+	CarriageSeatInfo map[uint32]*CarriageSeatInfo // key: seatTypeId  根据 seatTypeId 获取该类型座位的车厢切片
 }
 
 type CarriageSeatInfo struct {
-	fullValue		uint64
-	fullTickets		[]*FullTicket
-	sl 				*skiplist.SkipList
+	FullValue   uint64
+	FullTickets []*FullTicket
+	Sl          *skiplist.SkipList
 }
 
 
 type FullTicket struct {
-	seat				*SeatInfo
-	carriageSeq			string
-	currentSeatNumber	int32		// 从 0 开始，表示当前已分配出去的座位号
+	Seat              *SeatInfo
+	CarriageSeq       string
+	CurrentSeatNumber int32 // 从 0 开始，表示当前已分配出去的座位号
 }
 
 type SeatInfo struct {	// 描述车厢的座位信息，同一种车厢共用一份
-	SeatType 		string
-	maxSeatCount 	int32
-	seats 			[]string // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
+	SeatType     string
+	MaxSeatCount int32
+	Seats        []string // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
 }
 
 
 
 func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
 	// 根据请求在票池中获取车辆信息，经停站信息，计算 requestValue
-	train := tp.trainMap[trainId]
+	train := tp.TrainMap[trainId]
 	if train == nil {
 		return nil, errors.New("error train_id")
 	}
-	startStation := train.stopStationMap[startStationId]
-	destStation := train.stopStationMap[destStationId]
+	startStation := train.StopStationMap[startStationId]
+	destStation := train.StopStationMap[destStationId]
 	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
 		return nil, errors.New("error station_id")
 	}
 	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
-	carriages := train.carriageMap[date]
+	carriages := train.CarriageMap[date]
 	if carriages == nil {
 		return nil, errors.New("error date")
 	}
@@ -77,7 +77,7 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, da
 
 	for seatType, count := range seatCountMap {
 		// csi 为描述某种座位余票的结构体
-		csi := carriages.carriageSeatInfo[seatType]
+		csi := carriages.CarriageSeatInfo[seatType]
 		seatNode, seats := csi.allocateTicket(requestValue, count)
 		if seatNode == nil {
 			// 有任何一种类型的票出票失败，整个订单都失败
@@ -104,23 +104,23 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, da
 
 func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId uint32, date string) (map[uint32]int32, error) {
 
-	train := tp.trainMap[trainId]
+	train := tp.TrainMap[trainId]
 	if train == nil {
 		return nil, errors.New("error train_id")
 	}
-	startStation := train.stopStationMap[startStationId]
-	destStation := train.stopStationMap[destStationId]
+	startStation := train.StopStationMap[startStationId]
+	destStation := train.StopStationMap[destStationId]
 	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
 		return nil, errors.New("error station_id")
 	}
 	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
-	carriages := train.carriageMap[date]
+	carriages := train.CarriageMap[date]
 	if carriages == nil {
 		return nil, errors.New("error date")
 	}
 
 	seatCountMap := make(map[uint32]int32)
-	for seatTypeId, csi := range carriages.carriageSeatInfo {
+	for seatTypeId, csi := range carriages.CarriageSeatInfo {
 		seatCountMap[seatTypeId] = csi.getTicketCount(requestValue)
 	}
 
@@ -128,35 +128,35 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId u
 }
 
 func(tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint32, date string, seatTypeId uint32, seatInfo string) error{
-	train := tp.trainMap[trainId]
+	train := tp.TrainMap[trainId]
 	if train == nil {
 		return errors.New("error train_id")
 	}
-	startStation := train.stopStationMap[startStationId]
-	destStation := train.stopStationMap[destStationId]
+	startStation := train.StopStationMap[startStationId]
+	destStation := train.StopStationMap[destStationId]
 	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
 		return errors.New("error station_id")
 	}
 	key := generateRequestValue(startStation.Seq, destStation.Seq)
-	carriages := train.carriageMap[date]
+	carriages := train.CarriageMap[date]
 	if carriages == nil {
 		return errors.New("error date")
 	}
-	csi := carriages.carriageSeatInfo[seatTypeId]
+	csi := carriages.CarriageSeatInfo[seatTypeId]
 	csi.refund(key, seatInfo)
 	return nil
 }
 
 func(tp *TicketPool) GetTrain(trainId uint32) *Train{
-	return tp.trainMap[trainId]
+	return tp.TrainMap[trainId]
 }
 
 func(tp *TicketPool) GetSeatTypeNameById(seatTypeId uint32) string{
-	return tp.idToSeatTypeMap[seatTypeId]
+	return tp.IdToSeatTypeMap[seatTypeId]
 }
 
 func(tp *TicketPool) GetIdBySeatTypeName(seatTypeName string) uint32{
-	return tp.seatTypeToIdMap[seatTypeName]
+	return tp.SeatTypeToIdMap[seatTypeName]
 }
 
 func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*skiplist.Node, []string){
@@ -191,18 +191,18 @@ func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*sk
 }
 
 func(t *Train) GetStopStation (stationId uint32) *StopStation {
-	return t.stopStationMap[stationId]
+	return t.StopStationMap[stationId]
 }
 
 
 func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 	seats := make([]string, count)
 	num := 0
-	for i := 0; i < len(csi.fullTickets); i++ {
+	for i := 0; i < len(csi.FullTickets); i++ {
 		for {
-			ft := csi.fullTickets[i]
-			maxSeatCount := ft.seat.maxSeatCount
-			csn := ft.currentSeatNumber
+			ft := csi.FullTickets[i]
+			maxSeatCount := ft.Seat.MaxSeatCount
+			csn := ft.CurrentSeatNumber
 			if csn >= maxSeatCount {
 				// 当前车厢全票已拆完
 				break
@@ -211,18 +211,18 @@ func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 			if split >= count {
 				split = count
 			}
-			if !atomic.CompareAndSwapInt32(&ft.currentSeatNumber, csn, csn+split) {
+			if !atomic.CompareAndSwapInt32(&ft.CurrentSeatNumber, csn, csn+split) {
 				continue
 			}
 			count -= split
 
 			for j := csn; j < csn+split; j++ {
-				seats[num] = fmt.Sprintf("%s %s",ft.carriageSeq, ft.seat.seats[j])
+				seats[num] = fmt.Sprintf("%s %s",ft.CarriageSeq, ft.Seat.Seats[j])
 				num++
 			}
 			if count == 0 {
 				return &skiplist.Node{
-					Key:   csi.fullValue,
+					Key:   csi.FullValue,
 					Value: seats,
 					Next:  nil,
 				}
@@ -233,16 +233,16 @@ func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 	}
 	// 所有车厢全票之和不足count，返回nil，分配出的票插入票池（有可能别的线程也进行了分配，所以不能再减回去）
 	if len(seats) > int(count) {
-		csi.put(csi.fullValue, seats[:len(seats)-int(count)])
+		csi.put(csi.FullValue, seats[:len(seats)-int(count)])
 	}
 	return nil
 }
 
 func(csi *CarriageSeatInfo) getTicketCount(requestValue uint64) int32 {
-	fullTickets := csi.fullTickets
+	fullTickets := csi.FullTickets
 	var count int32 = 0
 	for i := 0; i < len(fullTickets); i++{
-		count += fullTickets[i].seat.maxSeatCount - fullTickets[i].currentSeatNumber
+		count += fullTickets[i].Seat.MaxSeatCount - fullTickets[i].CurrentSeatNumber
 
 	}
 	// 全票全部被拆分后去票池搜索
@@ -261,22 +261,22 @@ func (csi *CarriageSeatInfo) getValues(node *skiplist.Node) []string{
 }
 
 func(csi *CarriageSeatInfo) refund(key uint64, value string) {
-	csi.sl.Do("Refund", key, value)
+	csi.Sl.Do("Refund", key, value)
 }
 
 func (csi *CarriageSeatInfo) allocate(requestValue uint64, count int) *skiplist.Node{
 	respChan := make(chan *skiplist.Node, 1)
-	csi.sl.Do("Allocate", requestValue, count, respChan)
+	csi.Sl.Do("Allocate", requestValue, count, respChan)
 	return <- respChan
 }
 
 func (csi *CarriageSeatInfo) put(key uint64, value []string){
-	csi.sl.Do("Put", key, value)
+	csi.Sl.Do("Put", key, value)
 }
 
 func (csi *CarriageSeatInfo) search(requestValue uint64) int32 {
 	respChan := make(chan int32, 1)
-	csi.sl.Do("Search", requestValue, respChan)
+	csi.Sl.Do("Search", requestValue, respChan)
 	return <- respChan
 }
 

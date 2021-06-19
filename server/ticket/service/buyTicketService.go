@@ -5,6 +5,7 @@
 package service
 
 import (
+	"common/tools/logging"
 	"encoding/json"
 	"fmt"
 	"github.com/gomodule/redigo/redis"
@@ -44,6 +45,7 @@ func CheckUnHandleIndent(userId uint32) (bool, error) {
 func CreateOrder(createReq *orderPb.CreateRequest) (*orderPb.CreateRespond, error) {
 	resp, err := ts.orderCli.Create(createReq)
 	if err != nil {
+		logging.Error(err)
 		return nil, err
 	}
 	return resp, nil
@@ -54,6 +56,7 @@ func SaveTickets(key string, tickets []*ticketPoolPb.Ticket, expireTime int32) e
 	defer conn.Close()
 	data, err := json.Marshal(tickets)
 	if err != nil {
+		logging.Error(err)
 		return err
 	}
 
@@ -68,13 +71,13 @@ func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 
 	data, err := redis.Bytes(conn.Do("GET", key))
 	if err != nil {
-		// 通知支付模块
+		logging.Error(err)
 		return
 	}
 	var tpTickets []*ticketPoolPb.Ticket
 	err = json.Unmarshal(data, &tpTickets)
 	if err != nil {
-		// 通知支付模块
+		logging.Error(err)
 		return
 	}
 	tickets := make([]models.Ticket, len(tpTickets))
@@ -105,7 +108,7 @@ func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 	}
 	err = models.AddMultipleTicket(&tickets)
 	if err != nil {
-		// 通知支付模块
+		logging.Error(err)
 		return
 	}
 }
