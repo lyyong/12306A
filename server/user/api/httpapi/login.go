@@ -35,10 +35,11 @@ func Login(c *gin.Context) {
 	}
 
 	r := struct {
-		Token string `json:"token"`
+		Token string            `json:"token"`
+		User  *service.UserInfo `json:"user"`
 	}{}
 
-	if token, err := service.Login(req.Username, req.Password); err != nil {
+	if token, userInfo, err := service.Login(req.Username, req.Password); err != nil {
 		if errors.Is(err, errortype.ErrUserNotExist) || errors.Is(err, errortype.ErrWrongPassword) {
 			c.JSON(http.StatusOK, resp.R(r).SetMsg("用户名或密码不正确"))
 		} else {
@@ -47,6 +48,7 @@ func Login(c *gin.Context) {
 		return
 	} else {
 		r.Token = token
+		r.User = userInfo
 	}
 	c.JSON(http.StatusOK, resp.R(r).SetMsg("登录成功").SetCode(200))
 }
