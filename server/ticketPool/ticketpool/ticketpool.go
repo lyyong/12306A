@@ -23,10 +23,10 @@ type Train struct {
 	CarriageMap    map[string]*Carriages   // key: date  根据日期获得某一天的所有车厢Carriages
 }
 
-type StopStation struct{
-	Seq        	int // 序号：描述该车站是第几个经停站，从 0 开始
-	ArriveTime 	string
-	StartTime  	string
+type StopStation struct {
+	Seq         int // 序号：描述该车站是第几个经停站，从 0 开始
+	ArriveTime  string
+	StartTime   string
 	StationName string
 }
 
@@ -40,22 +40,19 @@ type CarriageSeatInfo struct {
 	Sl          *skiplist.SkipList
 }
 
-
 type FullTicket struct {
 	Seat              *SeatInfo
 	CarriageSeq       string
 	CurrentSeatNumber int32 // 从 0 开始，表示当前已分配出去的座位号
 }
 
-type SeatInfo struct {	// 描述车厢的座位信息，同一种车厢共用一份
+type SeatInfo struct { // 描述车厢的座位信息，同一种车厢共用一份
 	SeatType     string
 	MaxSeatCount int32
 	Seats        []string // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
 }
 
-
-
-func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
+func (tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
 	// 根据请求在票池中获取车辆信息，经停站信息，计算 requestValue
 	train := tp.TrainMap[trainId]
 	if train == nil {
@@ -63,17 +60,17 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, da
 	}
 	startStation := train.StopStationMap[startStationId]
 	destStation := train.StopStationMap[destStationId]
-	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq {
 		return nil, errors.New("error station_id")
 	}
-	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
+	requestValue := generateRequestValue(startStation.Seq-1, destStation.Seq-1)
 	carriages := train.CarriageMap[date]
 	if carriages == nil {
 		return nil, errors.New("error date")
 	}
 
 	csiNodeMap := make(map[*CarriageSeatInfo]*skiplist.Node)
-	seatsMap := make(map[uint32][]string,len(seatCountMap))
+	seatsMap := make(map[uint32][]string, len(seatCountMap))
 
 	for seatType, count := range seatCountMap {
 		// csi 为描述某种座位余票的结构体
@@ -102,7 +99,7 @@ func(tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, da
 	return seatsMap, nil
 }
 
-func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId uint32, date string) (map[uint32]int32, error) {
+func (tp *TicketPool) SearchTicketCount(trainId, startStationId, destStationId uint32, date string) (map[uint32]int32, error) {
 
 	train := tp.TrainMap[trainId]
 	if train == nil {
@@ -110,10 +107,10 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId u
 	}
 	startStation := train.StopStationMap[startStationId]
 	destStation := train.StopStationMap[destStationId]
-	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq {
 		return nil, errors.New("error station_id")
 	}
-	requestValue := generateRequestValue(startStation.Seq, destStation.Seq)
+	requestValue := generateRequestValue(startStation.Seq-1, destStation.Seq-1)
 	carriages := train.CarriageMap[date]
 	if carriages == nil {
 		return nil, errors.New("error date")
@@ -127,17 +124,17 @@ func(tp *TicketPool) SearchTicketCount(trainId , startStationId, destStationId u
 	return seatCountMap, nil
 }
 
-func(tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint32, date string, seatTypeId uint32, seatInfo string) error{
+func (tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint32, date string, seatTypeId uint32, seatInfo string) error {
 	train := tp.TrainMap[trainId]
 	if train == nil {
 		return errors.New("error train_id")
 	}
 	startStation := train.StopStationMap[startStationId]
 	destStation := train.StopStationMap[destStationId]
-	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq{
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq {
 		return errors.New("error station_id")
 	}
-	key := generateRequestValue(startStation.Seq, destStation.Seq)
+	key := generateRequestValue(startStation.Seq-1, destStation.Seq-1)
 	carriages := train.CarriageMap[date]
 	if carriages == nil {
 		return errors.New("error date")
@@ -147,19 +144,19 @@ func(tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint32
 	return nil
 }
 
-func(tp *TicketPool) GetTrain(trainId uint32) *Train{
+func (tp *TicketPool) GetTrain(trainId uint32) *Train {
 	return tp.TrainMap[trainId]
 }
 
-func(tp *TicketPool) GetSeatTypeNameById(seatTypeId uint32) string{
+func (tp *TicketPool) GetSeatTypeNameById(seatTypeId uint32) string {
 	return tp.IdToSeatTypeMap[seatTypeId]
 }
 
-func(tp *TicketPool) GetIdBySeatTypeName(seatTypeName string) uint32{
+func (tp *TicketPool) GetIdBySeatTypeName(seatTypeName string) uint32 {
 	return tp.SeatTypeToIdMap[seatTypeName]
 }
 
-func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*skiplist.Node, []string){
+func (csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32) (*skiplist.Node, []string) {
 	// 优先从票池出票
 	node := csi.allocate(requestValue, int(count))
 
@@ -190,12 +187,11 @@ func(csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32)(*sk
 	return nil, nil
 }
 
-func(t *Train) GetStopStation (stationId uint32) *StopStation {
+func (t *Train) GetStopStation(stationId uint32) *StopStation {
 	return t.StopStationMap[stationId]
 }
 
-
-func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
+func (csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 	seats := make([]string, count)
 	num := 0
 	for i := 0; i < len(csi.FullTickets); i++ {
@@ -217,7 +213,7 @@ func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 			count -= split
 
 			for j := csn; j < csn+split; j++ {
-				seats[num] = fmt.Sprintf("%s %s",ft.CarriageSeq, ft.Seat.Seats[j])
+				seats[num] = fmt.Sprintf("%s %s", ft.CarriageSeq, ft.Seat.Seats[j])
 				num++
 			}
 			if count == 0 {
@@ -238,10 +234,10 @@ func(csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 	return nil
 }
 
-func(csi *CarriageSeatInfo) getTicketCount(requestValue uint64) int32 {
+func (csi *CarriageSeatInfo) getTicketCount(requestValue uint64) int32 {
 	fullTickets := csi.FullTickets
 	var count int32 = 0
-	for i := 0; i < len(fullTickets); i++{
+	for i := 0; i < len(fullTickets); i++ {
 		count += fullTickets[i].Seat.MaxSeatCount - fullTickets[i].CurrentSeatNumber
 
 	}
@@ -252,7 +248,7 @@ func(csi *CarriageSeatInfo) getTicketCount(requestValue uint64) int32 {
 	return count
 }
 
-func (csi *CarriageSeatInfo) getValues(node *skiplist.Node) []string{
+func (csi *CarriageSeatInfo) getValues(node *skiplist.Node) []string {
 	values := make([]string, 0)
 	for ; node != nil; node = node.Next {
 		values = append(values, node.Value...)
@@ -260,32 +256,30 @@ func (csi *CarriageSeatInfo) getValues(node *skiplist.Node) []string{
 	return values
 }
 
-func(csi *CarriageSeatInfo) refund(key uint64, value string) {
+func (csi *CarriageSeatInfo) refund(key uint64, value string) {
 	csi.Sl.Do("Refund", key, value)
 }
 
-func (csi *CarriageSeatInfo) allocate(requestValue uint64, count int) *skiplist.Node{
+func (csi *CarriageSeatInfo) allocate(requestValue uint64, count int) *skiplist.Node {
 	respChan := make(chan *skiplist.Node, 1)
 	csi.Sl.Do("Allocate", requestValue, count, respChan)
-	return <- respChan
+	return <-respChan
 }
 
-func (csi *CarriageSeatInfo) put(key uint64, value []string){
+func (csi *CarriageSeatInfo) put(key uint64, value []string) {
 	csi.Sl.Do("Put", key, value)
 }
 
 func (csi *CarriageSeatInfo) search(requestValue uint64) int32 {
 	respChan := make(chan int32, 1)
 	csi.Sl.Do("Search", requestValue, respChan)
-	return <- respChan
+	return <-respChan
 }
 
-func generateRequestValue(startStation, destStation int) uint64{
+func generateRequestValue(startStation, destStation int) uint64 {
 	var value uint64 = 1
 	value <<= destStation - startStation
 	value -= 1
 	value <<= startStation
 	return value
 }
-
-
