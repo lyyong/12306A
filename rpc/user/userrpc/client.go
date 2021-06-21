@@ -17,6 +17,7 @@ type Client struct {
 	client userpb.UserServiceClient
 }
 
+// Deprecated: Use NewClientWithTarget instead.
 func NewClient() *Client {
 	return NewClientWithTarget(targetService)
 }

@@ -41,13 +41,13 @@ func GetTicketByOrderId(orderId string) ([]*Ticket, error) {
 
 func GetTicketsByPassengerId(passengerId uint32) ([]*Ticket, error) {
 	var tickets []*Ticket
-	res := database.DB.Where("passenger_id = ?", passengerId).Find(tickets)
+	res := database.DB.Where("passenger_id = ?", passengerId).Find(&tickets)
 	return tickets, res.Error
 }
 
 func DeleteTicketByTicketId(db *gorm.DB, ticketsId []uint32) ([]*Ticket, error) {
 	var tickets []*Ticket
-	res := db.Find(tickets, ticketsId)
+	res := db.Where("id IN ?", ticketsId).Find(&tickets)
 	if res.Error != nil {
 		return nil, res.Error
 	}

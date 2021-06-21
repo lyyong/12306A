@@ -56,29 +56,54 @@ func Register(p *RegisterParam) error {
 	return nil
 }
 
+type UserInfo struct {
+	ID                uint   `json:"id"`
+	Username          string `json:"username"`
+	State             int    `json:"state"`
+	CertificateType   int    `json:"certificateType"`
+	Name              string `json:"name"`
+	CertificateNumber string `json:"certificateNumber"`
+	PhoneNumber       string `json:"phoneNumber"`
+	Email             string `json:"email"`
+	PassengerType     int    `json:"passengerType"`
+}
+
 // 用户登录 返回token
-func Login(username, password string) (string, error) {
+func Login(username, password string) (string, *UserInfo, error) {
 	// 根据用户名获取用户信息
 	u, err := model.GetUserByUsername(DB, username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logging.Debug("[用户登录] 用户名不存在:", username)
-			return "", errortype.ErrUserNotExist
+			return "", nil, errortype.ErrUserNotExist
 		} else {
 			logging.Error(err)
-			return "", errortype.ErrUnknown
+			return "", nil, errortype.ErrUnknown
 		}
 	}
 
 	// 验证密码
 	hashedPassword := hash2(password, u.Salt)
 	if hashedPassword != u.Password {
-		return "", errortype.ErrWrongPassword
+		return "", nil, errortype.ErrWrongPassword
 	}
 
 	logging.Debug(username, "登录成功")
 	token, _ := usertoken.Generate(u.ID, u.Username)
-	return token, nil
+
+	// 用户信息
+	info := &UserInfo{
+		ID:                u.ID,
+		Username:          u.Username,
+		State:             u.State,
+		CertificateType:   u.CertificateType,
+		Name:              u.Name,
+		CertificateNumber: u.CertificateNumber,
+		PhoneNumber:       u.PhoneNumber,
+		Email:             u.Email,
+		PassengerType:     u.PassengerType,
+	}
+	return token, info, nil
 }
 
 func generateSalt() string {
