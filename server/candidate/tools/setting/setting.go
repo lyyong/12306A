@@ -51,8 +51,8 @@ type redis struct {
 }
 
 type rpcTarget struct {
-	Order      string
-	TicketPool string
+	Order  string
+	Ticket string
 }
 
 type kafka struct {

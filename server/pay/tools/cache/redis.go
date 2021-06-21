@@ -106,3 +106,9 @@ func LIndex(key string, index int, value interface{}) error {
 	}
 	return json.Unmarshal(bytes, value)
 }
+
+func LRem(key string, index int, data interface{}) error {
+	value, _ := json.Marshal(data)
+	ctx := context.Background()
+	return RedisConn.LRem(ctx, key, int64(index), value).Err()
+}

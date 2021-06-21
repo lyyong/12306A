@@ -21,7 +21,8 @@ type candidateRecv struct {
 	StartStationID uint   `json:"start_station_id" binding:"required"`
 	DestStationID  uint   `json:"dest_station_id" binding:"required"`
 	ExpireDate     string `json:"expire_date" binding:"required"`
-	Passengers     []uint `json:"passengers" binding:"required"` // 乘客id
+	SeatTypeID     int    `json:"seat_type_id" binding:"required"` // 座位类型, 0商务座, 1一等座, 2二等座
+	Passengers     []uint `json:"passengers" binding:"required"`   // 乘客id
 }
 
 type candidateSend struct {
@@ -70,7 +71,7 @@ func Candidate(c *gin.Context) {
 		send.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
 		return
 	}
-	oosID, err := canService.CacheCandidate(userInfo.UserId, cr.TrainID, cr.StartStationID, cr.DestStationID, &Date, &ExpireDate, cr.Passengers)
+	oosID, err := canService.CacheCandidate(userInfo.UserId, cr.TrainID, cr.StartStationID, cr.DestStationID, &Date, &ExpireDate, cr.Passengers, cr.SeatTypeID)
 	if err != nil {
 		logging.Error(err)
 		send.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
@@ -104,6 +105,9 @@ func validateCandidateRecv(cr *candidateRecv) error {
 	}
 	if len(cr.Passengers) <= 0 {
 		return errors.New("没有乘客信息")
+	}
+	if cr.SeatTypeID < 0 || cr.SeatTypeID > 2 {
+		return errors.New("座位类型出错")
 	}
 	return nil
 }

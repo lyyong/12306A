@@ -3,6 +3,7 @@
 package main
 
 import (
+	"candidate/machine"
 	"candidate/router"
 	"candidate/tools/setting"
 	"common/router_tracer"
@@ -72,6 +73,9 @@ func init() {
 	if err != nil {
 		logging.Error(err)
 	}
+
+	// 开启自动抢票机器
+	machine.SetupByDuration(context.Background(), 3*time.Hour, setting.RPCTarget.Ticket)
 }
 
 // 需要关闭的组件

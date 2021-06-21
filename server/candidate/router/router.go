@@ -31,7 +31,7 @@ func InitRouter() *gin.Engine {
 	{
 		apiV1.POST("/", v1.Candidate)
 		apiV1.POST("/cash", v1.Cash)
-		apiV1.POST("/state", v1.ReadState)
+		apiV1.GET("/state", v1.ReadState)
 	}
 	return r
 }
