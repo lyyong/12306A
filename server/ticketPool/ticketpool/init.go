@@ -6,7 +6,9 @@ package ticketpool
 
 import (
 	"common/tools/logging"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"ticketPool/model"
@@ -43,6 +45,30 @@ var (
 )
 
 func InitTicketPool() {
+	logging.Info("Init TicketPool From Serialize File")
+	err := InitTicketPoolFromFile()
+	if err != nil {
+		logging.Error(err)
+		logging.Info("Init TicketPool From DB")
+		InitTicketPoolFromDB()
+	}
+}
+
+func InitTicketPoolFromFile() error {
+	file, err := ioutil.ReadFile("TicketPoolData.json")
+	if err != nil {
+		return err
+	}
+	var ticketPool *TicketPool
+	err = json.Unmarshal(file, &ticketPool)
+	Tp = ticketPool
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func InitTicketPoolFromDB() {
 	ticketPool := &TicketPool{
 		TrainMap:        make(map[uint32]*Train),
 		IdToSeatTypeMap: initIdToSeatTypeMap(),
@@ -133,17 +159,16 @@ func genStaticInfo() {
 
 func initIdToSeatTypeMap() map[uint32]string {
 	idToSeatTypeMap := make(map[uint32]string)
-	seatTypeNames := []string{"商务座","一等座","二等座","高级软卧","软卧","硬卧","硬座"}
+	seatTypeNames := []string{"商务座", "一等座", "二等座", "高级软卧", "软卧", "硬卧", "硬座"}
 	for i := 0; i < len(seatTypeNames); i++ {
 		idToSeatTypeMap[uint32(i)] = seatTypeNames[i]
 	}
 	return idToSeatTypeMap
 }
 
-
-func initSeatTypeToIdMap() map[string]uint32{
+func initSeatTypeToIdMap() map[string]uint32 {
 	seatTypeToIdMap := make(map[string]uint32)
-	seatTypeNames := []string{"商务座","一等座","二等座","高级软卧","软卧","硬卧","硬座"}
+	seatTypeNames := []string{"商务座", "一等座", "二等座", "高级软卧", "软卧", "硬卧", "硬座"}
 	for i := 0; i < len(seatTypeNames); i++ {
 		seatTypeToIdMap[seatTypeNames[i]] = uint32(i)
 	}
@@ -198,12 +223,6 @@ func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carria
 	}
 	return carriages
 }
-
-
-
-
-
-
 
 // 初始化假数据 - 测试
 func InitMockData() {
