@@ -4,17 +4,19 @@ import (
 	"common/tools/logging"
 	orderClient "rpc/pay/client/orderRPCClient"
 	ticketPoolClient "rpc/ticketPool/Client"
+	userClient "rpc/user/userrpc"
 	"ticket/utils/setting"
 )
 
 var ts *TicketService
 
 type TicketService struct {
-	orderCli	*orderClient.OrderRPCClient
-	tpCli		*ticketPoolClient.TPRPCClient
+	orderCli *orderClient.OrderRPCClient
+	tpCli    *ticketPoolClient.TPRPCClient
+	userCli  *userClient.Client
 }
 
-func init(){
+func init() {
 	logging.Info("Init Ticket Service")
 	var err error
 	ts, err = NewTicketService()
@@ -31,16 +33,10 @@ func NewTicketService() (*TicketService, error) {
 	if err != nil {
 		return nil, err
 	}
-	ts.tpCli,err = ticketPoolClient.NewClientWithTarget(setting.RpcTarget.TicketPool)
+	ts.tpCli, err = ticketPoolClient.NewClientWithTarget(setting.RpcTarget.TicketPool)
 	if err != nil {
 		return nil, err
 	}
+	ts.userCli = userClient.NewClientWithTarget(setting.RpcTarget.User)
 	return ts, nil
 }
-
-
-
-
-
-
-

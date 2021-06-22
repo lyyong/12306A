@@ -68,6 +68,7 @@ var Zipkin = &zipkin{}
 type rpcTarget struct {
 	Order      string
 	TicketPool string
+	User       string
 }
 
 var RpcTarget = &rpcTarget{}

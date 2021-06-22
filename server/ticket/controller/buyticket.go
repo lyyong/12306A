@@ -75,11 +75,22 @@ func BuyTicket(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "存在未处理订单", Data: nil})
 		return
 	}
-
+	// 验证乘客身份信息
 	passengerId := make([]uint32, len(btReq.Passengers))
 	for index, value := range btReq.Passengers {
+		isOk, err := service.CheckUserInfo(value.PassengerId, value.PassengerName)
+		if err != nil {
+			logging.Error(err)
+			c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "验证乘客信息失败", Data: nil})
+			return
+		}
+		if !isOk {
+			c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "乘客信息有误", Data: nil})
+			return
+		}
 		passengerId[index] = value.PassengerId
 	}
+
 	isConflict, err := service.CheckConflict(&passengerId, btReq.Date)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Response{Code: 0, Msg: err.Error(), Data: nil})

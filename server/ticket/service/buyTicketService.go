@@ -18,6 +18,17 @@ import (
 	"time"
 )
 
+func CheckUserInfo(passengerId uint32, passengerName string) (bool, error) {
+	user, err := ts.userCli.GetUser(uint(passengerId))
+	if err != nil {
+		return false, err
+	}
+	if user.Name != passengerName {
+		return false, nil
+	}
+	return true, nil
+}
+
 func CheckConflict(passengerId *[]uint32, date string) (bool, error) {
 	isConflict, err := models.IsConflict(passengerId, date)
 	if err != nil {
