@@ -1,5 +1,6 @@
 echo start build task
 go env -w GOOS=linux
+go env -w CGO_ENABLED=0
 set root_dir=%cd%
 set candidate_dir=%root_dir%\server\candidate
 set pay_dir=%root_dir%\server\pay
@@ -9,22 +10,23 @@ set ticketPool_dir=%root_dir%\server\ticketPool
 set user_dir=%root_dir%\server\user
 echo building candidate server
 cd %candidate_dir%
-CGO_ENABLED=0 go build -o candidate .
+go build -o candidate .
 echo building pay server
 cd %pay_dir%
-CGO_ENABLED=0 go build -o pay .
+go build -o pay .
 echo building search server
 cd %search_dir%
-CGO_ENABLED=0 go build -o search .
+go build -o search .
 echo building ticket server
 cd %ticket_dir%
-CGO_ENABLED=0 go build -o ticket .
+go build -o ticket .
 echo building ticketPool server
 cd %ticketPool_dir%
-CGO_ENABLED=0 go build -o ticket-pool-k .
+go build -o ticket-pool-k .
 echo building user server
 cd %user_dir%
-CGO_ENABLED=0 go build -o user .
+go build -o user .
 echo build finish
 go env -w GOOS=windows
+go env -w CGO_ENABLED=1
 pause

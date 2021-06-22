@@ -37,10 +37,6 @@ func InitRouter() *gin.Engine {
 		{
 			wantGroup.POST("/abb", v1.WantPayAbb)
 		}
-		refundGroup := payApiV1.Group("/refund")
-		{
-			refundGroup.POST("/", v1.Refund)
-		}
 	}
 	orderApiV1 := r.Group("/order/api/v1")
 	{
