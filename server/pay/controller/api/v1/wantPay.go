@@ -22,16 +22,7 @@ type wantPayAbbSend struct {
 	OrderInfo      string `json:"order_info"`
 }
 
-// 告知服务器想要通过支付宝支付 godoc
-// @Summary 告知服务器想要支付
-// @Description 获得支付需要的来自支付宝的OrderInfo
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Param wantPayR body v1.wantPayAbbRecv true "需要接受的信息"
-// @Success 200 {object} controller.JSONResult{data=v1.wantPayAbbSend} "返回订单号和OrderInfo"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router /want/abb [post]
+// WantPayAbb 告知服务器想要使用支付宝支付, 然后获取支付密钥
 func WantPayAbb(c *gin.Context) {
 	sender := controller.NewSend(c)
 	noData := make(map[string]interface{})

@@ -1,24 +1,39 @@
+// Package service
 // @Author LiuYong
 // @Created at 2021-02-04
-// @Modified at 2021-02-04
 package service
 
 import (
 	"common/tools/logging"
+	"context"
+	"encoding/json"
 	"errors"
+	"github.com/segmentio/kafka-go"
 	"pay/model"
 	"pay/service/cache"
 	cache2 "pay/tools/cache"
+	"pay/tools/setting"
+	"rpc/pay/client/orderRPCClient"
 	"strconv"
+	"sync"
 	"time"
 )
 
 type orderService struct {
 }
 
-const orderExpTime = 1800
+var (
+	kwToOrder     *kafka.Writer
+	onceForKO     sync.Once
+	topicRefundOK = "RefundOK"
+)
+
+const (
+	orderExpTime = 1800
+)
 
 func NewOrderService() *orderService {
+	kwToOrder = getKWToOrder()
 	return &orderService{}
 }
 
@@ -189,20 +204,45 @@ func (s orderService) Refund(userID uint, outsideID string, fullMoney bool, mone
 	orders := make([]*model.Order, 0)
 	if cache2.Exists(orderCache.GetOrdersKey()) {
 		cache2.Get(orderCache.GetOrdersKey(), &orders)
-	} else {
-		orders, _ = model.GetOrdersByUserID(userID)
-	}
-	for _, order := range orders {
-		if order.OutsideID == outsideID {
-			order.State = model.ORDER_REFUND
-			// TODO 真实退款
-			cache2.Delete(orderCache.GetOrdersKey())
-			cache2.Set(orderCache.GetOrdersKey(), orders, expTime)
-			model.UpdateOrder(order)
-			return nil
+		for _, order := range orders {
+			if order.OutsideID == outsideID {
+				if order.State != model.ORDER_UNFINISHED {
+					return errors.New("订单状态不正确")
+				}
+				order.State = model.ORDER_REFUND
+				// TODO 真实退款
+				cache2.Delete(orderCache.GetOrdersKey())
+				cache2.Set(orderCache.GetOrdersKey(), orders, expTime)
+				model.UpdateOrder(order)
+				// 消息队列发送取消订单完成
+				refundOKInfo := orderRPCClient.RefundOKInfo{OutsideID: outsideID}
+				msgV, err := json.Marshal(&refundOKInfo)
+				if err != nil {
+					logging.Error(err)
+					return err
+				}
+				err = kwToPay.WriteMessages(context.TODO(), kafka.Message{
+					Value: msgV,
+				})
+				if err != nil {
+					logging.Error(err)
+					return err
+				}
+				return nil
+			}
 		}
 	}
-	return errors.New("无此订单")
+
+	// 数据库操作
+	order, err := model.GetOrderByOutsideID(outsideID)
+	if err != nil || order == nil {
+		return errors.New("查询订单出错")
+	}
+	if order.State != model.ORDER_UNFINISHED {
+		return errors.New("订单状态不正确")
+	}
+	model.UpdateOrder(order)
+	return nil
 }
 
 func (s *orderService) CancelUnpayOrder(userID uint) {
@@ -210,4 +250,19 @@ func (s *orderService) CancelUnpayOrder(userID uint) {
 		UserID: userID,
 	}
 	cache2.Delete(orderCache.GetUnpayOrderKey())
+}
+
+func getKWToOrder() *kafka.Writer {
+	onceForKO.Do(func() {
+		if kwToOrder == nil {
+			kwToOrder = &kafka.Writer{
+				Addr:         kafka.TCP(setting.Kafka.Host),
+				Topic:        topicRefundOK,
+				Async:        false,                 // 非异步执行
+				BatchTimeout: 50 * time.Millisecond, // 消息在发送缓存中的等待时间, 设置小点速度快但是占用cpu
+				WriteTimeout: 10 * time.Second,
+			}
+		}
+	})
+	return kwToOrder
 }

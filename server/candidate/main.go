@@ -1,9 +1,9 @@
 // @Author LiuYong
 // @Created at 2021-02-02
-// @Modified at 2021-02-02
 package main
 
 import (
+	"candidate/machine"
 	"candidate/router"
 	"candidate/tools/setting"
 	"common/router_tracer"
@@ -56,12 +56,12 @@ func init() {
 		Network: "tcp",
 		Addr:    setting.Redis.Host,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
-			res, err := cn.Ping(ctx).Result()
+			_, err := cn.Ping(ctx).Result()
 			if err != nil {
 				logging.Error(err)
 				return err
 			}
-			fmt.Println(res)
+			// logging.Info(res)
 			return nil
 		},
 		ReadTimeout:  setting.Redis.ReadTimeout,
@@ -73,6 +73,9 @@ func init() {
 	if err != nil {
 		logging.Error(err)
 	}
+
+	// 开启自动抢票机器
+	machine.SetupByDuration(context.Background(), 3*time.Hour, setting.RPCTarget.Ticket)
 }
 
 // 需要关闭的组件

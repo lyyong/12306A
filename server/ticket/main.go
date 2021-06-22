@@ -40,13 +40,13 @@ func main() {
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
-	logging.Info("Listen:",setting.Server.RPCAddr)
+	logging.Info("rpc port:", setting.Server.RPCAddr)
 	rpcListen, err := net.Listen("tcp", setting.Server.RPCAddr)
 	if err != nil {
 		logging.Error("listen fail:", err)
 		return
 	}
-	go func(){
+	go func() {
 		if err := rpcServer.Serve(rpcListen); err != nil {
 			logging.Fatal("rpc server: ", err)
 			return
@@ -57,11 +57,11 @@ func main() {
 	logging.Info("Register Router")
 	initRouter := routers.InitRouter()
 	server := &http.Server{
-		Addr:              setting.Server.HttpAddr,
-		Handler:           initRouter,
+		Addr:    setting.Server.HttpAddr,
+		Handler: initRouter,
 	}
-	go func(){
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed{
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logging.Fatal("listen fail: ", err)
 		}
 	}()

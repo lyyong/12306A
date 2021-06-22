@@ -4,7 +4,7 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"pay/tools/database"
 )
 

@@ -1,36 +1,40 @@
+// Package database
 // @Author LiuYong
 // @Created at 2021-02-04
-// @Modified at 2021-02-04
 package database
 
 import (
 	"common/tools/logging"
+	"database/sql"
 	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var client *gorm.DB
+var db *sql.DB
 
 func Setup(dbType, username, password, dbHost, dbname string) error {
 	var err error
-	client, err = gorm.Open(dbType, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	client, err = gorm.Open(mysql.Open(fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		username,
 		password,
 		dbHost,
-		dbname))
+		dbname)), &gorm.Config{})
 	if err != nil {
 		return err
 	}
-	client.DB().SetConnMaxIdleTime(10)
-	client.DB().SetMaxOpenConns(100)
-	client.LogMode(true)
+	db, _ = client.DB()
+	db.SetConnMaxIdleTime(10)
+	db.SetMaxOpenConns(100)
+	client.Logger.LogMode(logger.Info)
 	return nil
 }
 
 func Close() {
 	if client != nil {
-		_ = client.Close()
+		db.Close()
 	}
 }
 

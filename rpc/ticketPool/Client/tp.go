@@ -28,7 +28,7 @@ func NewClient() (*TPRPCClient, error) {
 	return NewClientWithTarget(targetServiceName)
 }
 
-// NewClient 创建一个ticketPool的RPC客户端
+// NewClientWithTarget 创建一个ticketPool的RPC客户端
 func NewClientWithTarget(target string) (*TPRPCClient, error) {
 	var err error
 	once.Do(func() {
@@ -45,7 +45,6 @@ func NewClientWithTarget(target string) (*TPRPCClient, error) {
 
 	return client, err
 }
-
 
 func (c TPRPCClient) GetTicket(request *ticketPoolRPC.GetTicketRequest) (*ticketPoolRPC.GetTicketResponse, error) {
 	if c.tpClient == nil {

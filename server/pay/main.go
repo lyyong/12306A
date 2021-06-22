@@ -1,6 +1,5 @@
 // @Author liuYong
 // @Created at 2020-01-05
-// @Modified at 2020-01-05
 package main
 
 import (
@@ -54,12 +53,12 @@ func init() {
 		Network: "tcp",
 		Addr:    setting.Redis.Host,
 		OnConnect: func(ctx context.Context, cn *redis.Conn) error {
-			res, err := cn.Ping(ctx).Result()
+			_, err := cn.Ping(ctx).Result()
 			if err != nil {
 				logging.Error(err)
 				return err
 			}
-			fmt.Println(res)
+			// logging.Info(res)
 			return nil
 		},
 		ReadTimeout:  setting.Redis.ReadTimeout,

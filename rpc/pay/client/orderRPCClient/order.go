@@ -18,6 +18,8 @@ type OrderRPCClient struct {
 	pbClient *orderRPCpb.OrderRPCServiceClient
 	// 支付成功后进行处理的函数
 	dealPayOK func(payOKInfo *PayOKOrderInfo)
+	// 退款完成后进行处理的函数
+	dealRefundOK func(info *RefundOKInfo)
 }
 
 type PayOKOrderInfo struct {
@@ -26,6 +28,10 @@ type PayOKOrderInfo struct {
 	AffairID  string
 	Money     int
 	State     int
+}
+
+type RefundOKInfo struct {
+	OutsideID string
 }
 
 // 唯一
@@ -42,7 +48,8 @@ var (
 
 const (
 	targetServiceName_localhost = ":8082"
-	topic                       = "PayOK"
+	topicPayOK                  = "PayOK"
+	topicRefundOK               = "RefundOK"
 	partition                   = 0
 )
 
@@ -65,7 +72,8 @@ func NewClient() (*OrderRPCClient, error) {
 		client.pbClient = &tclient
 
 		// 连接kafka并接受消息
-		go runRecvKafka(context.Background(), client)
+		go runRecvKafkaPayOK(context.Background(), client)
+		go runRecvKafkaRefundOK(context.Background(), client)
 	})
 	return client, nil
 }
@@ -104,8 +112,8 @@ func NewClientWithTargetAndMQHost(target, MQHost string) (*OrderRPCClient, error
 	return NewClientWithMQHost(MQHost)
 }
 
-// runRecvKafka 运行接受协程, 只能在协程中运行
-func runRecvKafka(ctx context.Context, cli *OrderRPCClient) {
+// runRecvKafkaPayOK 运行接受协程, 只能在协程中运行
+func runRecvKafka(ctx context.Context, cli *OrderRPCClient, topic string) {
 	wg.Add(1)
 	defer wg.Done()
 	// 创建kafka消费者
@@ -135,7 +143,7 @@ func runRecvKafka(ctx context.Context, cli *OrderRPCClient) {
 				logging.Error("order get kafka message error: ", err)
 				break
 			}
-			if cli.dealPayOK != nil {
+			if cli.dealPayOK != nil && topic == topicPayOK {
 				var payOK PayOKOrderInfo
 				err := json.Unmarshal(msg.Value, &payOK)
 				if err != nil {
@@ -143,6 +151,15 @@ func runRecvKafka(ctx context.Context, cli *OrderRPCClient) {
 					break
 				}
 				cli.dealPayOK(&payOK)
+			}
+			if cli.dealRefundOK != nil && topic == topicRefundOK {
+				var refundOK RefundOKInfo
+				err := json.Unmarshal(msg.Value, &refundOK)
+				if err != nil {
+					logging.Error("order get kafka message error: ", err)
+					break
+				}
+				cli.dealRefundOK(&refundOK)
 			}
 		}
 	}
@@ -152,18 +169,34 @@ func runRecvKafka(ctx context.Context, cli *OrderRPCClient) {
 	}
 }
 
+// runRecvKafkaPayOK 从kafka接收到退款完成通知, 然后执行相应的函数
+func runRecvKafkaPayOK(ctx context.Context, cli *OrderRPCClient) {
+	runRecvKafka(ctx, cli, topicPayOK)
+}
+
+// runRecvKafkaRefundOK 从kafka接收到退款完成通知, 然后执行相应的函数
+func runRecvKafkaRefundOK(ctx context.Context, cli *OrderRPCClient) {
+	runRecvKafka(ctx, cli, topicRefundOK)
+}
+
 // SetMQHost 重设队列的地址, 该方法可能会出现等待, 最好在NewClientWithMQHost时设置好
 func (c *OrderRPCClient) SetMQHost(MQHost string) {
 	runFlag = false
 	wg.Wait()
 	runFlag = true
 	kafkaDefaultHost = MQHost
-	go runRecvKafka(context.Background(), c)
+	go runRecvKafkaPayOK(context.Background(), c)
+	go runRecvKafkaRefundOK(context.Background(), c)
 }
 
 // SetDealPayOK 设置支付成功后的出处理函数
 func (c *OrderRPCClient) SetDealPayOK(deal func(payOK *PayOKOrderInfo)) {
 	c.dealPayOK = deal
+}
+
+// SetDealRefundOK 设置退款完成后的处理函数
+func (c *OrderRPCClient) SetDealRefundOK(deal func(info *RefundOKInfo)) {
+	c.dealRefundOK = deal
 }
 
 func (c *OrderRPCClient) Create(info *orderRPCpb.CreateRequest) (*orderRPCpb.CreateRespond, error) {

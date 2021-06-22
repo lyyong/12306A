@@ -55,14 +55,7 @@ type UnpayTicketInfo struct {
 	Price           int    `json:"price"`
 }
 
-// @Summary 用户获取自己的历史订单信息
-// @Description
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Success 200 {object} controller.JSONResult{} "返回成功"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router /history [get]
+// GetUserHistoryOrders 获取用户的历史订单
 func GetUserHistoryOrders(c *gin.Context) {
 	userInfo, ok := usertoken.GetUserInfo(c)
 	sender := controller.NewSend(c)
@@ -77,14 +70,7 @@ func GetUserHistoryOrders(c *gin.Context) {
 	getUserOrdersHelper(orders, sender)
 }
 
-// @Summary 用户获取自己未出行的订单信息
-// @Description
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Success 200 {object} controller.JSONResult{} "返回成功"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router /unfished [get]
+// GetUserUnfinishedOrders 获取用户未完成的订单, 也就是还没有发车的订单
 func GetUserUnfinishedOrders(c *gin.Context) {
 	userInfo, ok := usertoken.GetUserInfo(c)
 	sender := controller.NewSend(c)
@@ -142,14 +128,7 @@ func getUserOrdersHelper(orders []*model.Order, sender *controller.Send) {
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, orderInfo2Client))
 }
 
-// @Summary 用户获取自己的未支付订单
-// @Description
-// @Accept json
-// @Produce json
-// @Param token header string true "认证信息"
-// @Success 200 {object} controller.JSONResult{} "返回成功"
-// @Failure 400 {object} controller.JSONResult{}
-// @Router /unpay [get]
+// GetUserUnpayOrders 获取用户未支付的订单
 func GetUserUnpayOrders(c *gin.Context) {
 	userInfo, ok := usertoken.GetUserInfo(c)
 	sender := controller.NewSend(c)
@@ -215,6 +194,7 @@ func GetUserUnpayOrders(c *gin.Context) {
 	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, orderInfo2Client))
 }
 
+// CancelUnpayOrder 取消用户未支付的订单
 func CancelUnpayOrder(c *gin.Context) {
 	userInfo, ok := usertoken.GetUserInfo(c)
 	sender := controller.NewSend(c)

@@ -3,7 +3,7 @@
 // @Modified at 2021-02-04
 package model
 
-import "github.com/jinzhu/gorm"
+import "gorm.io/gorm"
 
 type Model struct {
 	gorm.Model
