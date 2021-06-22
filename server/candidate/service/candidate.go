@@ -12,7 +12,7 @@ import (
 	cache2 "pay/tools/cache"
 	"rpc/pay/client/orderRPCClient"
 	"rpc/pay/proto/orderRPCpb"
-	"rpc/ticket/client"
+	"rpc/ticket/Client"
 	"rpc/ticket/proto/ticketRPC"
 	"strconv"
 	"strings"
