@@ -1,6 +1,6 @@
+// Package service
 // @Author LiuYong
 // @Created at 2021-02-04
-// @Modified at 2021-02-04
 package service
 
 import (
@@ -204,34 +204,45 @@ func (s orderService) Refund(userID uint, outsideID string, fullMoney bool, mone
 	orders := make([]*model.Order, 0)
 	if cache2.Exists(orderCache.GetOrdersKey()) {
 		cache2.Get(orderCache.GetOrdersKey(), &orders)
-	} else {
-		orders, _ = model.GetOrdersByUserID(userID)
-	}
-	for _, order := range orders {
-		if order.OutsideID == outsideID {
-			order.State = model.ORDER_REFUND
-			// TODO 真实退款
-			cache2.Delete(orderCache.GetOrdersKey())
-			cache2.Set(orderCache.GetOrdersKey(), orders, expTime)
-			model.UpdateOrder(order)
-			// 消息队列发送取消订单完成
-			refundOKInfo := orderRPCClient.RefundOKInfo{OutsideID: outsideID}
-			msgV, err := json.Marshal(&refundOKInfo)
-			if err != nil {
-				logging.Error(err)
-				return err
+		for _, order := range orders {
+			if order.OutsideID == outsideID {
+				if order.State != model.ORDER_UNFINISHED {
+					return errors.New("订单状态不正确")
+				}
+				order.State = model.ORDER_REFUND
+				// TODO 真实退款
+				cache2.Delete(orderCache.GetOrdersKey())
+				cache2.Set(orderCache.GetOrdersKey(), orders, expTime)
+				model.UpdateOrder(order)
+				// 消息队列发送取消订单完成
+				refundOKInfo := orderRPCClient.RefundOKInfo{OutsideID: outsideID}
+				msgV, err := json.Marshal(&refundOKInfo)
+				if err != nil {
+					logging.Error(err)
+					return err
+				}
+				err = kwToPay.WriteMessages(context.TODO(), kafka.Message{
+					Value: msgV,
+				})
+				if err != nil {
+					logging.Error(err)
+					return err
+				}
+				return nil
 			}
-			err = kwToPay.WriteMessages(context.TODO(), kafka.Message{
-				Value: msgV,
-			})
-			if err != nil {
-				logging.Error(err)
-				return err
-			}
-			return nil
 		}
 	}
-	return errors.New("无此订单")
+
+	// 数据库操作
+	order, err := model.GetOrderByOutsideID(outsideID)
+	if err != nil || order == nil {
+		return errors.New("查询订单出错")
+	}
+	if order.State != model.ORDER_UNFINISHED {
+		return errors.New("订单状态不正确")
+	}
+	model.UpdateOrder(order)
+	return nil
 }
 
 func (s *orderService) CancelUnpayOrder(userID uint) {
