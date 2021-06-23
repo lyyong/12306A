@@ -16,8 +16,8 @@ func InitRouter() *gin.Engine {
 	r.Use(usertoken.TokenParser())
 	v1 := r.Group("/ticket/api/v1")
 	{
-		v1.POST("/buyTicket", controller.BuyTicket)
-		v1.POST("/refundTicket", controller.RefundTicket)
+		v1.POST("/buy", controller.BuyTicket)
+		v1.POST("/refund", controller.RefundTicket)
 	}
 
 	return r
