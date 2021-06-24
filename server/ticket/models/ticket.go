@@ -28,6 +28,15 @@ type Ticket struct {
 	State          uint8
 }
 
+const (
+	TicketBuySuccessful = iota
+	TicketFinish
+	TicketRefund
+	TicketChange
+	TicketWaitCash
+	TicketRefundFinish
+)
+
 func AddMultipleTicket(tickets *[]Ticket) error {
 	res := database.DB.Create(tickets)
 	return res.Error
@@ -43,6 +52,15 @@ func GetTicketsByPassengerId(passengerId uint32) ([]*Ticket, error) {
 	var tickets []*Ticket
 	res := database.DB.Where("passenger_id = ?", passengerId).Find(&tickets)
 	return tickets, res.Error
+}
+
+func GetTicketByID(id uint) (*Ticket, error) {
+	var ticket Ticket
+	err := database.DB.Where("id = ?", id).Find(&ticket).Error
+	if err != nil {
+		return nil, err
+	}
+	return &ticket, nil
 }
 
 func DeleteTicketByTicketId(db *gorm.DB, ticketsId []uint32) ([]*Ticket, error) {

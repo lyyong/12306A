@@ -18,7 +18,7 @@ message Ticket {
   string seat_number = 13;        // 座号
   string passenger_name = 14;
   uint32 passenger_id = 15;       // 乘车人id
-  uint32 order_id = 16;           // 订单号
+  string order_id = 16;           // 订单号
   int32  price = 17;
 }
 
