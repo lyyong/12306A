@@ -13,6 +13,7 @@ type Passenger struct {
 	Name              string
 	CertificateType   int
 	CertificateNumber string
+	PhoneNumber       string
 	PassengerType     int
 	State             int
 	CreatedBy         string
@@ -20,16 +21,20 @@ type Passenger struct {
 	DeletedBy         string
 }
 
-func InsertPassenger(db *gorm.DB, userId uint, passengers []*Passenger) error {
+func InsertPassenger(db *gorm.DB, userId uint, passenger *Passenger) error {
 	user := new(User)
 	user.ID = userId
-	return db.Model(user).Association("Passengers").Append(passengers)
+	return db.Model(user).Association("Passengers").Append(passenger)
 }
 
-func UpdatePassenger(db *gorm.DB, userId uint, passengers []*Passenger) error {
+func UpdatePassenger(db *gorm.DB, userId uint, passenger *Passenger) error {
+	return db.Model(passenger).Updates(passenger).Error
+}
+
+func DeletePassenger(db *gorm.DB, userId uint, passenger *Passenger) error {
 	user := new(User)
 	user.ID = userId
-	return db.Model(user).Association("Passengers").Replace(passengers)
+	return db.Model(user).Association("Passengers").Delete(passenger)
 }
 
 func ListPassenger(db *gorm.DB, userId uint) ([]Passenger, error) {

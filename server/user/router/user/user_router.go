@@ -20,5 +20,6 @@ func Router(r *gin.RouterGroup) *gin.RouterGroup {
 	r.POST("/passenger", httpapi.InsertPassenger)
 	r.PUT("/passenger", httpapi.UpdatePassenger)
 	r.GET("/passenger", httpapi.ListPassenger)
+	r.DELETE("/passenger", httpapi.DeletePassenger)
 	return r
 }

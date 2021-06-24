@@ -20,11 +20,11 @@ func InitRouter() *gin.Engine {
 	v1 := r.Group("/search/api/v1/")
 	{
 		// 查询所有站点
-		v1.POST("/queryAllStations", v12.QueryAllStation)
+		v1.GET("/stations", v12.QueryAllStation)
 		// 查询车次的所有站点
-		v1.POST("/queryStation", v12.QueryStationByTrainNo)
+		v1.GET("/station", v12.QueryStationByTrainNo)
 		// 查询两城市之间合适的车次及余票数量
-		v1.POST("/remainder", v12.QueryRemainder)
+		v1.GET("/remainder", v12.QueryRemainder)
 
 		v1.GET("/remainder/:train_id/:date/:start_station_id/:end_station_id", v12.QueryRemainderWithTrainNumber)
 	}
