@@ -13,14 +13,11 @@ import (
 )
 
 type InsertPassengerRequest struct {
-	Data []InsertPassengerRequestData
-}
-
-type InsertPassengerRequestData struct {
-	Name              string
-	CertificateType   int
-	CertificateNumber string
-	PassengerType     int
+	Name              string `json:"name"`
+	CertificateType   int    `json:"certificate_type"`
+	CertificateNumber string `json:"certificate_number"`
+	PhoneNumber       string `json:"phone_number"`
+	PassengerType     int    `json:"passenger_type"`
 }
 
 // InsertPassenger godoc
@@ -46,16 +43,13 @@ func InsertPassenger(c *gin.Context) {
 		return
 	}
 
-	param := new(service.PassengerParam)
-	param.UserId = info.UserId
-	for _, p := range req.Data {
-		data := &service.PassengerParamData{
-			Name:              p.Name,
-			CertificateType:   p.CertificateType,
-			CertificateNumber: p.CertificateNumber,
-			PassengerType:     p.PassengerType,
-		}
-		param.Data = append(param.Data, data)
+	param := &service.PassengerParam{
+		UserId:            info.UserId,
+		Name:              req.Name,
+		CertificateType:   req.CertificateType,
+		CertificateNumber: req.CertificateNumber,
+		PhoneNumber:       req.PhoneNumber,
+		PassengerType:     req.PassengerType,
 	}
 
 	if err := service.InsertPassenger(param); err != nil {
@@ -67,14 +61,12 @@ func InsertPassenger(c *gin.Context) {
 }
 
 type UpdatePassengerRequest struct {
-	Data []UpdatePassengerRequestData
-}
-
-type UpdatePassengerRequestData struct {
-	Name              string
-	CertificateType   int
-	CertificateNumber string
-	PassengerType     int
+	ID                uint   `json:"id"`
+	Name              string `json:"name"`
+	CertificateType   int    `json:"certificate_type"`
+	CertificateNumber string `json:"certificate_number"`
+	PhoneNumber       string `json:"phone_number"`
+	PassengerType     int    `json:"passenger_type"`
 }
 
 // UpdatePassenger godoc
@@ -100,16 +92,14 @@ func UpdatePassenger(c *gin.Context) {
 		return
 	}
 
-	param := new(service.PassengerParam)
-	param.UserId = info.UserId
-	for _, p := range req.Data {
-		data := &service.PassengerParamData{
-			Name:              p.Name,
-			CertificateType:   p.CertificateType,
-			CertificateNumber: p.CertificateNumber,
-			PassengerType:     p.PassengerType,
-		}
-		param.Data = append(param.Data, data)
+	param := &service.PassengerParam{
+		UserId:            info.UserId,
+		PassengerId:       req.ID,
+		Name:              req.Name,
+		CertificateType:   req.CertificateType,
+		CertificateNumber: req.CertificateNumber,
+		PhoneNumber:       req.PhoneNumber,
+		PassengerType:     req.PassengerType,
 	}
 
 	if err := service.UpdatePassenger(param); err != nil {
@@ -118,6 +108,46 @@ func UpdatePassenger(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人修改成功").SetCode(200))
+}
+
+type DeletePassengerRequest struct {
+	ID uint `json:"id"`
+}
+
+// DeletePassenger godoc
+// @Summary 删除乘车人
+// @Description 删除乘车人，参数为乘车人信息
+// @ID passenger-delete
+// @Accept json
+// @Produce json
+// @Param form body DeletePassengerRequest true "乘车人ID"
+// @Success 200 {object} resp.Response
+// @Router /passenger [delete]
+func DeletePassenger(c *gin.Context) {
+	req := new(DeletePassengerRequest)
+	if err := c.ShouldBindJSON(req); err != nil {
+		c.JSON(http.StatusBadRequest, resp.R(struct{}{}).SetMsg("JSON格式错误"))
+		return
+	}
+
+	// 从Token中解析出用户ID
+	info, ok := usertoken.GetUserInfo(c)
+	if !ok {
+		c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("用户未登录"))
+		return
+	}
+
+	param := &service.PassengerParam{
+		UserId:      info.UserId,
+		PassengerId: req.ID,
+	}
+
+	if err := service.DeletePassenger(param); err != nil {
+		c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人删除失败"))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp.R(struct{}{}).SetMsg("乘车人删除成功").SetCode(200))
 }
 
 type ListPassengerResponse struct {
@@ -129,6 +159,7 @@ type ListPassengerResponseData struct {
 	Name              string `json:"name"`
 	CertificateType   int    `json:"certificateType"`
 	CertificateNumber string `json:"certificateNumber"`
+	PhoneNumber       string `json:"phoneNumber"`
 	PassengerType     int    `json:"passengerType"`
 }
 
@@ -159,6 +190,7 @@ func ListPassenger(c *gin.Context) {
 				Name:              p.Name,
 				CertificateType:   p.CertificateType,
 				CertificateNumber: p.CertificateNumber,
+				PhoneNumber:       p.PhoneNumber,
 				PassengerType:     p.PassengerType,
 			}
 			response.Passenger = append(response.Passenger, data)

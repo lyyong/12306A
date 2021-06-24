@@ -11,32 +11,27 @@ import (
 )
 
 type PassengerParam struct {
-	UserId uint
-	Data   []*PassengerParamData
-}
-
-type PassengerParamData struct {
+	UserId            uint
 	PassengerId       uint
 	Name              string
 	CertificateType   int
 	CertificateNumber string
+	PhoneNumber       string
 	PassengerType     int
 }
 
 // 添加乘车人
 func InsertPassenger(param *PassengerParam) error {
-	var passengers []*model.Passenger
-	for _, data := range param.Data {
-		passenger := &model.Passenger{
-			Name:              data.Name,
-			CertificateType:   data.CertificateType,
-			CertificateNumber: data.CertificateNumber,
-			PassengerType:     data.PassengerType,
-			State:             0,
-		}
-		passengers = append(passengers, passenger)
+	passenger := &model.Passenger{
+		Name:              param.Name,
+		CertificateType:   param.CertificateType,
+		CertificateNumber: param.CertificateNumber,
+		PhoneNumber:       param.PhoneNumber,
+		PassengerType:     param.PassengerType,
+		State:             0,
 	}
-	err := model.InsertPassenger(DB, param.UserId, passengers)
+
+	err := model.InsertPassenger(DB, param.UserId, passenger)
 	if err != nil {
 		logging.Error("添加乘车人出错")
 		// TODO: 返回错误
@@ -46,18 +41,29 @@ func InsertPassenger(param *PassengerParam) error {
 
 // 更新乘车人
 func UpdatePassenger(param *PassengerParam) error {
-	var passengers []*model.Passenger
-	for _, data := range param.Data {
-		passenger := &model.Passenger{
-			Name:              data.Name,
-			CertificateType:   data.CertificateType,
-			CertificateNumber: data.CertificateNumber,
-			PassengerType:     data.PassengerType,
-			State:             0,
-		}
-		passengers = append(passengers, passenger)
+	passenger := &model.Passenger{
+		Name:              param.Name,
+		CertificateType:   param.CertificateType,
+		CertificateNumber: param.CertificateNumber,
+		PhoneNumber:       param.PhoneNumber,
+		PassengerType:     param.PassengerType,
+		State:             0,
 	}
-	err := model.UpdatePassenger(DB, param.UserId, passengers)
+	passenger.ID = param.PassengerId
+
+	err := model.UpdatePassenger(DB, param.UserId, passenger)
+	if err != nil {
+		logging.Error("修改乘车人出错")
+		// TODO: 返回错误
+	}
+	return nil
+}
+
+func DeletePassenger(param *PassengerParam) error {
+	passenger := &model.Passenger{}
+	passenger.ID = param.PassengerId
+
+	err := model.DeletePassenger(DB, param.UserId, passenger)
 	if err != nil {
 		logging.Error("修改乘车人出错")
 		// TODO: 返回错误
@@ -70,6 +76,7 @@ type PassengerRecord struct {
 	Name              string
 	CertificateType   int
 	CertificateNumber string
+	PhoneNumber       string
 	PassengerType     int
 	State             int
 }
@@ -87,6 +94,7 @@ func ListPassenger(userId uint) ([]*PassengerRecord, error) {
 			Name:              p.Name,
 			CertificateType:   p.CertificateType,
 			CertificateNumber: p.CertificateNumber,
+			PhoneNumber:       p.PhoneNumber,
 			PassengerType:     p.PassengerType,
 			State:             p.State,
 		}
