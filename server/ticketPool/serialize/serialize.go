@@ -16,6 +16,9 @@ func Serialize() {
 	go func() {
 		for {
 			tp := ticketpool.Tp
+			tp.RWLock.Lock()
+			logging.Info("开始序列化")
+			st := time.Now()
 			res, err := json.Marshal(&tp)
 			if err != nil {
 				logging.Error(err)
@@ -24,7 +27,9 @@ func Serialize() {
 			if err != nil {
 				logging.Error(err)
 			}
-			time.Sleep(1000)
+			logging.Info("序列化结束, 耗时: ", time.Now().Sub(st).Milliseconds())
+			tp.RWLock.Unlock()
+			time.Sleep(5 * time.Second)
 		}
 	}()
 }

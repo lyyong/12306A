@@ -6,6 +6,7 @@ package ticketpool
 
 import (
 	"common/tools/logging"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -52,6 +53,7 @@ func InitTicketPool() {
 		logging.Info("Init TicketPool From DB")
 		InitTicketPoolFromDB()
 	}
+	rockUpdate(context.TODO())
 }
 
 func InitTicketPoolFromFile() error {
@@ -113,6 +115,9 @@ func InitTicketPoolFromDB() {
 
 		for i := 0; i < 7; i++ {
 			date := t.Format("2006-01-02")
+			// 添加到时间管理中
+			td, _ := time.Parse("2006-01-02", date)
+			ticketPool.Date = append(ticketPool.Date, &td)
 			cm[date] = genCarriages(train.ID, date, stopInfos, carriageList)
 			t = t.Add(time.Hour * 24)
 		}
@@ -403,4 +408,45 @@ func showTicketPoolInfo() {
 			}
 		}
 	}
+}
+
+// rockUpdate 滚动更新票池
+func rockUpdate(ctx context.Context) {
+	// 得到明天凌晨0点的时间点
+	updateTime, _ := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
+	updateTime = updateTime.Add(24 * time.Hour)
+	// 每分钟检查时间是否到0点
+	ticker := time.NewTicker(time.Minute)
+	go func() {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			now := time.Now()
+			if now.Format("2006-01-02") == Tp.Date[1].Format("2006-01-02") {
+				// 开始初始化
+				date := Tp.Date[len(Tp.Date)-1].Add(24 * time.Hour)
+				Tp.RWLock.Lock()
+				logging.Info("开始更新票池, 开始时间: ", time.Now().Format("2006-01-02; 15:04:05"))
+				for trainID, train := range Tp.TrainMap {
+					delete(train.CarriageMap, Tp.Date[0].Format("2006-01-02"))
+					realTrain := model.GetTrainsByNumberLike(train.TrainNum)
+					trainType := model.GetTrainTypeByID(realTrain[0].TrainType)
+					// 得到车厢列表
+					tcList := strings.Split(trainType.CarriageList, ",")
+					// 得到真正的车厢列表
+					carriageList := make([]*model.CarriageType, len(tcList))
+					for i, tc := range tcList {
+						cid, _ := strconv.Atoi(tc)
+						carriageList[i] = model.GetCarriageTypesByID(uint(cid))
+					}
+					train.CarriageMap[date.Format("2006-01-02")] = genCarriages(uint(trainID), date.Format("2006-01-02"), model.GetStopInfoByTrainID(uint(trainID)), carriageList)
+
+				}
+				Tp.Date = append(Tp.Date[1:], &date)
+				Tp.RWLock.Unlock()
+				logging.Info("更新票池完成")
+			}
+		}
+	}()
 }

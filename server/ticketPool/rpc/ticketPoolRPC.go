@@ -22,7 +22,6 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	logging.Info("购票请求: ", req)
 
 	tp := ticketpool.Tp
-	train := tp.GetTrain(req.TrainId)
 
 	seatCountMap := make(map[uint32]int32)
 	for i := 0; i < len(req.Passengers); i++ {
@@ -37,8 +36,8 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	}
 
 	// 整合票池返回的座位信息与请求信息，生成车票返回
-	startStation := train.GetStopStation(req.StartStationId)
-	destStation := train.GetStopStation(req.DestStationId)
+	startStation := tp.GetStopStation(req.TrainId, req.StartStationId)
+	destStation := tp.GetStopStation(req.TrainId, req.DestStationId)
 	st, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, startStation.StartTime))
 	at, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, destStation.ArriveTime))
 	if at.Before(st) {
@@ -60,7 +59,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 				tickets[ticketIndex] = &pb.Ticket{
 					Id:             0,
 					TrainId:        req.TrainId,
-					TrainNum:       train.TrainNum,
+					TrainNum:       tp.GetTrainNumber(req.TrainId),
 					StartStationId: req.StartStationId,
 					StartStation:   startStation.StationName,
 					StartTime:      startTime,
@@ -73,7 +72,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 					SeatNumber:     carriageAndSeat[1],
 					PassengerName:  passengerInfo.PassengerName,
 					PassengerId:    passengerInfo.PassengerId,
-					OrderId:        0,
+					OrderId:        "",
 					Price:          88,
 				}
 				ticketIndex++
@@ -115,7 +114,7 @@ func (tps *TicketPoolServer) RefundTicket(ctx context.Context, req *pb.RefundTic
 	logging.Info("退票请求: ", req)
 	tp := ticketpool.Tp
 	for _, ticket := range req.Tickets {
-		err := tp.RefundTickets(ticket.TrainId, ticket.StartStationId, ticket.DestStationId, ticket.StartTime, tp.GetIdBySeatTypeName(ticket.SeatType), fmt.Sprintf("%s %s",ticket.CarriageNumber, ticket.SeatNumber))
+		err := tp.RefundTickets(ticket.TrainId, ticket.StartStationId, ticket.DestStationId, ticket.StartTime, tp.GetIdBySeatTypeName(ticket.SeatType), fmt.Sprintf("%s %s", ticket.CarriageNumber, ticket.SeatNumber))
 		if err != nil {
 			logging.Error(err)
 			return nil, err

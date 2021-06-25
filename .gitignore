@@ -10,3 +10,4 @@ server/search/search
 server/ticket/ticket
 server/ticketPool/ticket-pool-k
 server/user/user
+/server/ticketPool/TicketPoolData.json
