@@ -7,9 +7,8 @@ package ticketpool
 import (
 	"common/tools/logging"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"sort"
 	"strconv"
 	"strings"
 	"ticketPool/model"
@@ -18,7 +17,8 @@ import (
 )
 
 var (
-	Tp *TicketPool
+	Tp   *TicketPool
+	Date []*time.Time // 当前可用的日期
 )
 
 //func init(){
@@ -53,20 +53,30 @@ func InitTicketPool() {
 		logging.Info("Init TicketPool From DB")
 		InitTicketPoolFromDB()
 	}
+	/* 开启票池序列化 */
+	Serialize()
+	// 开启滚动更新
 	rockUpdate(context.TODO())
 }
 
 func InitTicketPoolFromFile() error {
-	file, err := ioutil.ReadFile("TicketPoolData.json")
+	var ticketPool TicketPool
+	err := UnSerialize(&ticketPool)
 	if err != nil {
 		return err
 	}
-	var ticketPool *TicketPool
-	err = json.Unmarshal(file, &ticketPool)
-	Tp = ticketPool
-	if err != nil {
-		return err
+	Tp = &ticketPool
+	// 恢复Date
+	for _, v := range Tp.TrainMap {
+		for k, _ := range v.CarriageMap {
+			t, _ := time.Parse("2006-01-02", k)
+			Date = append(Date, &t)
+		}
+		break
 	}
+	sort.Slice(Date, func(i, j int) bool {
+		return Date[i].Before(*Date[j])
+	})
 	return nil
 }
 
@@ -117,7 +127,7 @@ func InitTicketPoolFromDB() {
 			date := t.Format("2006-01-02")
 			// 添加到时间管理中
 			td, _ := time.Parse("2006-01-02", date)
-			ticketPool.Date = append(ticketPool.Date, &td)
+			Date = append(Date, &td)
 			cm[date] = genCarriages(train.ID, date, stopInfos, carriageList)
 			t = t.Add(time.Hour * 24)
 		}
@@ -423,13 +433,13 @@ func rockUpdate(ctx context.Context) {
 			return
 		case <-ticker.C:
 			now := time.Now()
-			if now.Format("2006-01-02") == Tp.Date[1].Format("2006-01-02") {
+			if now.Format("2006-01-02") == Date[1].Format("2006-01-02") {
 				// 开始初始化
-				date := Tp.Date[len(Tp.Date)-1].Add(24 * time.Hour)
-				Tp.RWLock.Lock()
+				date := Date[len(Date)-1].Add(24 * time.Hour)
+				TpLock.Lock()
 				logging.Info("开始更新票池, 开始时间: ", time.Now().Format("2006-01-02; 15:04:05"))
 				for trainID, train := range Tp.TrainMap {
-					delete(train.CarriageMap, Tp.Date[0].Format("2006-01-02"))
+					delete(train.CarriageMap, Date[0].Format("2006-01-02"))
 					realTrain := model.GetTrainsByNumberLike(train.TrainNum)
 					trainType := model.GetTrainTypeByID(realTrain[0].TrainType)
 					// 得到车厢列表
@@ -443,8 +453,8 @@ func rockUpdate(ctx context.Context) {
 					train.CarriageMap[date.Format("2006-01-02")] = genCarriages(uint(trainID), date.Format("2006-01-02"), model.GetStopInfoByTrainID(uint(trainID)), carriageList)
 
 				}
-				Tp.Date = append(Tp.Date[1:], &date)
-				Tp.RWLock.Unlock()
+				Date = append(Date[1:], &date)
+				TpLock.Unlock()
 				logging.Info("更新票池完成")
 			}
 		}

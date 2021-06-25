@@ -10,16 +10,17 @@ import (
 	"sync"
 	"sync/atomic"
 	"ticketPool/skiplist"
-	"time"
 )
 
 type TicketPool struct {
 	TrainMap        map[uint32]*Train // key: trainId
 	IdToSeatTypeMap map[uint32]string // key: seatTypeId  value: seatTypeName
 	SeatTypeToIdMap map[string]uint32
-	Date            []*time.Time
-	RWLock          sync.RWMutex
 }
+
+var (
+	TpLock sync.RWMutex
+)
 
 type Train struct {
 	TrainNum       string
@@ -57,9 +58,9 @@ type SeatInfo struct { // 描述车厢的座位信息，同一种车厢共用一
 }
 
 func (tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	// 根据请求在票池中获取车辆信息，经停站信息，计算 requestValue
 	train := tp.TrainMap[trainId]
@@ -108,9 +109,9 @@ func (tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, d
 }
 
 func (tp *TicketPool) SearchTicketCount(trainId, startStationId, destStationId uint32, date string) (map[uint32]int32, error) {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	train := tp.TrainMap[trainId]
 	if train == nil {
@@ -136,9 +137,9 @@ func (tp *TicketPool) SearchTicketCount(trainId, startStationId, destStationId u
 }
 
 func (tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint32, date string, seatTypeId uint32, seatInfo string) error {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	train := tp.TrainMap[trainId]
 	if train == nil {
@@ -160,25 +161,25 @@ func (tp *TicketPool) RefundTickets(trainId, startStationId, destStationId uint3
 }
 
 func (tp *TicketPool) GetTrainNumber(trainId uint32) string {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	return tp.TrainMap[trainId].TrainNum
 }
 
 func (tp *TicketPool) GetSeatTypeNameById(seatTypeId uint32) string {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	return tp.IdToSeatTypeMap[seatTypeId]
 }
 
 func (tp *TicketPool) GetIdBySeatTypeName(seatTypeName string) uint32 {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	return tp.SeatTypeToIdMap[seatTypeName]
 }
@@ -215,9 +216,9 @@ func (csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32) (*
 }
 
 func (tp *TicketPool) GetStopStation(trainId, stationId uint32) *StopStation {
-	tp.RWLock.RLock()
+	TpLock.RLock()
 	defer func() {
-		tp.RWLock.RUnlock()
+		TpLock.RUnlock()
 	}()
 	return tp.TrainMap[trainId].StopStationMap[stationId]
 }

@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"syscall"
 	"ticketPool/rpc"
-	"ticketPool/serialize"
 	"ticketPool/ticketpool"
 	"ticketPool/utils/database"
 	"ticketPool/utils/setting"
@@ -43,7 +42,6 @@ func main() {
 	err := router_tracer.SetupByHttp(setting.Server.Name,
 		setting.Server.Host, strconv.Itoa(setting.Server.RPCPort), setting.Zipkin.HttpEndpoint)
 
-
 	/* 初始化 rpc (注册rpc服务）*/
 	logging.Info("register rpc server")
 	rpcServer := rpc.InitRPCServer()
@@ -67,8 +65,6 @@ func main() {
 	ticketpool.InitTicketPool()
 	logging.Info("TicketPool init success")
 
-	/* 开启票池序列化 */
-	serialize.Serialize()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	signal.Notify(quit, syscall.SIGTERM)

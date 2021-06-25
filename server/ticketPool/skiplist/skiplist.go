@@ -11,12 +11,12 @@ import (
 )
 
 type SkipList struct {
-	head 			*Index
-	maxLevel 		int
-	requestChan 	chan *Request
-	trainId			uint32
-	date			string
-	seatTypeId		uint32
+	Head        *Index
+	MaxLevel    int
+	RequestChan chan *Request
+	TrainId     uint32
+	Date        string
+	SeatTypeId  uint32
 }
 
 type Node struct {
@@ -25,95 +25,92 @@ type Node struct {
 	Next  *Node
 }
 
-
 type Index struct {
-	node 	*Node
-	down 	*Index
-	right 	*Index
+	Node  *Node
+	Down  *Index
+	Right *Index
 }
-
 
 type Request struct {
-	option		string
-	args		[]interface{}
+	Option string
+	Args   []interface{}
 }
 
-
-func NewSkipList(trainId uint32, date string, seatTypeId uint32) *SkipList{
+func NewSkipList(trainId uint32, date string, seatTypeId uint32) *SkipList {
 	head := &Index{
-		node:  &Node{},
-		down:  nil,
-		right: nil,
+		Node:  &Node{},
+		Down:  nil,
+		Right: nil,
 	}
 	sl := &SkipList{
-		head:        head,
-		maxLevel:    1,
-		requestChan: make(chan *Request, 100),
-		trainId:    trainId,
-		date:       date,
-		seatTypeId: seatTypeId,
+		Head:        head,
+		MaxLevel:    1,
+		RequestChan: make(chan *Request, 100),
+		TrainId:     trainId,
+		Date:        date,
+		SeatTypeId:  seatTypeId,
 	}
 	sl.DealWithRequest()
 	return sl
 }
 
-func(sl *SkipList) Do(cmd string, args ...interface{}){
-	sl.requestChan <- &Request{
-		option: cmd,
-		args:   args,
+func (sl *SkipList) Do(cmd string, args ...interface{}) {
+	sl.RequestChan <- &Request{
+		Option: cmd,
+		Args:   args,
 	}
 }
 
-func(sl *SkipList) DealWithRequest(){
+func (sl *SkipList) DealWithRequest() {
 	go func() {
 		for {
-			req := <-sl.requestChan
-			switch req.option {
+			req := <-sl.RequestChan
+			switch req.Option {
 			case "Put":
-				key := req.args[0].(uint64)
-				value := req.args[1].([]string)
+				key := req.Args[0].(uint64)
+				value := req.Args[1].([]string)
 				if key == 0 {
 					continue
 				}
 				sl.Put(key, value)
 				persistence.Do(&persistence.PersistentRequest{
 					Option:     "INSERT",
-					TrainId:    sl.trainId,
-					Date:       sl.date,
-					SeatTypeId: sl.seatTypeId,
+					TrainId:    sl.TrainId,
+					Date:       sl.Date,
+					SeatTypeId: sl.SeatTypeId,
 					Key:        key,
 					Value:      value,
 				})
 			case "Allocate":
-				key := req.args[0].(uint64)
-				count := req.args[1].(int)
-				respChan := req.args[2].(chan *Node)
+				key := req.Args[0].(uint64)
+				count := req.Args[1].(int)
+				respChan := req.Args[2].(chan *Node)
 				node := sl.Allocate(key, count)
 				respChan <- node
-				for ; node != nil; node = node.Next{
+				for ; node != nil; node = node.Next {
 					persistence.Do(&persistence.PersistentRequest{
 						Option:     "DELETE",
-						TrainId:    sl.trainId,
-						Date:       sl.date,
-						SeatTypeId: sl.seatTypeId,
+						TrainId:    sl.TrainId,
+						Date:       sl.Date,
+						SeatTypeId: sl.SeatTypeId,
 						Key:        node.Key,
 						Value:      node.Value,
 					})
 				}
 			case "Search":
-				key := req.args[0].(uint64)
-				respChan := req.args[1].(chan int32)
+				key := req.Args[0].(uint64)
+				respChan := req.Args[1].(chan int32)
 				respChan <- sl.Search(key)
 			case "Refund":
-				key := req.args[0].(uint64)
-				value := req.args[1].(string)
+				key := req.Args[0].(uint64)
+				value := req.Args[1].(string)
 				sl.refund(key, value)
 			}
 		}
 	}()
 }
 
-func(sl *SkipList) Get(key uint64) []string {
+func (sl *SkipList) Get(key uint64) []string {
 	b := sl.findPredecessor(key)
 	n := b.Next
 
@@ -133,8 +130,7 @@ func(sl *SkipList) Get(key uint64) []string {
 	}
 }
 
-
-func(sl *SkipList) Put(key uint64, value []string) {
+func (sl *SkipList) Put(key uint64, value []string) {
 	var node *Node
 
 	b := sl.findPredecessor(key)
@@ -167,86 +163,84 @@ func(sl *SkipList) Put(key uint64, value []string) {
 
 	// 新插入节点时随机决定是否加入索引节点
 	rnd := rand.Uint32()
-	if rnd & 0x80000001 == 0 {
+	if rnd&0x80000001 == 0 {
 		level := 1
-		for rnd >>= 1; (rnd & 1) != 0; rnd>>=1 {
+		for rnd >>= 1; (rnd & 1) != 0; rnd >>= 1 {
 			level++
 		}
 		var idx *Index
 
 		// 随机level <= 当前 level 时，生成随机 level 个索引节点
-		if level <= sl.maxLevel {
-			for i := 0; i < level; i++{
+		if level <= sl.MaxLevel {
+			for i := 0; i < level; i++ {
 				idx = &Index{
-					node:  node,
-					down:  idx,
-					right: nil,
+					Node:  node,
+					Down:  idx,
+					Right: nil,
 				}
 			}
 		} else {
 			// 随机 level 大于当前 level 时
 			// 增加索引层数
-			level = sl.maxLevel + 1
+			level = sl.MaxLevel + 1
 			// 生成当 level 个索引节点
 			for i := 0; i < level; i++ {
 				idx = &Index{
-					node:  node,
-					down:  idx,
-					right: nil,
+					Node:  node,
+					Down:  idx,
+					Right: nil,
 				}
 			}
 			// 增加原头索引高度
-			h := sl.head
+			h := sl.Head
 
 			newH := &Index{
-				node:  h.node,
-				down:  h,
-				right: nil,
+				Node:  h.Node,
+				Down:  h,
+				Right: nil,
 			}
-			sl.head = newH
-			sl.maxLevel++
+			sl.Head = newH
+			sl.MaxLevel++
 		}
 
 		// 寻找索引插入点
 		// 从头结点开始（头结点 level 为最高 level），每层向右寻找插入位置，找到后插入，然后进入下一层
-		q := sl.head
-		r := q.right
-		hLevel := sl.maxLevel
+		q := sl.Head
+		r := q.Right
+		hLevel := sl.MaxLevel
 		for {
 
 			if r != nil {
-				n := r.node
+				n := r.Node
 				c := cpr(key, n.Key)
 				if c > 0 {
 					q = r
-					r = r.right
+					r = r.Right
 					continue
 				}
 			}
 			if hLevel == level {
-				idx.right = r
-				q.right = idx
-				idx = idx.down
+				idx.Right = r
+				q.Right = idx
+				idx = idx.Down
 				if level--; level < 1 {
 					break
 				}
 			}
 			hLevel--
 
-			q = q.down
-			r = q.right
+			q = q.Down
+			r = q.Right
 		}
 	}
 
-
-
 }
 
-func(sl *SkipList) Remove (key uint64) []string {
+func (sl *SkipList) Remove(key uint64) []string {
 	b := sl.findPredecessor(key)
 	n := b.Next
 
-	for{
+	for {
 		if n == nil {
 			return nil
 		}
@@ -267,23 +261,23 @@ func(sl *SkipList) Remove (key uint64) []string {
 		b.Next = n.Next
 
 		sl.findPredecessor(key) // clean Index
-		if sl.head.right == nil {
+		if sl.Head.Right == nil {
 			sl.tryReduceLevel()
 		}
 		return v
 	}
 }
 
-func(sl *SkipList) refund(key uint64, value string) {
-	h := sl.head
+func (sl *SkipList) refund(key uint64, value string) {
+	h := sl.Head
 
 	for {
-		if h.down == nil {
+		if h.Down == nil {
 			break
 		}
-		h = h.down
+		h = h.Down
 	}
-	n := h.node
+	n := h.Node
 	for {
 		n = n.Next
 
@@ -293,12 +287,12 @@ func(sl *SkipList) refund(key uint64, value string) {
 		}
 
 		values := n.Value
-		for i := 0; i < len(values); i++{
+		for i := 0; i < len(values); i++ {
 			if values[i] == value {
 				newKey := n.Key | key
 				if len(values) == 1 {
 					sl.Remove(n.Key)
-				}else {
+				} else {
 					n.Value = append(values[:i], values[i+1:]...)
 				}
 				sl.Put(newKey, []string{value})
@@ -308,43 +302,43 @@ func(sl *SkipList) refund(key uint64, value string) {
 	}
 }
 
-func(sl *SkipList) tryReduceLevel() {
-	if sl.maxLevel <= 3 {
+func (sl *SkipList) tryReduceLevel() {
+	if sl.MaxLevel <= 3 {
 		return
 	}
-	d := sl.head.down
+	d := sl.Head.Down
 
-	if d == nil && d.down == nil {
-		sl.head = d
+	if d == nil && d.Down == nil {
+		sl.Head = d
 	}
 }
 
 // return Node  -->  Node.Key <= Key < Node.Next.Key
-func(sl *SkipList) findPredecessor(key uint64) *Node {
+func (sl *SkipList) findPredecessor(key uint64) *Node {
 	var q, r, d *Index
-	q = sl.head
-	r = q.right
+	q = sl.Head
+	r = q.Right
 	for {
 		if r != nil {
-			n := r.node
+			n := r.Node
 			k := n.Key
 			if n.Value == nil { // clean index
-				q.right = r.right
-				r = q.right
+				q.Right = r.Right
+				r = q.Right
 				continue
 			}
-			if cpr(key,k) > 0 { // 与 q 的右节点的 Key 比较，Key > k 则向右寻找
+			if cpr(key, k) > 0 { // 与 q 的右节点的 Key 比较，Key > k 则向右寻找
 				q = r
-				r = r.right
+				r = r.Right
 				continue
 			}
 		}
-		// r == nil 或 Key <= k    r = q.right n == r.node
-		if d = q.down; d == nil { // 进入下一层
-			return q.node
+		// r == nil 或 Key <= k    r = q.Right n == r.Node
+		if d = q.Down; d == nil { // 进入下一层
+			return q.Node
 		}
 		q = d
-		r = d.right
+		r = d.Right
 	}
 }
 
@@ -357,26 +351,25 @@ func cpr(x, y uint64) int {
 	return 0
 }
 
-
-func(sl *SkipList) Allocate(key uint64, count int) *Node {
+func (sl *SkipList) Allocate(key uint64, count int) *Node {
 	b := sl.findPredecessor(key)
 	n := b.Next
 
 	var node *Node
 
-	for{
+	for {
 		if n == nil {
 			return node
 		}
 		c := cpr(key, n.Key)
 		if c <= 0 {
-			if key & n.Key == key {
+			if key&n.Key == key {
 				v := n.Value
 				lenV := len(n.Value)
 				if lenV > count {
 					// 当前节点的座位数量满足需求，分配并返回
 					retV := make([]string, count)
-					copy(retV,v[lenV-count:])
+					copy(retV, v[lenV-count:])
 					n.Value = v[:lenV-count]
 
 					node = &Node{
@@ -403,11 +396,11 @@ func(sl *SkipList) Allocate(key uint64, count int) *Node {
 					n = f
 
 					sl.findPredecessor(key) // clean Index
-					if sl.head.right == nil {
+					if sl.Head.Right == nil {
 						sl.tryReduceLevel()
 					}
 
-					if count == 0{
+					if count == 0 {
 						return node
 					}
 					continue
@@ -420,8 +413,7 @@ func(sl *SkipList) Allocate(key uint64, count int) *Node {
 
 }
 
-
-func(sl *SkipList) Search(key uint64) int32 {
+func (sl *SkipList) Search(key uint64) int32 {
 	b := sl.findPredecessor(key)
 	n := b.Next
 
@@ -442,7 +434,7 @@ func(sl *SkipList) Search(key uint64) int32 {
 	return int32(count)
 }
 
-func(n *Node) appendMarker(node *Node){
+func (n *Node) appendMarker(node *Node) {
 	n.Next = &Node{
 		Key:   0,
 		Value: nil,
@@ -450,18 +442,16 @@ func(n *Node) appendMarker(node *Node){
 	}
 }
 
+func (sl *SkipList) Print() {
+	for head := sl.Head; head != nil; head = head.Down {
 
-func(sl *SkipList) Print(){
-	for head := sl.head; head != nil; head = head.down{
-
-		for r := head; r != nil; r = r.right {
-			fmt.Print( r.node.Key, "   ")
+		for r := head; r != nil; r = r.Right {
+			fmt.Print(r.Node.Key, "   ")
 		}
 		fmt.Println()
 	}
 
-	for node := sl.head.node; node != nil; node = node.Next {
-		fmt.Print(node.Key,"    ")
+	for node := sl.Head.Node; node != nil; node = node.Next {
+		fmt.Print(node.Key, "    ")
 	}
 }
-

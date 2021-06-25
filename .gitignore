@@ -11,3 +11,4 @@ server/ticket/ticket
 server/ticketPool/ticket-pool-k
 server/user/user
 /server/ticketPool/TicketPoolData.json
+/server/ticketPool/TicketPoolData.gob
