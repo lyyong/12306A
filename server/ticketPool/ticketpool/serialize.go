@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
-	"ticketPool/skiplist"
 	"time"
 )
 
@@ -22,7 +21,7 @@ const (
 )
 
 func init() {
-	gob.Register(skiplist.Request{})
+	gob.Register(Request{})
 }
 
 func Serialize() {

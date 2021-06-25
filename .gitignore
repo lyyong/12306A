@@ -12,3 +12,4 @@ server/ticketPool/ticket-pool-k
 server/user/user
 /server/ticketPool/TicketPoolData.json
 /server/ticketPool/TicketPoolData.gob
+/server/user/config/ly-config.ini

@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
-	"ticketPool/skiplist"
 )
 
 type TicketPool struct {
@@ -42,7 +41,7 @@ type Carriages struct {
 type CarriageSeatInfo struct {
 	FullValue   uint64
 	FullTickets []*FullTicket
-	Sl          *skiplist.SkipList
+	Sl          *SkipList
 }
 
 type FullTicket struct {
@@ -78,7 +77,7 @@ func (tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, d
 		return nil, errors.New("error date")
 	}
 
-	csiNodeMap := make(map[*CarriageSeatInfo]*skiplist.Node)
+	csiNodeMap := make(map[*CarriageSeatInfo]*Node)
 	seatsMap := make(map[uint32][]string, len(seatCountMap))
 
 	for seatType, count := range seatCountMap {
@@ -184,7 +183,7 @@ func (tp *TicketPool) GetIdBySeatTypeName(seatTypeName string) uint32 {
 	return tp.SeatTypeToIdMap[seatTypeName]
 }
 
-func (csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32) (*skiplist.Node, []string) {
+func (csi *CarriageSeatInfo) allocateTicket(requestValue uint64, count int32) (*Node, []string) {
 	// 优先从票池出票
 	node := csi.allocate(requestValue, int(count))
 
@@ -223,7 +222,7 @@ func (tp *TicketPool) GetStopStation(trainId, stationId uint32) *StopStation {
 	return tp.TrainMap[trainId].StopStationMap[stationId]
 }
 
-func (csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
+func (csi *CarriageSeatInfo) splitFullTicket(count int32) *Node {
 	seats := make([]string, count)
 	num := 0
 	for i := 0; i < len(csi.FullTickets); i++ {
@@ -249,7 +248,7 @@ func (csi *CarriageSeatInfo) splitFullTicket(count int32) *skiplist.Node {
 				num++
 			}
 			if count == 0 {
-				return &skiplist.Node{
+				return &Node{
 					Key:   csi.FullValue,
 					Value: seats,
 					Next:  nil,
@@ -280,7 +279,7 @@ func (csi *CarriageSeatInfo) getTicketCount(requestValue uint64) int32 {
 	return count
 }
 
-func (csi *CarriageSeatInfo) getValues(node *skiplist.Node) []string {
+func (csi *CarriageSeatInfo) getValues(node *Node) []string {
 	values := make([]string, 0)
 	for ; node != nil; node = node.Next {
 		values = append(values, node.Value...)
@@ -292,8 +291,8 @@ func (csi *CarriageSeatInfo) refund(key uint64, value string) {
 	csi.Sl.Do("Refund", key, value)
 }
 
-func (csi *CarriageSeatInfo) allocate(requestValue uint64, count int) *skiplist.Node {
-	respChan := make(chan *skiplist.Node, 1)
+func (csi *CarriageSeatInfo) allocate(requestValue uint64, count int) *Node {
+	respChan := make(chan *Node, 1)
 	csi.Sl.Do("Allocate", requestValue, count, respChan)
 	return <-respChan
 }

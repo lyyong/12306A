@@ -2,7 +2,7 @@
 // @Created at 2021/2/10
 // @Modified at 2021/2/10
 
-package skiplist
+package ticketpool
 
 import (
 	"fmt"
@@ -65,6 +65,7 @@ func (sl *SkipList) DealWithRequest() {
 	go func() {
 		for {
 			req := <-sl.RequestChan
+			TpLock.RLock()
 			switch req.Option {
 			case "Put":
 				key := req.Args[0].(uint64)
@@ -106,6 +107,7 @@ func (sl *SkipList) DealWithRequest() {
 				value := req.Args[1].(string)
 				sl.refund(key, value)
 			}
+			TpLock.RUnlock()
 		}
 	}()
 }

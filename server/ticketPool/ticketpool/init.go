@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"ticketPool/model"
-	"ticketPool/skiplist"
 	"time"
 )
 
@@ -224,17 +223,17 @@ func genCarriages(trainId uint, date string, stopInfos []*model.StopInfo, carria
 	carriages.CarriageSeatInfo[BUSINESS_SEAT_ID] = &CarriageSeatInfo{
 		FullValue:   fullV,
 		FullTickets: business,
-		Sl:          skiplist.NewSkipList(uint32(trainId), date, BUSINESS_SEAT_ID),
+		Sl:          NewSkipList(uint32(trainId), date, BUSINESS_SEAT_ID),
 	}
 	carriages.CarriageSeatInfo[FIRST_SEAT_ID] = &CarriageSeatInfo{
 		FullValue:   fullV,
 		FullTickets: first,
-		Sl:          skiplist.NewSkipList(uint32(trainId), date, FIRST_SEAT_ID),
+		Sl:          NewSkipList(uint32(trainId), date, FIRST_SEAT_ID),
 	}
 	carriages.CarriageSeatInfo[SECOND_SEAT_ID] = &CarriageSeatInfo{
 		FullValue:   fullV,
 		FullTickets: second,
-		Sl:          skiplist.NewSkipList(uint32(trainId), date, SECOND_SEAT_ID),
+		Sl:          NewSkipList(uint32(trainId), date, SECOND_SEAT_ID),
 	}
 	return carriages
 }
@@ -376,17 +375,17 @@ func InitMockData() {
 	carriages.CarriageSeatInfo[0] = &CarriageSeatInfo{
 		FullValue:   fullTicketValue,
 		FullTickets: business,
-		Sl:          skiplist.NewSkipList(0, "2021-02-16", 0),
+		Sl:          NewSkipList(0, "2021-02-16", 0),
 	}
 	carriages.CarriageSeatInfo[1] = &CarriageSeatInfo{
 		FullValue:   fullTicketValue,
 		FullTickets: first,
-		Sl:          skiplist.NewSkipList(0, "2021-02-16", 1),
+		Sl:          NewSkipList(0, "2021-02-16", 1),
 	}
 	carriages.CarriageSeatInfo[2] = &CarriageSeatInfo{
 		FullValue:   fullTicketValue,
 		FullTickets: second,
-		Sl:          skiplist.NewSkipList(0, "2021-02-16", 2),
+		Sl:          NewSkipList(0, "2021-02-16", 2),
 	}
 }
 
