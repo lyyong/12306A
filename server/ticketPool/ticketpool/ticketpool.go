@@ -9,12 +9,16 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
+	"ticketPool/model"
 )
 
 type TicketPool struct {
 	TrainMap        map[uint32]*Train // key: trainId
 	IdToSeatTypeMap map[uint32]string // key: seatTypeId  value: seatTypeName
 	SeatTypeToIdMap map[string]uint32
+	// 为降低不一致性带来得bug, 将静态资源一起保存
+	AllCarriages []*model.CarriageType
+	AllSeatInfos map[string]*SeatInfo // 每个车厢对应对应作为类型的SeatInfo, key格式为carriage_id:seatTypeID
 }
 
 var (

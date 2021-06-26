@@ -27,6 +27,7 @@ func init() {
 func Serialize() {
 	go func() {
 		for {
+			time.Sleep(3 * time.Minute)
 			tp := Tp
 			TpLock.Lock()
 			logging.Info("开始序列化")
@@ -35,7 +36,6 @@ func Serialize() {
 			serializeByGOB(&tp)
 			logging.Info("序列化结束, 耗时: ", time.Now().Sub(st).Milliseconds())
 			TpLock.Unlock()
-			time.Sleep(5 * time.Second)
 		}
 	}()
 }

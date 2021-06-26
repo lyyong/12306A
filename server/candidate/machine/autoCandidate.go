@@ -85,14 +85,14 @@ func tryGetTicketsByDatabase() {
 	// 获取订单
 	orderIDs := model.GetCandidatesOrderIDs()
 	for i := range orderIDs {
-		candidates, err := model.GetCandidatesByOrderID(orderIDs[i])
+		candidates, err := model.GetCandidatesByOrderID(orderIDs[i].OrderID)
 		if err != nil || len(candidates) == 0 {
 			logging.Error("获取候补订单出错: ", err, "订单编号: ", orderIDs[i])
 			continue
 		}
 		// 检查候补订单的时间
 		if candidates[0].Date.Before(thisDate) || candidates[0].ExpireDate.Before(thisDate) {
-			err := model.UpdateCandidatesState(orderIDs[i], model.CandidateFail)
+			err := model.UpdateCandidatesState(orderIDs[i].OrderID, model.CandidateFail)
 			if err != nil {
 				logging.Error("修改候补状态出错: ", err, "订单编号: ", orderIDs[i])
 				return

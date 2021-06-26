@@ -88,9 +88,9 @@ func GetCandidatesByOrderID(orderID string) ([]*Candidate, error) {
 }
 
 // GetCandidatesOrderIDs 获取正在候补状态的订单, 已创建订单的时间排序
-func GetCandidatesOrderIDs() []string {
-	res := make([]string, 0, 10)
-	database.Client().Raw("select distinct order_id from candidates where state = 0 order by created_at asc").Scan(&res)
+func GetCandidatesOrderIDs() []*Candidate {
+	res := make([]*Candidate, 0, 10)
+	database.Client().Where("state = ?", 0).Find(&res)
 	return res
 }
 
