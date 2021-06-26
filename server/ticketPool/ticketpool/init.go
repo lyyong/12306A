@@ -75,6 +75,15 @@ func InitTicketPoolFromFile() error {
 		return err
 	}
 	Tp = &ticketPool
+	// 启动每个跳表的处理逻辑协程
+	for _, train := range Tp.TrainMap {
+		for _, carriage := range train.CarriageMap {
+			for _, carriageSeatInfo := range carriage.CarriageSeatInfo {
+				carriageSeatInfo.Sl.RequestChan = make(chan *Request, 100)
+				carriageSeatInfo.Sl.DealWithRequest()
+			}
+		}
+	}
 	return nil
 }
 

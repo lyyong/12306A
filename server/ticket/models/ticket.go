@@ -9,23 +9,24 @@ import (
 type Ticket struct {
 	gorm.Model
 
-	UserId         uint32
-	TrainId        uint32
-	TrainNum       string
-	StartStationId uint32
-	StartStation   string
-	StartTime      time.Time
-	DestStationId  uint32
-	DestStation    string
-	DestTime       time.Time
-	SeatType       string
-	CarriageNumber string
-	SeatNumber     string
-	Price          int32
-	OrderOutsideId string
-	PassengerName  string
-	PassengerId    uint32
-	State          uint8
+	UserId            uint32
+	TrainId           uint32
+	TrainNum          string
+	StartStationId    uint32
+	StartStation      string
+	StartTime         time.Time
+	DestStationId     uint32
+	DestStation       string
+	DestTime          time.Time
+	SeatType          string
+	CarriageNumber    string
+	SeatNumber        string
+	Price             int32
+	OrderOutsideId    string
+	PassengerId       uint32
+	PassengerName     string
+	CertificateNumber string
+	State             uint8
 }
 
 const (

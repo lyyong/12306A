@@ -20,14 +20,10 @@ const (
 	GOBFile  = "TicketPoolData.gob"
 )
 
-func init() {
-	gob.Register(Request{})
-}
-
 func Serialize() {
 	go func() {
 		for {
-			time.Sleep(3 * time.Minute)
+			time.Sleep(30 * time.Minute)
 			tp := Tp
 			TpLock.Lock()
 			logging.Info("开始序列化")

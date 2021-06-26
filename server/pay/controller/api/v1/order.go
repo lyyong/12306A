@@ -28,31 +28,31 @@ type OrderInfo struct {
 }
 
 type UnpayOrderInfo struct {
-	OrderId        string            `json:"order_id"`
-	TrainId        int               `json:"train_id"`
-	TrainNum       string            `json:"train_num"`
-	StartStationId int               `json:"start_station_id"`
-	StartStation   string            `json:"start_station"`
-	StartTime      string            `json:"start_time"`
-	DestStationId  int               `json:"dest_station_id"`
-	DestStation    string            `json:"dest_station"`
-	ArriveTime     string            `json:"arrive_time"`
-	Date           string            `json:"date"`
-	ExpiredTime    int               `json:"expired_time"`
-	Price          int               `json:"price"`
-	Tickets        []UnpayTicketInfo `json:"tickets"`
+	OrderId        string       `json:"order_id"`
+	TrainId        int          `json:"train_id"`
+	TrainNum       string       `json:"train_num"`
+	StartStationId int          `json:"start_station_id"`
+	StartStation   string       `json:"start_station"`
+	StartTime      string       `json:"start_time"`
+	DestStationId  int          `json:"dest_station_id"`
+	DestStation    string       `json:"dest_station"`
+	ArriveTime     string       `json:"arrive_time"`
+	Date           string       `json:"date"`
+	ExpiredTime    int          `json:"expired_time"`
+	Price          int          `json:"price"`
+	Tickets        []TicketInfo `json:"tickets"`
 }
 
-type UnpayTicketInfo struct {
-	PassengerId     int    `json:"passenger_id"`
-	PassengerName   string `json:"passenger_name"`
-	PassengerType   string `json:"passenger_type"`
-	CertificateType string `json:"certificate_type"`
-	SeatTypeId      int    `json:"seat_type_id"`
-	SeatType        string `json:"seat_type"`
-	CarriageNumber  string `json:"carriage_number"`
-	SeatNumber      string `json:"seat_number"`
-	Price           int    `json:"price"`
+type TicketInfo struct {
+	CertificateNumber string `json:"certificate_number"`
+	PassengerName     string `json:"passenger_name"`
+	PassengerType     string `json:"passenger_type"`
+	CertificateType   string `json:"certificate_type"`
+	SeatTypeId        int    `json:"seat_type_id"`
+	SeatType          string `json:"seat_type"`
+	CarriageNumber    string `json:"carriage_number"`
+	SeatNumber        string `json:"seat_number"`
+	Price             int    `json:"price"`
 }
 
 // GetUserHistoryOrders 获取用户的历史订单
@@ -168,12 +168,12 @@ func GetUserUnpayOrders(c *gin.Context) {
 	// TODO 数据补全
 	orderInfo2Client := &UnpayOrderInfo{
 		OrderId:        order.OutsideID,
-		TrainId:        0,
+		TrainId:        int(resp.Tickets[0].TrainId),
 		TrainNum:       resp.Tickets[0].TrainNum,
-		StartStationId: 0,
+		StartStationId: int(resp.Tickets[0].StartStationId),
 		StartStation:   resp.Tickets[0].StartStation,
 		StartTime:      resp.Tickets[0].StartTime,
-		DestStationId:  0,
+		DestStationId:  int(resp.Tickets[0].DestStationId),
 		DestStation:    resp.Tickets[0].DestStation,
 		ArriveTime:     resp.Tickets[0].DestTime,
 		Date:           resp.Tickets[0].StartTime,
@@ -182,12 +182,13 @@ func GetUserUnpayOrders(c *gin.Context) {
 	}
 
 	for i := range resp.Tickets {
-		orderInfo2Client.Tickets = append(orderInfo2Client.Tickets, UnpayTicketInfo{
-			PassengerName:  resp.Tickets[i].PassengerName,
-			SeatType:       resp.Tickets[i].SeatType,
-			CarriageNumber: resp.Tickets[i].CarriageNumber,
-			SeatNumber:     resp.Tickets[i].SeatNumber,
-			Price:          int(resp.Tickets[i].Price),
+		orderInfo2Client.Tickets = append(orderInfo2Client.Tickets, TicketInfo{
+			CertificateNumber: resp.Tickets[i].CertificateNumber,
+			PassengerName:     resp.Tickets[i].PassengerName,
+			SeatType:          resp.Tickets[i].SeatType,
+			CarriageNumber:    resp.Tickets[i].CarriageNumber,
+			SeatNumber:        resp.Tickets[i].SeatNumber,
+			Price:             int(resp.Tickets[i].Price),
 		})
 	}
 

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	orderPb "rpc/pay/proto/orderRPCpb"
 	ticketPoolPb "rpc/ticketPool/proto/ticketPoolRPC"
+	"rpc/user/userrpc"
 	"ticket/service"
 )
 
@@ -43,13 +44,13 @@ type BuyTicketResponse struct {
 }
 
 type TicketInfo struct {
-	PassengerId    uint32 `json:"passenger_id"`
-	PassengerName  string `json:"passenger_name"`
-	SeatTypeId     uint32 `json:"seat_type_id"`
-	SeatType       string `json:"seat_type"`
-	CarriageNumber string `json:"carriage_number"`
-	SeatNumber     string `json:"seat_number"`
-	Price          int32  `json:"price"`
+	CertificateNumber string `json:"certificate_number"` // 乘客的身份证好
+	PassengerName     string `json:"passenger_name"`
+	SeatTypeId        uint32 `json:"seat_type_id"`
+	SeatType          string `json:"seat_type"`
+	CarriageNumber    string `json:"carriage_number"`
+	SeatNumber        string `json:"seat_number"`
+	Price             int32  `json:"price"`
 }
 
 func BuyTicket(c *gin.Context) {
@@ -76,15 +77,20 @@ func BuyTicket(c *gin.Context) {
 		return
 	}
 	// 验证乘客身份信息
+	allPassengerForUser, err := service.GetPassengers(uint32(userInfo.UserId))
+	if err != nil {
+		logging.Error(err)
+		c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "验证乘客信息失败", Data: nil})
+		return
+	}
+	allPassenger := make(map[uint32]*userrpc.Passenger)
+	for i := range allPassengerForUser {
+		allPassenger[uint32(allPassengerForUser[i].Id)] = allPassengerForUser[i]
+	}
 	passengerId := make([]uint32, len(btReq.Passengers))
 	for index, value := range btReq.Passengers {
-		isOk, err := service.CheckUserInfo(value.PassengerId, value.PassengerName)
-		if err != nil {
-			logging.Error(err)
-			c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "验证乘客信息失败", Data: nil})
-			return
-		}
-		if !isOk {
+		_, isOK := allPassenger[value.PassengerId]
+		if !isOK {
 			c.JSON(http.StatusBadRequest, Response{Code: 0, Msg: "乘客信息有误", Data: nil})
 			return
 		}
@@ -104,10 +110,11 @@ func BuyTicket(c *gin.Context) {
 	passengers := make([]*ticketPoolPb.PassengerInfo, len(btReq.Passengers))
 	for index, value := range btReq.Passengers {
 		passengers[index] = &ticketPoolPb.PassengerInfo{
-			PassengerName: value.PassengerName,
-			PassengerId:   value.PassengerId,
-			SeatTypeId:    value.SeatTypeId,
-			ChooseSeat:    value.ChooseSeat,
+			PassengerId:       value.PassengerId,
+			PassengerName:     value.PassengerName,
+			CertificateNumber: allPassenger[value.PassengerId].CertificateNumber,
+			SeatTypeId:        value.SeatTypeId,
+			ChooseSeat:        value.ChooseSeat,
 		}
 	}
 	getTicketReq := &ticketPoolPb.GetTicketRequest{
@@ -146,13 +153,13 @@ func BuyTicket(c *gin.Context) {
 	ticketsInfo := make([]TicketInfo, len(tickets))
 	for index, value := range tickets {
 		ticketsInfo[index] = TicketInfo{
-			PassengerId:    value.PassengerId,
-			PassengerName:  value.PassengerName,
-			SeatTypeId:     value.SeatTypeId,
-			SeatType:       value.SeatType,
-			CarriageNumber: value.CarriageNumber,
-			SeatNumber:     value.SeatNumber,
-			Price:          value.Price,
+			CertificateNumber: value.CertificateNumber,
+			PassengerName:     value.PassengerName,
+			SeatTypeId:        value.SeatTypeId,
+			SeatType:          value.SeatType,
+			CarriageNumber:    value.CarriageNumber,
+			SeatNumber:        value.SeatNumber,
+			Price:             value.Price,
 		}
 	}
 	btResp := &BuyTicketResponse{

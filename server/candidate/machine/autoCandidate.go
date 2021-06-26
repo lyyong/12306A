@@ -82,21 +82,23 @@ func SetupByTime() {
 func tryGetTicketsByDatabase() {
 	// 当前日期
 	thisDate := time.Now()
+	logging.Info("开始获取候补票")
 	// 获取订单
 	orderIDs := model.GetCandidatesOrderIDs()
 	for i := range orderIDs {
-		candidates, err := model.GetCandidatesByOrderID(orderIDs[i].OrderID)
+		candidates, err := model.GetCandidatesByOrderID(orderIDs[i])
 		if err != nil || len(candidates) == 0 {
 			logging.Error("获取候补订单出错: ", err, "订单编号: ", orderIDs[i])
 			continue
 		}
 		// 检查候补订单的时间
 		if candidates[0].Date.Before(thisDate) || candidates[0].ExpireDate.Before(thisDate) {
-			err := model.UpdateCandidatesState(orderIDs[i].OrderID, model.CandidateFail)
+			err := model.UpdateCandidatesState(orderIDs[i], model.CandidateFail)
 			if err != nil {
 				logging.Error("修改候补状态出错: ", err, "订单编号: ", orderIDs[i])
 				return
 			}
+			continue
 		}
 		// 获取票
 		passengers := make([]*ticketRPC.Passenger, len(candidates))
@@ -135,6 +137,7 @@ func tryGetTicketsByDatabase() {
 			}
 		}
 	}
+	logging.Info("获取候补票结束")
 }
 
 // tryGetTicketsByCache 尝试获取通过缓存中的信息车票

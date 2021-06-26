@@ -13,20 +13,14 @@ import (
 	"rpc/pay/client/orderRPCClient"
 	orderPb "rpc/pay/proto/orderRPCpb"
 	ticketPoolPb "rpc/ticketPool/proto/ticketPoolRPC"
+	"rpc/user/userrpc"
 	"ticket/models"
 	"ticket/utils/redispool"
 	"time"
 )
 
-func CheckUserInfo(passengerId uint32, passengerName string) (bool, error) {
-	user, err := ts.userCli.GetUser(uint(passengerId))
-	if err != nil {
-		return false, err
-	}
-	if user.Name != passengerName {
-		return false, nil
-	}
-	return true, nil
+func GetPassengers(userID uint32) ([]*userrpc.Passenger, error) {
+	return ts.userCli.ListPassenger(uint(userID))
 }
 
 func CheckConflict(passengerId *[]uint32, date string) (bool, error) {
@@ -97,24 +91,24 @@ func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 		arriveTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].ArriveTime)
 
 		tickets[i] = models.Ticket{
-			Model:          gorm.Model{},
-			UserId:         uint32(payOKInfo.UserID),
-			TrainId:        tpTickets[i].TrainId,
-			TrainNum:       tpTickets[i].TrainNum,
-			StartStationId: tpTickets[i].StartStationId,
-			StartStation:   tpTickets[i].StartStation,
-			StartTime:      startTime,
-			DestStationId:  tpTickets[i].DestStationId,
-			DestStation:    tpTickets[i].DestStation,
-			DestTime:       arriveTime,
-			SeatType:       tpTickets[i].SeatType,
-			CarriageNumber: tpTickets[i].CarriageNumber,
-			SeatNumber:     tpTickets[i].SeatNumber,
-			Price:          tpTickets[i].Price,
-			OrderOutsideId: payOKInfo.OutsideID,
-			PassengerName:  tpTickets[i].PassengerName,
-			PassengerId:    tpTickets[i].PassengerId,
-			State:          0,
+			Model:             gorm.Model{},
+			UserId:            uint32(payOKInfo.UserID),
+			TrainId:           tpTickets[i].TrainId,
+			TrainNum:          tpTickets[i].TrainNum,
+			StartStationId:    tpTickets[i].StartStationId,
+			StartStation:      tpTickets[i].StartStation,
+			StartTime:         startTime,
+			DestStationId:     tpTickets[i].DestStationId,
+			DestStation:       tpTickets[i].DestStation,
+			DestTime:          arriveTime,
+			SeatType:          tpTickets[i].SeatType,
+			CarriageNumber:    tpTickets[i].CarriageNumber,
+			SeatNumber:        tpTickets[i].SeatNumber,
+			Price:             tpTickets[i].Price,
+			OrderOutsideId:    payOKInfo.OutsideID,
+			PassengerName:     tpTickets[i].PassengerName,
+			CertificateNumber: tpTickets[i].CertificateNumber,
+			State:             0,
 		}
 	}
 	err = models.AddMultipleTicket(&tickets)

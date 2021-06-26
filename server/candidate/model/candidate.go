@@ -31,7 +31,9 @@ const (
 	BusinessSeat = iota
 	FirstSeat
 	SecondSeat
+)
 
+const (
 	CandidateIng = iota
 	CandidateNotCash
 	CandidateSuccess
@@ -88,9 +90,16 @@ func GetCandidatesByOrderID(orderID string) ([]*Candidate, error) {
 }
 
 // GetCandidatesOrderIDs 获取正在候补状态的订单, 已创建订单的时间排序
-func GetCandidatesOrderIDs() []*Candidate {
-	res := make([]*Candidate, 0, 10)
-	database.Client().Where("state = ?", 0).Find(&res)
+func GetCandidatesOrderIDs() []string {
+	selectRes := make([]struct {
+		OrderID   string
+		CreatedAt time.Time
+	}, 0)
+	database.Client().Raw("select distinct order_id,created_at from candidates where state = 0 order by created_at asc").Scan(&selectRes)
+	res := make([]string, len(selectRes))
+	for i := range selectRes {
+		res[i] = selectRes[i].OrderID
+	}
 	return res
 }
 

@@ -18,6 +18,7 @@ func InitRouter() *gin.Engine {
 	{
 		v1.POST("/buy", controller.BuyTicket)
 		v1.POST("/refund", controller.RefundTicket)
+		v1.POST("/change", controller.ChangeTicket)
 	}
 
 	return r
