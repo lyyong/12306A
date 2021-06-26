@@ -13,18 +13,19 @@ import (
 
 type Candidate struct {
 	model.Model
-	Date           time.Time `json:"date"`             // 候补时间
-	TrainID        uint      `json:"train_id"`         // 车次id
-	OrderID        string    `json:"order_id"`         // 订单id
-	UserID         uint      `json:"user_id"`          // 用户id
-	PassengerID    uint      `json:"passenger_id"`     // 乘客id
-	PassengerName  string    `json:"passenger_name"`   // 乘客名称
-	StartStationID uint      `json:"start_station_id"` // 上车车站id
-	DestStationID  uint      `json:"dest_station_id"`  // 下车车站id
-	ExpireDate     time.Time `json:"expire_date"`
-	SeatTypeID     int       `json:"seat_type_id"` // 0商务座, 1一等座, 2二等座
-	TicketID       uint      `json:"ticket_id"`
-	State          int       `json:"state"` // 状态，0正在候补，1候补成功但是未兑现, 2候补成功，3为候补失败
+	Date              time.Time `json:"date"`               // 候补时间
+	TrainID           uint      `json:"train_id"`           // 车次id
+	OrderID           string    `json:"order_id"`           // 订单id
+	UserID            uint      `json:"user_id"`            // 用户id
+	PassengerID       uint      `json:"passenger_id"`       // 乘客id
+	PassengerName     string    `json:"passenger_name"`     // 乘客名称
+	CertificateNumber string    `json:"certificate_number"` // 乘客的身份证号
+	StartStationID    uint      `json:"start_station_id"`   // 上车车站id
+	DestStationID     uint      `json:"dest_station_id"`    // 下车车站id
+	ExpireDate        time.Time `json:"expire_date"`
+	SeatTypeID        int       `json:"seat_type_id"` // 0商务座, 1一等座, 2二等座
+	TicketID          uint      `json:"ticket_id"`
+	State             int       `json:"state"` // 状态，0正在候补，1候补成功但是未兑现, 2候补成功，3为候补失败
 }
 
 const (
@@ -128,6 +129,6 @@ func GetTrainNumber(trainID uint) string {
 
 func GetStationName(stationID uint) string {
 	res := ""
-	database.Client().Raw("select name from trains where id = ?", stationID).Scan(&res)
+	database.Client().Raw("select name from stations where id = ?", stationID).Scan(&res)
 	return res
 }

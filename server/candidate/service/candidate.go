@@ -14,6 +14,7 @@ import (
 	"rpc/pay/proto/orderRPCpb"
 	"rpc/ticket/Client"
 	"rpc/ticket/proto/ticketRPC"
+	"rpc/user/userrpc"
 	"strconv"
 	"strings"
 	"time"
@@ -22,6 +23,7 @@ import (
 type candidateService struct {
 	orderOp  *orderRPCClient.OrderRPCClient
 	ticketOp *client.TicketRPCClient
+	userOp   *userrpc.Client
 }
 
 func NewCandidateService() (*candidateService, error) {
@@ -36,6 +38,7 @@ func NewCandidateService() (*candidateService, error) {
 	if err != nil {
 		return nil, err
 	}
+	cs.userOp = userrpc.NewClientWithTarget(setting.RPCTarget.User)
 	return cs, nil
 }
 
@@ -67,21 +70,32 @@ func (c candidateService) CacheCandidate(userID, trainId, startStationID, destSt
 		return "", err
 	}
 
-	// TODO 获取乘客的姓名
+	listPassenger, err := c.userOp.ListPassenger(userID)
+	if err != nil {
+		return "", err
+	}
+	allPassenger := make(map[uint]*userrpc.Passenger)
+	for i := range listPassenger {
+		allPassenger[listPassenger[i].Id] = listPassenger[i]
+	}
 	candidates := make([]*model.Candidate, len(passengers))
 	for i := range candidates {
+		if _, ok := allPassenger[passengers[i]]; !ok {
+			return "", errors.New("乘客id出错")
+		}
 		candidates[i] = &model.Candidate{
-			Date:           *date,
-			TrainID:        trainId,
-			OrderID:        resp.GetOrderOutsideID(),
-			UserID:         userID,
-			PassengerID:    passengers[i],
-			PassengerName:  "",
-			StartStationID: startStationID,
-			DestStationID:  destStationID,
-			ExpireDate:     *expire,
-			SeatTypeID:     seatTypeID,
-			State:          0,
+			Date:              *date,
+			TrainID:           trainId,
+			OrderID:           resp.GetOrderOutsideID(),
+			UserID:            userID,
+			PassengerID:       passengers[i],
+			PassengerName:     allPassenger[passengers[i]].Name,
+			CertificateNumber: allPassenger[passengers[i]].CertificateNumber,
+			StartStationID:    startStationID,
+			DestStationID:     destStationID,
+			ExpireDate:        *expire,
+			SeatTypeID:        seatTypeID,
+			State:             0,
 		}
 	}
 
@@ -97,7 +111,7 @@ func (c candidateService) CacheCandidate(userID, trainId, startStationID, destSt
 
 // ReadCandidate 获取到候补订单的信息
 func (c candidateService) ReadCandidate(userID uint) []*model.Candidate {
-	cans, err := model.GetCandidates(map[string]interface{}{"user_id": userID, "state": model.CandidateIng})
+	cans, err := model.GetCandidates(map[string]interface{}{"user_id": userID, "state": []int{model.CandidateIng, model.CandidateNotCash}})
 	if err != nil {
 		logging.Error("读取候补订单出错: ", err)
 	}

@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 	pb "rpc/ticket/proto/ticketRPC"
 	ticketPoolPb "rpc/ticketPool/proto/ticketPoolRPC"
-	"rpc/user/userrpc"
 	"ticket/models"
 	"ticket/service"
 	"ticket/utils/redispool"
@@ -136,20 +135,12 @@ func (ts *TicketServer) UpdateTicketsState(ctx context.Context, in *pb.UpdateSta
 
 func (ts *TicketServer) BuyTickets(ctx context.Context, in *pb.BuyTicketsRequest) (*pb.BuyTicketsResponseList, error) {
 	// 处理请求数据
-	allPassengerForUser, err := service.GetPassengers(in.UserId)
-	if err != nil {
-		logging.Error(err)
-		return nil, err
-	}
-	allPassenger := make(map[uint32]*userrpc.Passenger)
-	for i := range allPassengerForUser {
-		allPassenger[uint32(allPassengerForUser[i].Id)] = allPassengerForUser[i]
-	}
 	passengers := make([]*ticketPoolPb.PassengerInfo, len(in.Passengers))
 	for index, value := range in.Passengers {
 		passengers[index] = &ticketPoolPb.PassengerInfo{
 			PassengerName:     value.PassengerName,
-			CertificateNumber: allPassenger[value.PassengerId].CertificateNumber,
+			PassengerId:       value.PassengerId,
+			CertificateNumber: value.CertificateNumber,
 			SeatTypeId:        value.SeatTypeId,
 		}
 	}
@@ -188,6 +179,7 @@ func (ts *TicketServer) BuyTickets(ctx context.Context, in *pb.BuyTicketsRequest
 			SeatNumber:        tpTickets[i].SeatNumber,
 			Price:             tpTickets[i].Price,
 			OrderOutsideId:    in.OrderOuterId,
+			PassengerId:       tpTickets[i].PassengerId,
 			PassengerName:     tpTickets[i].PassengerName,
 			CertificateNumber: tpTickets[i].CertificateNumber,
 			State:             4,
@@ -202,8 +194,10 @@ func (ts *TicketServer) BuyTickets(ctx context.Context, in *pb.BuyTicketsRequest
 	// 构造响应数据
 	response := make([]*pb.BuyTicketsResponse, len(tickets))
 	for i := 0; i < len(response); i++ {
-		response[i].TicketId = uint32(tickets[i].ID)
-		response[i].PassengerId = tickets[i].PassengerId
+		response[i] = &pb.BuyTicketsResponse{
+			PassengerId: tickets[i].PassengerId,
+			TicketId:    uint32(tickets[i].ID),
+		}
 	}
 	return &pb.BuyTicketsResponseList{Response: response}, nil
 }

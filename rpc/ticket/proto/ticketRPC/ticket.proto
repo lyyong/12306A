@@ -65,7 +65,8 @@ message BuyTicketsRequest {
 message Passenger {
   uint32 passenger_id = 1;
   string passenger_name = 2;
-  uint32 seat_type_id = 3;
+  string certificate_number = 3;
+  uint32 seat_type_id = 4;
 }
 
 message BuyTicketsResponse{

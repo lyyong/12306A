@@ -42,10 +42,6 @@ func ReadState(c *gin.Context) {
 	}
 	cc, _ := service.NewCandidateService()
 	cans := cc.ReadCandidate(userInfo.UserId)
-	if len(cans) == 0 {
-		send.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
-		return
-	}
 	passengers := make([]passenger, len(cans))
 	for i := range passengers {
 		passengers[i] = passenger{

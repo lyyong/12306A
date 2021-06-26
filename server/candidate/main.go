@@ -75,7 +75,7 @@ func init() {
 	}
 
 	// 开启自动抢票机器
-	machine.SetupByDuration(context.Background(), 1*time.Minute, setting.RPCTarget.Ticket)
+	machine.SetupByDuration(context.Background(), 3*time.Hour, setting.RPCTarget.Ticket)
 }
 
 // 需要关闭的组件

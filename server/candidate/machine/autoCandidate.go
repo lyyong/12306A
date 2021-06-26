@@ -104,9 +104,10 @@ func tryGetTicketsByDatabase() {
 		passengers := make([]*ticketRPC.Passenger, len(candidates))
 		for j := range passengers {
 			passengers[j] = &ticketRPC.Passenger{
-				PassengerId:   uint32(candidates[j].PassengerID),
-				PassengerName: candidates[j].PassengerName,
-				SeatTypeId:    uint32(candidates[j].SeatTypeID),
+				PassengerId:       uint32(candidates[j].PassengerID),
+				PassengerName:     candidates[j].PassengerName,
+				CertificateNumber: candidates[j].CertificateNumber,
+				SeatTypeId:        uint32(candidates[j].SeatTypeID),
 			}
 		}
 		req := &ticketRPC.BuyTicketsRequest{
@@ -128,6 +129,7 @@ func tryGetTicketsByDatabase() {
 			for j := range candidates {
 				if uint32(candidates[j].PassengerID) == tickets.Response[i].PassengerId {
 					candidates[j].TicketID = uint(tickets.Response[i].TicketId)
+					candidates[j].State = model.CandidateNotCash
 					err := model.UpdateCandidate(candidates[i])
 					if err != nil {
 						logging.Error("更新订单信息出错: ", err, " 订单编号: ", orderIDs[i], " 乘客id: ", candidates[j].PassengerID)
