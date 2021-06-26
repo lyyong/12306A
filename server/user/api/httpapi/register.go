@@ -18,8 +18,8 @@ type RegisterRequest struct {
 	Password          string
 	CertificateType   int
 	Name              string
-	CertificateNumber string
-	PhoneNumber       string
+	CertificateNumber string `binding:"certificateNumber"`
+	PhoneNumber       string `binding:"phoneNumber"`
 	Email             string
 	PassengerType     int
 }

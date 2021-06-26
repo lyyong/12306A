@@ -11,6 +11,7 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 	_ "user/docs"
 	"user/router/user"
+	"user/util/validator"
 )
 
 // 初始化路由
@@ -20,6 +21,9 @@ func InitRouter() *gin.Engine {
 
 	// Token解析中间件
 	r.Use(usertoken.TokenParser())
+
+	// 初始化验证器
+	validator.InitValidator()
 
 	// 初始化各个模块的路由
 	InitUserRouter(r)

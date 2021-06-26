@@ -15,8 +15,8 @@ import (
 type InsertPassengerRequest struct {
 	Name              string `json:"name"`
 	CertificateType   int    `json:"certificate_type"`
-	CertificateNumber string `json:"certificate_number"`
-	PhoneNumber       string `json:"phone_number"`
+	CertificateNumber string `json:"certificate_number" binding:"certificateNumber"`
+	PhoneNumber       string `json:"phone_number" binding:"phoneNumber"`
 	PassengerType     int    `json:"passenger_type"`
 }
 
@@ -64,8 +64,8 @@ type UpdatePassengerRequest struct {
 	ID                uint   `json:"id"`
 	Name              string `json:"name"`
 	CertificateType   int    `json:"certificate_type"`
-	CertificateNumber string `json:"certificate_number"`
-	PhoneNumber       string `json:"phone_number"`
+	CertificateNumber string `json:"certificate_number" binding:"certificateNumber"`
+	PhoneNumber       string `json:"phone_number" binding:"phoneNumber"`
 	PassengerType     int    `json:"passenger_type"`
 }
 
