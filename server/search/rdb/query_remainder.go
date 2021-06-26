@@ -78,7 +78,7 @@ func QueryTicketNumByDate(date, startCity, endCity string) []*outer.Train {
 	var trainTicketInfos []*ticketPoolRPC.TrainTicketInfo
 
 	//先查询缓存
-	cacheKey := startCity + "-" + endCity + "-cache"
+	cacheKey := date+"-"+startCity + "-" + endCity + "-cache"
 	exists, err := RedisDB.Exists(cacheKey).Result()
 	if err != nil {
 		return nil
