@@ -126,6 +126,9 @@ func getUserOrdersHelper(orders []*model.Order, sender *controller.Send) {
 						Price:             int(resp.List[j].Tickets[k].Price),
 					})
 				}
+				if len(tickets) == 0 {
+					continue
+				}
 				t := &OrderInfo{
 					OrderId:        resp.List[j].Tickets[0].OrderOutsideId,
 					TrainId:        int(resp.List[j].Tickets[0].TrainId),

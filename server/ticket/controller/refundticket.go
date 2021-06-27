@@ -12,12 +12,11 @@ import (
 	"ticket/service"
 )
 
-
-type RefundRequest struct{
-	TicketsId 			[]uint32	`json:"tickets_id"`
+type RefundRequest struct {
+	TicketsId []uint32 `json:"tickets_id"`
 }
 
-func RefundTicket(c *gin.Context){
+func RefundTicket(c *gin.Context) {
 	var refundReq RefundRequest
 	if err := c.ShouldBindJSON(&refundReq); err != nil {
 		logging.Error("bind param error:", err)
@@ -28,6 +27,7 @@ func RefundTicket(c *gin.Context){
 	isOk := service.RefundTicket(refundReq.TicketsId)
 	if !isOk {
 		c.JSON(http.StatusInternalServerError, Response{Code: 0, Msg: "退票失败", Data: nil})
+		return
 	}
 	c.JSON(http.StatusOK, Response{Code: 0, Msg: "退票成功", Data: nil})
 }
