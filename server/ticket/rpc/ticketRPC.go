@@ -173,8 +173,8 @@ func (ts *TicketServer) BuyTickets(ctx context.Context, in *pb.BuyTicketsRequest
 	// 处理票池返回数据
 	tickets := make([]*models.Ticket, len(tpTickets))
 	for i := 0; i < len(tpTickets); i++ {
-		startTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].StartTime)
-		arriveTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].ArriveTime)
+		startTime, _ := time.ParseInLocation("2006-01-02 15:04", tpTickets[i].StartTime, time.Local)
+		arriveTime, _ := time.ParseInLocation("2006-01-02 15:04", tpTickets[i].ArriveTime, time.Local)
 
 		tickets[i] = &models.Ticket{
 			Model:             gorm.Model{},

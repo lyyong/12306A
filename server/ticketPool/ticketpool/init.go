@@ -58,7 +58,7 @@ func recoverDate(tp *TicketPool) {
 	// 恢复Date
 	for _, v := range tp.TrainMap {
 		for k, _ := range v.CarriageMap {
-			t, _ := time.Parse("2006-01-02", k)
+			t, _ := time.ParseInLocation("2006-01-02", k, time.Local)
 			Date = append(Date, &t)
 		}
 		break
@@ -321,7 +321,7 @@ func InitMockData() {
 	}
 	Tp.TrainMap[0] = train
 
-	t, err := time.Parse("2006-01-02 15:04", "2021-02-16 09:30")
+	t, err := time.ParseInLocation("2006-01-02 15:04", "2021-02-16 09:30", time.Local)
 	if err != nil {
 		logging.Error("time format error!")
 	}
@@ -337,7 +337,7 @@ func InitMockData() {
 	}
 
 	// 初始化 2021-02-16 这一天的票
-	date, _ := time.Parse("2006-01-02", "2021-02-16")
+	date, _ := time.ParseInLocation("2006-01-02", "2021-02-16", time.Local)
 	carriages := &Carriages{
 		CarriageSeatInfo: make(map[uint32]*CarriageSeatInfo),
 	}
@@ -427,7 +427,7 @@ func showTicketPoolInfo() {
 // rockUpdate 滚动更新票池
 func rockUpdate(ctx context.Context, tp *TicketPool) {
 	// 得到明天凌晨0点的时间点
-	updateTime, _ := time.Parse("2006-01-02", time.Now().Format("2006-01-02"))
+	updateTime, _ := time.ParseInLocation("2006-01-02", time.Now().Format("2006-01-02"), time.Local)
 	updateTime = updateTime.Add(24 * time.Hour)
 	// 每分钟检查时间是否到0点
 	ticker := time.NewTicker(time.Minute)

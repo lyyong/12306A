@@ -22,7 +22,7 @@ func Change(userID, ticketID, trainID, startStationID, destStationID uint, date 
 		logging.Error("信息验证失败")
 		return nil
 	}
-	newDate, err := time.Parse("2006-01-02", date)
+	newDate, err := time.ParseInLocation("2006-01-02", date, time.Local)
 	if err != nil || newDate.Before(time.Now()) {
 		logging.Error("时间匹配出错")
 		return nil
@@ -94,8 +94,8 @@ func Change(userID, ticketID, trainID, startStationID, destStationID uint, date 
 
 		return nil
 	}
-	startTime, _ := time.Parse("2006-01-02 15:04", getTicketResp.Tickets[0].StartTime)
-	arriveTime, _ := time.Parse("2006-01-02 15:04", getTicketResp.Tickets[0].ArriveTime)
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04", getTicketResp.Tickets[0].StartTime, time.Local)
+	arriveTime, _ := time.ParseInLocation("2006-01-02 15:04", getTicketResp.Tickets[0].ArriveTime, time.Local)
 	newTicket := models.Ticket{
 		UserId:            uint32(userID),
 		TrainId:           uint32(trainID),

@@ -38,8 +38,8 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 	// 整合票池返回的座位信息与请求信息，生成车票返回
 	startStation := tp.GetStopStation(req.TrainId, req.StartStationId)
 	destStation := tp.GetStopStation(req.TrainId, req.DestStationId)
-	st, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, startStation.StartTime))
-	at, _ := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, destStation.ArriveTime))
+	st, _ := time.ParseInLocation("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, startStation.StartTime), time.Local)
+	at, _ := time.ParseInLocation("2006-01-02 15:04", fmt.Sprintf("%s %s", req.Date, destStation.ArriveTime), time.Local)
 	if at.Before(st) {
 		at.AddDate(0, 0, 1)
 	}

@@ -59,13 +59,13 @@ func Candidate(c *gin.Context) {
 		return
 	}
 	// 缓存订单并且获得outsideID
-	Date, err := time.Parse("2006-01-02", cr.Date)
+	Date, err := time.ParseInLocation("2006-01-02", cr.Date, time.Local)
 	if err != nil {
 		logging.Error(err)
 		send.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
 		return
 	}
-	ExpireDate, err := time.Parse("2006-01-02", cr.ExpireDate)
+	ExpireDate, err := time.ParseInLocation("2006-01-02", cr.ExpireDate, time.Local)
 	if err != nil {
 		logging.Error(err)
 		send.Response(http.StatusOK, controller.NewJSONResult(message.ERROR, noData))
@@ -84,12 +84,12 @@ func Candidate(c *gin.Context) {
 
 // validateCandidateRecv 验证接收参数的正确性
 func validateCandidateRecv(cr *candidateRecv) error {
-	Date, err := time.Parse("2006-01-02", cr.Date)
+	Date, err := time.ParseInLocation("2006-01-02", cr.Date, time.Local)
 	if err != nil {
 		logging.Error(err)
 		return err
 	}
-	ExpireDate, err := time.Parse("2006-01-02", cr.ExpireDate)
+	ExpireDate, err := time.ParseInLocation("2006-01-02", cr.ExpireDate, time.Local)
 	if err != nil {
 		logging.Error(err)
 		return err
