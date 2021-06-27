@@ -29,7 +29,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 		seatCountMap[seatTypeId]++
 	}
 	// 调用tp.GetTicket出票，得到的是座位切片
-	seatsMap, err := tp.GetTicket(req.TrainId, req.StartStationId, req.DestStationId, req.Date, seatCountMap)
+	seatsMap, choseSeatMap, err := tp.GetTickets(req)
 	if err != nil {
 		logging.Error(err)
 		return &pb.GetTicketResponse{Tickets: nil}, err
@@ -48,12 +48,43 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 
 	tickets := make([]*pb.Ticket, len(req.Passengers))
 	ticketIndex := 0
+	for i := 0; i < len(req.Passengers); i++ {
+		passengerInfo := req.Passengers[i]
+		if passengerInfo.ChooseSeat != "" {
+			if choseSeatMap[passengerInfo.PassengerId] == "" {
+				// 未选到座
+				req.Passengers[i].ChooseSeat = ""
+				continue
+			}
+			carriageAndSeat := strings.Split(choseSeatMap[passengerInfo.PassengerId], " ")
+			tickets[ticketIndex] = &pb.Ticket{
+				Id:             0,
+				TrainId:        req.TrainId,
+				TrainNum:       tp.GetTrainNumber(req.TrainId),
+				StartStationId: req.StartStationId,
+				StartStation:   startStation.StationName,
+				StartTime:      startTime,
+				DestStationId:  req.DestStationId,
+				DestStation:    destStation.StationName,
+				ArriveTime:     arriveTime,
+				SeatTypeId:     passengerInfo.SeatTypeId,
+				SeatType:       tp.GetSeatTypeNameById(passengerInfo.SeatTypeId),
+				CarriageNumber: carriageAndSeat[0],
+				SeatNumber:     carriageAndSeat[1],
+				PassengerName:  passengerInfo.PassengerName,
+				PassengerId:    passengerInfo.PassengerId,
+				OrderId:        "",
+				Price:          88,
+			}
+			ticketIndex++
+		}
+	}
 	for seatTypeId, seats := range seatsMap {
 		seatIndex := 0
 		seatType := tp.GetSeatTypeNameById(seatTypeId)
 		for i := 0; i < len(req.Passengers); i++ {
 			passengerInfo := req.Passengers[i]
-			if seatTypeId == passengerInfo.SeatTypeId {
+			if passengerInfo.ChooseSeat == "" && seatTypeId == passengerInfo.SeatTypeId {
 				carriageAndSeat := strings.Split(seats[seatIndex], " ")
 				// 生成车票信息
 				tickets[ticketIndex] = &pb.Ticket{
@@ -81,6 +112,7 @@ func (tps *TicketPoolServer) GetTicket(ctx context.Context, req *pb.GetTicketReq
 			}
 		}
 	}
+
 	return &pb.GetTicketResponse{Tickets: tickets}, nil
 }
 

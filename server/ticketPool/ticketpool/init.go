@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"ticketPool/model"
 	"time"
 )
@@ -152,25 +153,49 @@ func genStaticInfo(tp *TicketPool) {
 	tp.AllSeatInfos = make(map[string]*SeatInfo) // 每个车厢对应对应作为类型的SeatInfo, key格式为carriage_id:seatTypeID
 	for _, carriage := range tp.AllCarriages {
 		if carriage.BusinessSeatNumber > 0 {
-			tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)] = &SeatInfo{
+			si := &SeatInfo{
 				SeatType:     "商务座",
 				MaxSeatCount: int32(carriage.BusinessSeatNumber),
 				Seats:        strings.Split(carriage.BusinessSeat, ","),
+				ChoseSeatMap: make(map[string][]int32),
 			}
+			csm := si.ChoseSeatMap
+			for i := 0; i < len(si.Seats); i++ {
+				s := si.Seats[i]
+				s = s[len(s)-1:]
+				csm[s] = append(csm[s], int32(i))
+			}
+			tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)] = si
 		}
 		if carriage.FirstSeatNumber > 0 {
-			tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)] = &SeatInfo{
+			si := &SeatInfo{
 				SeatType:     "一等座",
 				MaxSeatCount: int32(carriage.FirstSeatNumber),
 				Seats:        strings.Split(carriage.FirstSeat, ","),
+				ChoseSeatMap: make(map[string][]int32),
 			}
+			csm := si.ChoseSeatMap
+			for i := 0; i < len(si.Seats); i++ {
+				s := si.Seats[i]
+				s = s[len(s)-1:]
+				csm[s] = append(csm[s], int32(i))
+			}
+			tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)] = si
 		}
 		if carriage.SecondSeatNumber > 0 {
-			tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)] = &SeatInfo{
+			si := &SeatInfo{
 				SeatType:     "二等座",
 				MaxSeatCount: int32(carriage.SecondSeatNumber),
 				Seats:        strings.Split(carriage.SecondSeat, ","),
+				ChoseSeatMap: make(map[string][]int32),
 			}
+			csm := si.ChoseSeatMap
+			for i := 0; i < len(si.Seats); i++ {
+				s := si.Seats[i]
+				s = s[len(s)-1:]
+				csm[s] = append(csm[s], int32(i))
+			}
+			tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)] = si
 		}
 		// TODO 添加其他座位类型
 	}
@@ -203,24 +228,33 @@ func genCarriages(tp *TicketPool, trainId uint, date string, stopInfos []*model.
 	second := make([]*FullTicket, 0)   // 二等座
 	for i, carriage := range carriageList {
 		if carriage.BusinessSeatNumber > 0 {
+			seat := tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)]
 			business = append(business, &FullTicket{
-				Seat:              tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, BUSINESS_SEAT_ID)],
+				Seat:              seat,
 				CarriageSeq:       strconv.Itoa(i),
 				CurrentSeatNumber: 0,
+				IsAllocate:        make([]bool, len(seat.Seats)),
+				Lock:              sync.Mutex{},
 			})
 		}
 		if carriage.FirstSeatNumber > 0 {
+			seat := tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)]
 			first = append(first, &FullTicket{
-				Seat:              tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, FIRST_SEAT_ID)],
+				Seat:              seat,
 				CarriageSeq:       strconv.Itoa(i),
 				CurrentSeatNumber: 0,
+				IsAllocate:        make([]bool, len(seat.Seats)),
+				Lock:              sync.Mutex{},
 			})
 		}
 		if carriage.SecondSeatNumber > 0 {
+			seat := tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)]
 			second = append(second, &FullTicket{
-				Seat:              tp.AllSeatInfos[fmt.Sprintf("%d:%d", carriage.ID, SECOND_SEAT_ID)],
+				Seat:              seat,
 				CarriageSeq:       strconv.Itoa(i),
 				CurrentSeatNumber: 0,
+				IsAllocate:        make([]bool, len(seat.Seats)),
+				Lock:              sync.Mutex{},
 			})
 		}
 		// TODO 添加更多座位类型

@@ -7,8 +7,8 @@ package ticketpool
 import (
 	"errors"
 	"fmt"
+	pb "rpc/ticketPool/proto/ticketPoolRPC"
 	"sync"
-	"sync/atomic"
 	"ticketPool/model"
 )
 
@@ -51,13 +51,16 @@ type CarriageSeatInfo struct {
 type FullTicket struct {
 	Seat              *SeatInfo
 	CarriageSeq       string
-	CurrentSeatNumber int32 // 从 0 开始，表示当前已分配出去的座位号
+	CurrentSeatNumber int32  // 从 0 开始，表示当前已分配出去的座位号
+	IsAllocate        []bool // 描述数组对应下标编号的座位是否已分配
+	Lock              sync.Mutex
 }
 
 type SeatInfo struct { // 描述车厢的座位信息，同一种车厢共用一份
 	SeatType     string
 	MaxSeatCount int32
-	Seats        []string // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
+	Seats        []string           // 票池处理的是整形递增的座位编号，作为下标可以映射为string，如高铁座位的A1 B5...
+	ChoseSeatMap map[string][]int32 // key为选择的座位，如'A'，value为这种车厢中'A'座对应的编号
 }
 
 func (tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, date string, seatCountMap map[uint32]int32) (map[uint32][]string, error) {
@@ -109,6 +112,80 @@ func (tp *TicketPool) GetTicket(trainId, startStationId, destStationId uint32, d
 		}
 	}
 	return seatsMap, nil
+}
+
+func (tp *TicketPool) GetTickets(req *pb.GetTicketRequest) (map[uint32][]string, map[uint32]string, error) {
+	// 根据请求在票池中获取车辆信息，经停站信息，计算 requestValue
+	train := tp.TrainMap[req.TrainId]
+	if train == nil {
+		return nil, nil, errors.New("error train_id")
+	}
+	startStation := train.StopStationMap[req.StartStationId]
+	destStation := train.StopStationMap[req.DestStationId]
+	if startStation == nil || destStation == nil || startStation.Seq >= destStation.Seq {
+		return nil, nil, errors.New("error station_id")
+	}
+	requestValue := generateRequestValue(startStation.Seq-1, destStation.Seq-1)
+	carriages := train.CarriageMap[req.Date]
+	if carriages == nil {
+		return nil, nil, errors.New("error date")
+	}
+
+	choseSeatMap := make(map[uint32]string)
+	csiNodeMap := make(map[*CarriageSeatInfo]*Node)
+	// 暂存 csi 和已分配的车票（Node），如果后续出票失败，遍历已出车票进行退票
+	seatCountMap := make(map[uint32]int32)
+	seatsMap := make(map[uint32][]string, len(seatCountMap))
+
+	for i := 0; i < len(req.Passengers); i++ {
+		seatTypeId := req.Passengers[i].SeatTypeId
+		if req.Passengers[i].ChooseSeat != "" {
+			// 处理选座请求
+			csi := carriages.CarriageSeatInfo[seatTypeId]
+			node := csi.choseSeat(req.Passengers[i].ChooseSeat)
+			if node != nil {
+				choseSeatMap[req.Passengers[i].PassengerId] = node.Value[0]
+				node.Next = csiNodeMap[csi]
+				csiNodeMap[csi] = node
+				continue
+			}
+			// node == nil 表示选座失败，以不选座方式进行出票
+		}
+		seatCountMap[seatTypeId]++
+	}
+
+	for seatType, count := range seatCountMap {
+		// csi 为描述某种座位余票的结构体
+		csi := carriages.CarriageSeatInfo[seatType]
+		seatNode, seats := csi.allocateTicket(requestValue, count)
+		if seatNode == nil {
+			// 有任何一种类型的票出票失败，整个订单都失败
+			for c, node := range csiNodeMap {
+				for ; node != nil; node = node.Next {
+					c.put(node.Key, node.Value)
+				}
+			}
+			return nil, nil, errors.New("there are not enough tickets in the ticket pool")
+		}
+		// 记录 node 指针、cis指针，如果中途出票失败，则原样退回票池，如果出票成功，则计算余票插入票池
+		for n := seatNode; ; n = n.Next {
+			// csiNodeMap中可能已有该座位类型的Node(由选座阶段缓存)，因此遍历到该链表尾部进行连接
+			if n.Next == nil {
+				n.Next = csiNodeMap[csi]
+				break
+			}
+		}
+		csiNodeMap[csi] = seatNode
+		seatsMap[seatType] = seats
+	}
+
+	for csi, node := range csiNodeMap {
+		for ; node != nil; node = node.Next {
+			remainValue := node.Key ^ requestValue
+			csi.put(remainValue, node.Value)
+		}
+	}
+	return seatsMap, choseSeatMap, nil
 }
 
 func (tp *TicketPool) SearchTicketCount(trainId, startStationId, destStationId uint32, date string) (map[uint32]int32, error) {
@@ -226,6 +303,26 @@ func (tp *TicketPool) GetStopStation(trainId, stationId uint32) *StopStation {
 	return tp.TrainMap[trainId].StopStationMap[stationId]
 }
 
+func (csi *CarriageSeatInfo) choseSeat(choice string) *Node {
+	for i := 0; i < len(csi.FullTickets); i++ {
+		ft := csi.FullTickets[i]
+		csm := ft.Seat.ChoseSeatMap
+		seatNums := csm[choice]
+		for j := 0; j < len(seatNums); j++ {
+			seatNum := seatNums[j]
+			if !ft.IsAllocate[seatNum] {
+				ft.IsAllocate[seatNum] = true
+				return &Node{
+					Key:   csi.FullValue,
+					Value: []string{fmt.Sprintf("%s %s", ft.CarriageSeq, ft.Seat.Seats[seatNum])},
+					Next:  nil,
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (csi *CarriageSeatInfo) splitFullTicket(count int32) *Node {
 	seats := make([]string, count)
 	num := 0
@@ -238,19 +335,33 @@ func (csi *CarriageSeatInfo) splitFullTicket(count int32) *Node {
 				// 当前车厢全票已拆完
 				break
 			}
-			split := maxSeatCount - csn
-			if split >= count {
-				split = count
-			}
-			if !atomic.CompareAndSwapInt32(&ft.CurrentSeatNumber, csn, csn+split) {
-				continue
-			}
-			count -= split
 
-			for j := csn; j < csn+split; j++ {
-				seats[num] = fmt.Sprintf("%s %s", ft.CarriageSeq, ft.Seat.Seats[j])
-				num++
+			ft.Lock.Lock()
+			for count > 0 && ft.CurrentSeatNumber < maxSeatCount {
+				n := ft.CurrentSeatNumber
+				if !ft.IsAllocate[n] {
+					ft.IsAllocate[n] = true
+					seats[num] = fmt.Sprintf("%s %s", ft.CarriageSeq, ft.Seat.Seats[n])
+					num++
+					count--
+				}
+				ft.CurrentSeatNumber++
 			}
+			ft.Lock.Unlock()
+
+			//split := maxSeatCount - csn
+			//if split >= count {
+			//	split = count
+			//}
+			//if !atomic.CompareAndSwapInt32(&ft.CurrentSeatNumber, csn, csn+split) {
+			//	continue
+			//}
+			//count -= split
+			//
+			//for j := csn; j < csn+split; j++ {
+			//	seats[num] = fmt.Sprintf("%s %s", ft.CarriageSeq, ft.Seat.Seats[j])
+			//	num++
+			//}
 			if count == 0 {
 				return &Node{
 					Key:   csi.FullValue,
