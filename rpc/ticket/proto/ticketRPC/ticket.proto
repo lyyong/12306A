@@ -21,7 +21,7 @@ message Ticket {
   string certificate_number = 16;
   uint32 passenger_id = 17;
   string order_outside_id = 18;
-
+  uint32 state = 19;
 }
 
 message Empty {

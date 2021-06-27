@@ -132,3 +132,13 @@ func GetStationName(stationID uint) string {
 	database.Client().Raw("select name from stations where id = ?", stationID).Scan(&res)
 	return res
 }
+
+// GetAvailableCandidatesByUserID 获取用户可用的候补订单,  正在候补的和候补和兑现的
+func GetAvailableCandidatesByUserID(userId uint) ([]*Candidate, error) {
+	var res []*Candidate
+	err := database.Client().Where("user_id = ? AND state IN ?", userId, []int{CandidateIng, CandidateNotCash}).Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

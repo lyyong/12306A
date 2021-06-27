@@ -38,7 +38,7 @@ const (
 	TicketRefundFinish
 )
 
-func AddMultipleTicket(tickets *[]Ticket) error {
+func AddMultipleTicket(tickets []*Ticket) error {
 	res := database.DB.Create(tickets)
 	return res.Error
 }
@@ -75,7 +75,7 @@ func DeleteTicketByTicketId(db *gorm.DB, ticketsId []uint32) ([]*Ticket, error) 
 }
 
 func UpdateState(ticketsId []uint32, state uint8) error {
-	res := database.DB.Table("tickets").Where("id IN ?", ticketsId).Updates(Ticket{State: state})
+	res := database.DB.Model(&Ticket{}).Where("id IN ?", ticketsId).Update("state", state)
 	return res.Error
 }
 

@@ -19,15 +19,6 @@ import (
 )
 
 type OrderInfo struct {
-	TrainNumber    string `json:"train_number"`
-	LeaveStation   string `json:"leave_station"`
-	ArrivalStation string `json:"arrival_station"`
-	LeaveTime      string `json:"leave_time"`
-	TicketSum      int    `json:"ticket_sum"`
-	FirstPassenger string `json:"first_passenger"`
-}
-
-type UnpayOrderInfo struct {
 	OrderId        string       `json:"order_id"`
 	TrainId        int          `json:"train_id"`
 	TrainNum       string       `json:"train_num"`
@@ -44,16 +35,23 @@ type UnpayOrderInfo struct {
 }
 
 type TicketInfo struct {
+	TicketID          int    `json:"ticket_id"`
 	CertificateNumber string `json:"certificate_number"`
 	PassengerName     string `json:"passenger_name"`
-	PassengerType     string `json:"passenger_type"`
-	CertificateType   string `json:"certificate_type"`
-	SeatTypeId        int    `json:"seat_type_id"`
 	SeatType          string `json:"seat_type"`
 	CarriageNumber    string `json:"carriage_number"`
 	SeatNumber        string `json:"seat_number"`
 	Price             int    `json:"price"`
 }
+
+const (
+	ticketPaySuccessful = iota
+	ticketFinish
+	ticketRefund
+	ticketChange
+	ticketWaitCash
+	ticketChanged
+)
 
 // GetUserHistoryOrders 获取用户的历史订单
 func GetUserHistoryOrders(c *gin.Context) {
@@ -109,23 +107,46 @@ func getUserOrdersHelper(orders []*model.Order, sender *controller.Send) {
 		return
 	}
 
-	orderInfo2Client := make([]*OrderInfo, 0, len(orders))
+	orderInfos2Client := make([]*OrderInfo, 0, len(orders))
 	for i := range orders {
 		for j := range resp.GetList() {
 			if len(resp.GetList()[j].Tickets) > 0 && resp.GetList()[j].Tickets[0].OrderOutsideId == orders[i].OutsideID {
-				t := &OrderInfo{}
-				t.TicketSum = len(resp.GetList()[j].Tickets)
-				t.TrainNumber = resp.GetList()[j].Tickets[0].TrainNum
-				t.LeaveStation = resp.GetList()[j].Tickets[0].StartStation
-				t.ArrivalStation = resp.GetList()[j].Tickets[0].DestStation
-				t.LeaveTime = resp.GetList()[j].Tickets[0].StartTime
-				t.FirstPassenger = resp.GetList()[j].Tickets[0].PassengerName
-				orderInfo2Client = append(orderInfo2Client, t)
+				tickets := make([]TicketInfo, 0, len(resp.List[j].Tickets))
+				for k := range resp.List[j].Tickets {
+					if resp.List[j].Tickets[k].State == ticketChange || resp.List[j].Tickets[k].State == ticketRefund || resp.List[j].Tickets[k].State == ticketWaitCash {
+						continue
+					}
+					tickets = append(tickets, TicketInfo{
+						TicketID:          int(resp.List[j].Tickets[k].Id),
+						CertificateNumber: resp.List[j].Tickets[k].CertificateNumber,
+						PassengerName:     resp.List[j].Tickets[k].PassengerName,
+						SeatType:          resp.List[j].Tickets[k].SeatType,
+						CarriageNumber:    resp.List[j].Tickets[k].CarriageNumber,
+						SeatNumber:        resp.List[j].Tickets[k].SeatNumber,
+						Price:             int(resp.List[j].Tickets[k].Price),
+					})
+				}
+				t := &OrderInfo{
+					OrderId:        resp.List[j].Tickets[0].OrderOutsideId,
+					TrainId:        int(resp.List[j].Tickets[0].TrainId),
+					TrainNum:       resp.List[j].Tickets[0].TrainNum,
+					StartStationId: int(resp.List[j].Tickets[0].StartStationId),
+					StartStation:   resp.List[j].Tickets[0].StartStation,
+					StartTime:      resp.List[j].Tickets[0].StartTime,
+					DestStationId:  int(resp.List[j].Tickets[0].DestStationId),
+					DestStation:    resp.List[j].Tickets[0].DestStation,
+					ArriveTime:     resp.List[j].Tickets[0].DestTime,
+					Date:           resp.List[j].Tickets[0].StartTime,
+					Price:          int(resp.List[j].Tickets[0].Price),
+					Tickets:        tickets,
+				}
+
+				orderInfos2Client = append(orderInfos2Client, t)
 			}
 		}
 	}
 
-	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, orderInfo2Client))
+	sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, orderInfos2Client))
 }
 
 // GetUserUnpayOrders 获取用户未支付的订单
@@ -165,8 +186,7 @@ func GetUserUnpayOrders(c *gin.Context) {
 		sender.Response(http.StatusOK, controller.NewJSONResult(message.OK, nil))
 		return
 	}
-	// TODO 数据补全
-	orderInfo2Client := &UnpayOrderInfo{
+	orderInfo2Client := &OrderInfo{
 		OrderId:        order.OutsideID,
 		TrainId:        int(resp.Tickets[0].TrainId),
 		TrainNum:       resp.Tickets[0].TrainNum,
@@ -183,6 +203,7 @@ func GetUserUnpayOrders(c *gin.Context) {
 
 	for i := range resp.Tickets {
 		orderInfo2Client.Tickets = append(orderInfo2Client.Tickets, TicketInfo{
+			TicketID:          int(resp.Tickets[i].Id),
 			CertificateNumber: resp.Tickets[i].CertificateNumber,
 			PassengerName:     resp.Tickets[i].PassengerName,
 			SeatType:          resp.Tickets[i].SeatType,

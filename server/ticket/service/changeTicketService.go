@@ -58,11 +58,11 @@ func Change(userID, ticketID, trainID, startStationID, destStationID uint, date 
 			CertificateNumber: oldTicket.CertificateNumber,
 			PassengerName:     oldTicket.PassengerName,
 			SeatTypeId:        getSeatTypeId(oldTicket.SeatType),
-			ChooseSeat:        oldTicket.SeatNumber[:1],
+			ChooseSeat:        oldTicket.SeatNumber[len(oldTicket.SeatNumber)-1:],
 		}},
 	}
 	getTicketResp, err := ts.tpCli.GetTicket(getTicketReq)
-	if err != nil || len(getTicketResp.Tickets) == 1 {
+	if err != nil || len(getTicketResp.Tickets) != 1 {
 		return nil
 	}
 
@@ -121,7 +121,7 @@ func Change(userID, ticketID, trainID, startStationID, destStationID uint, date 
 		logging.Error(err)
 		return nil
 	}
-	err = models.AddMultipleTicket(&[]models.Ticket{newTicket})
+	err = models.AddMultipleTicket([]*models.Ticket{&newTicket})
 	if err != nil {
 		logging.Error(err)
 		return nil

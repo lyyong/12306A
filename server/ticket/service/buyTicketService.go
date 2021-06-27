@@ -85,12 +85,12 @@ func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 		logging.Error(err)
 		return
 	}
-	tickets := make([]models.Ticket, len(tpTickets))
+	tickets := make([]*models.Ticket, len(tpTickets))
 	for i := 0; i < len(tpTickets); i++ {
 		startTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].StartTime)
 		arriveTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].ArriveTime)
 
-		tickets[i] = models.Ticket{
+		tickets[i] = &models.Ticket{
 			Model:             gorm.Model{},
 			UserId:            uint32(payOKInfo.UserID),
 			TrainId:           tpTickets[i].TrainId,
@@ -106,12 +106,13 @@ func payOK(payOKInfo *orderRPCClient.PayOKOrderInfo) {
 			SeatNumber:        tpTickets[i].SeatNumber,
 			Price:             tpTickets[i].Price,
 			OrderOutsideId:    payOKInfo.OutsideID,
+			PassengerId:       tpTickets[i].PassengerId,
 			PassengerName:     tpTickets[i].PassengerName,
 			CertificateNumber: tpTickets[i].CertificateNumber,
 			State:             0,
 		}
 	}
-	err = models.AddMultipleTicket(&tickets)
+	err = models.AddMultipleTicket(tickets)
 	if err != nil {
 		logging.Error(err)
 		return

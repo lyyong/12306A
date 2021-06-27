@@ -111,7 +111,7 @@ func (c candidateService) CacheCandidate(userID, trainId, startStationID, destSt
 
 // ReadCandidate 获取到候补订单的信息
 func (c candidateService) ReadCandidate(userID uint) []*model.Candidate {
-	cans, err := model.GetCandidates(map[string]interface{}{"user_id": userID, "state": []int{model.CandidateIng, model.CandidateNotCash}})
+	cans, err := model.GetAvailableCandidatesByUserID(userID)
 	if err != nil {
 		logging.Error("读取候补订单出错: ", err)
 	}

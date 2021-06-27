@@ -39,9 +39,14 @@ func ReadState(c *gin.Context) {
 	if !ok {
 		logging.Info("请求header中解析token出错")
 		send.Response(http.StatusOK, controller.NewJSONResult(message.PARAMS_ERROR, noData))
+		return
 	}
 	cc, _ := service.NewCandidateService()
 	cans := cc.ReadCandidate(userInfo.UserId)
+	if len(cans) == 0 {
+		send.Response(http.StatusOK, controller.NewJSONResult(message.OK, noData))
+		return
+	}
 	passengers := make([]passenger, len(cans))
 	for i := range passengers {
 		passengers[i] = passenger{

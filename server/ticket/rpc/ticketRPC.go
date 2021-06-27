@@ -38,18 +38,24 @@ func (ts *TicketServer) GetTicketByOrdersId(ctx context.Context, in *pb.GetTicke
 		for j := 0; j < len(res); j++ {
 			tickets[j] = &pb.Ticket{
 				Id:                uint32(res[j].ID),
+				UserId:            res[j].UserId,
+				TrainId:           res[j].TrainId,
 				TrainNum:          res[j].TrainNum,
+				StartStationId:    res[j].StartStationId,
 				StartStation:      res[j].StartStation,
 				StartTime:         res[j].StartTime.String(),
+				DestStationId:     res[j].DestStationId,
 				DestStation:       res[j].DestStation,
 				DestTime:          res[j].DestTime.String(),
 				SeatType:          res[j].SeatType,
 				CarriageNumber:    res[j].CarriageNumber,
 				SeatNumber:        res[j].SeatNumber,
 				Price:             res[j].Price,
-				CertificateNumber: res[j].CertificateNumber,
 				PassengerName:     res[j].PassengerName,
+				CertificateNumber: res[j].CertificateNumber,
+				PassengerId:       res[j].PassengerId,
 				OrderOutsideId:    res[j].OrderOutsideId,
+				State:             uint32(res[j].State),
 			}
 		}
 		list[i] = &pb.Tickets{Tickets: tickets}
@@ -79,6 +85,8 @@ func (ts *TicketServer) GetUnHandleTickets(ctx context.Context, in *pb.GetUnHand
 	for i := 0; i < len(tpTickets); i++ {
 
 		tickets[i] = &pb.Ticket{
+			Id:                tpTickets[i].Id,
+			UserId:            in.UserId,
 			TrainId:           tpTickets[i].TrainId,
 			TrainNum:          tpTickets[i].TrainNum,
 			StartStationId:    tpTickets[i].StartStationId,
@@ -91,10 +99,10 @@ func (ts *TicketServer) GetUnHandleTickets(ctx context.Context, in *pb.GetUnHand
 			CarriageNumber:    tpTickets[i].CarriageNumber,
 			SeatNumber:        tpTickets[i].SeatNumber,
 			Price:             tpTickets[i].Price,
-			PassengerId:       tpTickets[i].PassengerId,
 			PassengerName:     tpTickets[i].PassengerName,
-			OrderOutsideId:    tpTickets[i].OrderId,
 			CertificateNumber: tpTickets[i].CertificateNumber,
+			PassengerId:       tpTickets[i].PassengerId,
+			OrderOutsideId:    tpTickets[i].OrderId,
 		}
 	}
 	return &pb.Tickets{Tickets: tickets}, nil
@@ -110,9 +118,13 @@ func (ts *TicketServer) GetTicketByPassengerId(ctx context.Context, in *pb.GetTi
 	for j := 0; j < len(res); j++ {
 		tickets[j] = &pb.Ticket{
 			Id:                uint32(res[j].ID),
+			UserId:            res[j].UserId,
+			TrainId:           res[j].TrainId,
 			TrainNum:          res[j].TrainNum,
+			StartStationId:    res[j].StartStationId,
 			StartStation:      res[j].StartStation,
 			StartTime:         res[j].StartTime.String(),
+			DestStationId:     res[j].DestStationId,
 			DestStation:       res[j].DestStation,
 			DestTime:          res[j].DestTime.String(),
 			SeatType:          res[j].SeatType,
@@ -120,8 +132,9 @@ func (ts *TicketServer) GetTicketByPassengerId(ctx context.Context, in *pb.GetTi
 			SeatNumber:        res[j].SeatNumber,
 			Price:             res[j].Price,
 			PassengerName:     res[j].PassengerName,
-			OrderOutsideId:    res[j].OrderOutsideId,
 			CertificateNumber: res[j].CertificateNumber,
+			PassengerId:       res[j].PassengerId,
+			OrderOutsideId:    res[j].OrderOutsideId,
 		}
 	}
 	return &pb.Tickets{Tickets: tickets}, nil
@@ -158,12 +171,12 @@ func (ts *TicketServer) BuyTickets(ctx context.Context, in *pb.BuyTicketsRequest
 		return nil, err
 	}
 	// 处理票池返回数据
-	tickets := make([]models.Ticket, len(tpTickets))
+	tickets := make([]*models.Ticket, len(tpTickets))
 	for i := 0; i < len(tpTickets); i++ {
 		startTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].StartTime)
 		arriveTime, _ := time.Parse("2006-01-02 15:04", tpTickets[i].ArriveTime)
 
-		tickets[i] = models.Ticket{
+		tickets[i] = &models.Ticket{
 			Model:             gorm.Model{},
 			UserId:            in.UserId,
 			TrainId:           tpTickets[i].TrainId,
@@ -186,7 +199,7 @@ func (ts *TicketServer) BuyTickets(ctx context.Context, in *pb.BuyTicketsRequest
 		}
 	}
 	// 车票信息写入数据库
-	err = models.AddMultipleTicket(&tickets)
+	err = models.AddMultipleTicket(tickets)
 	if err != nil {
 		logging.Error(err)
 		return nil, err
