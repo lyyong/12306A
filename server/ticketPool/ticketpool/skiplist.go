@@ -71,6 +71,7 @@ func (sl *SkipList) DealWithRequest() {
 				key := req.Args[0].(uint64)
 				value := req.Args[1].([]string)
 				if key == 0 {
+					TpLock.RUnlock()
 					continue
 				}
 				sl.Put(key, value)
